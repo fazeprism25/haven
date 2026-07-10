@@ -1,0 +1,37 @@
+{
+  "benchmark_id": "concept_consolidation_basic_046",
+  "category": "concept_consolidation",
+  "consolidation_pattern": "partial_overlap",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "We started renovating the kitchen a few weeks ago."
+    },
+    {
+      "speaker": "user",
+      "text": "My subscription to that meal kit service auto-renewed again."
+    },
+    {
+      "speaker": "user",
+      "text": "For the kitchen renovation, we decided to go with quartz countertops."
+    },
+    {
+      "speaker": "user",
+      "text": "I keep meaning to cancel that meal kit subscription."
+    },
+    {
+      "speaker": "user",
+      "text": "The kitchen renovation is also going to include new cabinet hardware."
+    }
+  ],
+  "query": "What decisions has the user made about the kitchen renovation?",
+  "expected": {
+    "answer_contains": [
+      "quartz countertops",
+      "cabinet hardware"
+    ],
+    "must_not_contain": [
+      "meal kit"
+    ]
+  }
+}

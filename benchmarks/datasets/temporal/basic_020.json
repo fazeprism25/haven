@@ -1,0 +1,55 @@
+{
+  "benchmark_id": "temporal_020",
+  "category": "Temporal",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "For the authentication provider, let's use Firebase Auth. It's easy to implement for our mobile apps."
+    },
+    {
+      "speaker": "assistant",
+      "text": "Firebase supports multiple providers. I'll set up the SDKs."
+    },
+    {
+      "speaker": "user",
+      "text": "But we need enterprise features like SSO. Let's use Okta. It's the enterprise standard."
+    },
+    {
+      "speaker": "assistant",
+      "text": "Okta has SAML and OIDC. I'll configure the identity provider."
+    },
+    {
+      "speaker": "user",
+      "text": "Okta is expensive. Let's use Auth0. It has a generous free tier and supports all the features we need."
+    },
+    {
+      "speaker": "assistant",
+      "text": "Auth0 is developer-friendly. I'll implement the authentication flows."
+    },
+    {
+      "speaker": "user",
+      "text": "We want to completely control our data. Let's use Keycloak. It's open-source and self-hosted."
+    },
+    {
+      "speaker": "assistant",
+      "text": "Keycloak is complex to operate. I'll deploy it with a PostgreSQL backend."
+    },
+    {
+      "speaker": "user",
+      "text": "We just need social logins for now. Firebase is the simplest. Let's use Firebase and add SSO later."
+    }
+  ],
+  "query": "What identity provider is the team using for authentication?",
+  "expected": {
+    "answer_contains": [
+      "Firebase",
+      "Auth",
+      "identity"
+    ],
+    "must_not_contain": [
+      "Okta",
+      "Auth0",
+      "Keycloak"
+    ]
+  }
+}

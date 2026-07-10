@@ -1,0 +1,27 @@
+{
+  "benchmark_id": "supersession_basic_017",
+  "category": "supersession",
+
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I intended to rely entirely on Mem0."
+    },
+    {
+      "speaker": "user",
+      "text": "That has changed. Mem0 will become only one component inside a larger manager architecture."
+    }
+  ],
+
+  "query": "What role will Mem0 have?",
+
+  "expected": {
+    "answer_contains": [
+      "one component",
+      "manager"
+    ],
+    "must_not_contain": [
+      "entirely on Mem0"
+    ]
+  }
+}

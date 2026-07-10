@@ -1,0 +1,28 @@
+{
+  "benchmark_id": "concept_consolidation_basic_033",
+  "category": "concept_consolidation",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I listen to jazz."
+    },
+    {
+      "speaker": "user",
+      "text": "I'm learning to paint."
+    },
+    {
+      "speaker": "user",
+      "text": "Jazz is my favorite music genre."
+    },
+    {
+      "speaker": "user",
+      "text": "I switched my phone plan recently."
+    }
+  ],
+  "query": "What music genre does the user listen to?",
+  "expected": {
+    "answer_contains": [
+      "jazz"
+    ]
+  }
+}

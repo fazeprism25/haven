@@ -1,0 +1,19 @@
+{
+  "benchmark_id": "basic_018",
+  "category": "Decisions",
+
+  "conversation": [
+    { "speaker": "user", "text": "I'm planning the architecture for a real-time chat feature. I'm debating between WebSockets, Server-Sent Events, and long polling." },
+    { "speaker": "user", "text": "Long polling is the simplest to implement but has the worst performance characteristics." },
+    { "speaker": "user", "text": "SSE works well for one-way streams but chat is bidirectional." },
+    { "speaker": "user", "text": "WebSockets handle bidirectional communication natively and our infra already supports it." },
+    { "speaker": "user", "text": "Decision made: WebSockets. The bidirectional requirement rules out SSE, and long polling is a non-starter for latency reasons." }
+  ],
+
+  "query": "What technology did the user choose to implement their real-time chat feature?",
+
+  "expected": {
+    "answer_contains": ["WebSockets"],
+    "must_not_contain": ["SSE", "Server-Sent Events", "long polling"]
+  }
+}

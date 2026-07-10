@@ -1,0 +1,27 @@
+{
+  "benchmark_id": "refinements_basic_016",
+  "category": "refinements",
+  "refinement_type": "goal",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "My goal is to run a marathon."
+    },
+    {
+      "speaker": "user",
+      "text": "I've also been meal-prepping on Sundays."
+    },
+    {
+      "speaker": "user",
+      "text": "My goal is to run a marathon in under four hours."
+    }
+  ],
+  "query": "What is the user's marathon goal?",
+  "expected": {
+    "answer_contains": [
+      "marathon",
+      "under four hours"
+    ],
+    "must_not_contain": []
+  }
+}

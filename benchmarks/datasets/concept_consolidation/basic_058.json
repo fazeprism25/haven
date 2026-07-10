@@ -1,0 +1,42 @@
+{
+  "benchmark_id": "concept_consolidation_basic_058",
+  "category": "concept_consolidation",
+  "consolidation_pattern": "distractor_heavy",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "We adopted a puppy last weekend."
+    },
+    {
+      "speaker": "user",
+      "text": "I've been using a new grocery delivery app."
+    },
+    {
+      "speaker": "user",
+      "text": "My sister started a new job."
+    },
+    {
+      "speaker": "user",
+      "text": "I need to get my bike tuned up."
+    },
+    {
+      "speaker": "user",
+      "text": "The puppy, a golden retriever mix, is already pretty good on the leash."
+    },
+    {
+      "speaker": "user",
+      "text": "I switched my music streaming service."
+    }
+  ],
+  "query": "What did the user say about their new puppy?",
+  "expected": {
+    "answer_contains": [
+      "puppy",
+      "golden retriever",
+      "leash"
+    ],
+    "must_not_contain": [
+      "grocery delivery"
+    ]
+  }
+}

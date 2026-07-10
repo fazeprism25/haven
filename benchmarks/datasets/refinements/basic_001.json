@@ -1,0 +1,28 @@
+{
+  "benchmark_id": "refinements_basic_001",
+  "category": "refinements",
+  "refinement_type": "job_title",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I work as a backend engineer at Initech."
+    },
+    {
+      "speaker": "user",
+      "text": "By the way, I've been trying to eat healthier this year."
+    },
+    {
+      "speaker": "user",
+      "text": "I work as a backend engineer at Initech, leading the payments team."
+    }
+  ],
+  "query": "What is the user's job at Initech?",
+  "expected": {
+    "answer_contains": [
+      "backend engineer",
+      "Initech",
+      "leading the payments team"
+    ],
+    "must_not_contain": []
+  }
+}

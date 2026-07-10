@@ -1,0 +1,28 @@
+{
+  "benchmark_id": "decision_basic_001",
+  "category": "decision_consistency",
+
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "For my personal AI project I decided to build the Manager AI before GraphRAG."
+    },
+
+    {
+      "speaker": "user",
+      "text": "The reason is that extraction quality appears to be a larger bottleneck than retrieval quality."
+    }
+  ],
+
+  "query": "What should I build next for the project?",
+
+  "expected": {
+    "answer_contains": [
+      "Manager AI"
+    ],
+
+    "must_not_contain": [
+      "GraphRAG first"
+    ]
+  }
+}

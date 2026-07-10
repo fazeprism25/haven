@@ -1,0 +1,23 @@
+{
+  "benchmark_id": "supersession_basic_047",
+  "category": "supersession",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "We decided to host on AWS."
+    },
+    {
+      "speaker": "user",
+      "text": "We reconsidered and decided to host on GCP instead."
+    }
+  ],
+  "query": "What is the current hosting decision?",
+  "expected": {
+    "answer_contains": [
+      "GCP"
+    ],
+    "must_not_contain": [
+      "AWS"
+    ]
+  }
+}

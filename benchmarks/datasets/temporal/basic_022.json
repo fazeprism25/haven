@@ -1,0 +1,55 @@
+{
+  "benchmark_id": "temporal_022",
+  "category": "Temporal",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "For the document database, let's use MongoDB. It's schema-less and scalable."
+    },
+    {
+      "speaker": "assistant",
+      "text": "MongoDB is great for flexible schemas. I'll design the collections."
+    },
+    {
+      "speaker": "user",
+      "text": "We need ACID transactions. Let's use PostgreSQL with JSONB. It's more reliable."
+    },
+    {
+      "speaker": "assistant",
+      "text": "PostgreSQL has better transaction support. I'll use the JSONB type."
+    },
+    {
+      "speaker": "user",
+      "text": "We need to store hierarchical data. Let's use Firebase Realtime Database. It's a tree structure."
+    },
+    {
+      "speaker": "assistant",
+      "text": "Firebase is real-time. I'll set up the security rules."
+    },
+    {
+      "speaker": "user",
+      "text": "Our documents are large and we need full-text search. Let's use Elasticsearch. It's designed for this."
+    },
+    {
+      "speaker": "assistant",
+      "text": "Elasticsearch is perfect for search. I'll index the documents."
+    },
+    {
+      "speaker": "user",
+      "text": "We don't need full-text search yet. Let's use MongoDB. It's the most versatile and our team knows it."
+    }
+  ],
+  "query": "What document database is being used for storing unstructured data?",
+  "expected": {
+    "answer_contains": [
+      "MongoDB",
+      "document",
+      "collection"
+    ],
+    "must_not_contain": [
+      "PostgreSQL",
+      "Firebase",
+      "Elasticsearch"
+    ]
+  }
+}

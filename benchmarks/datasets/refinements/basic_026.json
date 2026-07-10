@@ -1,0 +1,32 @@
+{
+  "benchmark_id": "refinements_basic_026",
+  "category": "refinements",
+  "refinement_type": "ownership",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I own the onboarding documentation."
+    },
+    {
+      "speaker": "user",
+      "text": "I own the onboarding documentation for new backend hires."
+    },
+    {
+      "speaker": "user",
+      "text": "The team switched chat tools."
+    },
+    {
+      "speaker": "user",
+      "text": "I own the onboarding documentation for new backend hires, including the local setup guide."
+    }
+  ],
+  "query": "What documentation does the user own?",
+  "expected": {
+    "answer_contains": [
+      "onboarding documentation",
+      "backend hires",
+      "local setup guide"
+    ],
+    "must_not_contain": []
+  }
+}

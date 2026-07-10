@@ -1,0 +1,28 @@
+{
+  "benchmark_id": "supersession_basic_046",
+  "category": "supersession",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "My goal is to learn Spanish."
+    },
+    {
+      "speaker": "user",
+      "text": "I switched my goal to learn Japanese."
+    },
+    {
+      "speaker": "user",
+      "text": "I've now settled on learning Mandarin instead."
+    }
+  ],
+  "query": "What language is the user currently trying to learn?",
+  "expected": {
+    "answer_contains": [
+      "Mandarin"
+    ],
+    "must_not_contain": [
+      "Spanish",
+      "Japanese"
+    ]
+  }
+}

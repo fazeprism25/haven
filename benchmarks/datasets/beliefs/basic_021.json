@@ -1,0 +1,40 @@
+{
+  "benchmark_id": "beliefs_021",
+  "category": "Beliefs",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "Early in my career, I held the belief that engineering management was the natural progression for every senior developer. I thought managing people was the ultimate way to scale impact."
+    },
+    {
+      "speaker": "assistant",
+      "text": "That's a very common path, though the skill sets required are entirely different."
+    },
+    {
+      "speaker": "user",
+      "text": "I learned that the hard way. I hated meetings and missed coding, so I changed my mind completely. I spent years advocating that the Individual Contributor (IC) track is superior because you retain technical autonomy without organizational politics."
+    },
+    {
+      "speaker": "assistant",
+      "text": "Staying close to the metal can be highly fulfilling for technical purists."
+    },
+    {
+      "speaker": "user",
+      "text": "But as a principal IC, you eventually realize you hit a glass ceiling without organizational influence. I've reassessed my stance. I now believe that a fluid 'Tech Lead Manager' role, where senior folks rotate between technical leadership and people management every 18 months, is the healthiest model for engineering longevity."
+    }
+  ],
+  "query": "What is the user's current belief regarding the ideal career path structure for senior engineers?",
+  "expected": {
+    "answer_contains": [
+      "rotate",
+      "hybrid",
+      "Tech Lead Manager",
+      "both"
+    ],
+    "must_not_contain": [
+      "strictly management",
+      "pure IC",
+      "Individual Contributor"
+    ]
+  }
+}

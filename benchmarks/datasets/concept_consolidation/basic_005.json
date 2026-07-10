@@ -1,0 +1,20 @@
+{
+  "benchmark_id": "concept_consolidation_basic_005",
+  "category": "concept_consolidation",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I work as a backend engineer."
+    },
+    {
+      "speaker": "user",
+      "text": "I work as a backend engineer."
+    }
+  ],
+  "query": "What does the user work as?",
+  "expected": {
+    "answer_contains": [
+      "backend engineer"
+    ]
+  }
+}

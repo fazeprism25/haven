@@ -1,0 +1,19 @@
+{
+  "benchmark_id": "goals_basic_007",
+  "category": "goals",
+
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I want the AI to track decisions and why they were made."
+    }
+  ],
+
+  "query": "What should the AI track?",
+
+  "expected": {
+    "answer_contains": [
+      "decisions"
+    ]
+  }
+}

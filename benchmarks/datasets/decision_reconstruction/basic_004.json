@@ -1,0 +1,65 @@
+{
+  "benchmark_id": "decision_reconstruction_basic_004",
+  "category": "decision_reconstruction",
+  "domain": "vacation_destination",
+  "decision_turn_indices": [
+    10
+  ],
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "Trying to plan a two-week trip for the fall, deciding between Italy, Greece, and Portugal."
+    },
+    {
+      "speaker": "user",
+      "text": "Italy has the food and the art, obviously, but it might be pretty crowded that time of year."
+    },
+    {
+      "speaker": "user",
+      "text": "Greece has the islands, which sounds relaxing, but inter-island ferries can eat up a lot of the trip."
+    },
+    {
+      "speaker": "user",
+      "text": "I need to get the car inspected before the end of the month."
+    },
+    {
+      "speaker": "user",
+      "text": "Portugal's been on my list for a while, and it's supposed to be a lot cheaper than the other two."
+    },
+    {
+      "speaker": "user",
+      "text": "The car inspection place said I need new brake pads too."
+    },
+    {
+      "speaker": "user",
+      "text": "Still weighing it, Italy for the culture versus Portugal for the value and the coastline."
+    },
+    {
+      "speaker": "user",
+      "text": "Got the brakes done, cost more than I expected honestly."
+    },
+    {
+      "speaker": "user",
+      "text": "I looked into beginner surfing options in Ericeira, apparently it's a really well-regarded spot for that."
+    },
+    {
+      "speaker": "user",
+      "text": "Greece is probably out at this point, the ferry logistics seem like a hassle for a two-week trip."
+    },
+    {
+      "speaker": "user",
+      "text": "Decided on Portugal for the trip. The surf lessons in Ericeira and the fact that it's easier on the budget than Italy sealed it."
+    }
+  ],
+  "query": "Where did the user decide to go on their fall vacation?",
+  "expected": {
+    "answer_contains": [
+      "Portugal",
+      "surf lessons in Ericeira",
+      "easier on the budget"
+    ],
+    "must_not_contain": [
+      "brake pads"
+    ]
+  }
+}

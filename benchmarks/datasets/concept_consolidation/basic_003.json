@@ -1,0 +1,24 @@
+{
+  "benchmark_id": "concept_consolidation_basic_003",
+  "category": "concept_consolidation",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I drink black coffee every morning."
+    },
+    {
+      "speaker": "user",
+      "text": "I drink black coffee every morning."
+    },
+    {
+      "speaker": "user",
+      "text": "I drink black coffee every morning."
+    }
+  ],
+  "query": "What does the user drink every morning?",
+  "expected": {
+    "answer_contains": [
+      "black coffee"
+    ]
+  }
+}

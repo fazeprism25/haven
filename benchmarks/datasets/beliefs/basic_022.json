@@ -1,0 +1,41 @@
+{
+  "benchmark_id": "beliefs_022",
+  "category": "Beliefs",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I used to think Object-Oriented Programming (OOP) with inheritance and encapsulation was the pinnacle of software design patterns."
+    },
+    {
+      "speaker": "assistant",
+      "text": "OOP has dominated enterprise software architecture for decades."
+    },
+    {
+      "speaker": "user",
+      "text": "But the 'banana monkey jungle' problem made me despise it. I became a hardcore functional programming (FP) purist, believing that side effects should be banned and everything should be written using pure functions and immutability."
+    },
+    {
+      "speaker": "assistant",
+      "text": "Functional programming definitely makes reasoning about state and concurrency much cleaner."
+    },
+    {
+      "speaker": "user",
+      "text": "The issue is that modeling real-world I/O and user interfaces with pure FP creates dense, unreadable category theory abstractions. I've abandoned the purism. I now believe that a pragmatic Data-Oriented Design philosophy—where data is strictly separated from behavior using plain data structures and procedural functions—is vastly superior."
+    }
+  ],
+  "query": "What is the user's current philosophical stance on programming paradigms?",
+  "expected": {
+    "answer_contains": [
+      "Data-Oriented",
+      "separate",
+      "structures",
+      "procedural"
+    ],
+    "must_not_contain": [
+      "Object-Oriented",
+      "OOP",
+      "functional programming",
+      "FP"
+    ]
+  }
+}

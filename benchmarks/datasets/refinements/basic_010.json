@@ -1,0 +1,28 @@
+{
+  "benchmark_id": "refinements_basic_010",
+  "category": "refinements",
+  "refinement_type": "technology",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I use Python for backend development."
+    },
+    {
+      "speaker": "user",
+      "text": "I picked up a new hobby, pottery, this month."
+    },
+    {
+      "speaker": "user",
+      "text": "I use Python for backend development and data pipelines."
+    }
+  ],
+  "query": "What does the user use Python for?",
+  "expected": {
+    "answer_contains": [
+      "Python",
+      "backend development",
+      "data pipelines"
+    ],
+    "must_not_contain": []
+  }
+}

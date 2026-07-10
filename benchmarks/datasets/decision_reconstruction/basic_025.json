@@ -1,0 +1,93 @@
+{
+  "benchmark_id": "decision_reconstruction_basic_025",
+  "category": "decision_reconstruction",
+  "domain": "mattress_purchase",
+  "decision_turn_indices": [
+    16
+  ],
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "Mattress shopping -- comparing Purple, Casper, and Saatva based on reviews so far."
+    },
+    {
+      "speaker": "user",
+      "text": "My favorite coffee shop is testing a new seasonal drink."
+    },
+    {
+      "speaker": "user",
+      "text": "Purple's reviews mention it sleeping cooler than most foam mattresses, which is appealing."
+    },
+    {
+      "speaker": "user",
+      "text": "I need to call the insurance company about a claim this week."
+    },
+    {
+      "speaker": "user",
+      "text": "Casper is the most well-known of the three but a few reviews mentioned it sagging after a couple years."
+    },
+    {
+      "speaker": "user",
+      "text": "Got a reminder that my credit card statement is due soon."
+    },
+    {
+      "speaker": "user",
+      "text": "I need to return a library book before it's overdue."
+    },
+    {
+      "speaker": "user",
+      "text": "I switched my podcast subscription to a cheaper plan."
+    },
+    {
+      "speaker": "user",
+      "text": "Saatva's trial window is a lot more generous than the other two, and reviews mention it staying cooler overnight than my current mattress."
+    },
+    {
+      "speaker": "user",
+      "text": "Returned the library book just in time."
+    },
+    {
+      "speaker": "user",
+      "text": "I need to schedule a haircut, it's overdue at this point."
+    },
+    {
+      "speaker": "user",
+      "text": "Ordered a sample of Saatva's foam layers and it did feel noticeably cooler than what I currently sleep on."
+    },
+    {
+      "speaker": "user",
+      "text": "My phone's storage is almost full again, need to clear out old photos."
+    },
+    {
+      "speaker": "user",
+      "text": "Purple is still tempting just for the cooling factor alone."
+    },
+    {
+      "speaker": "user",
+      "text": "My gym schedule changed again this week because of a instructor swap."
+    },
+    {
+      "speaker": "user",
+      "text": "Compared the trial periods again and Saatva's is significantly longer than both Purple's and Casper's."
+    },
+    {
+      "speaker": "user",
+      "text": "Going with Saatva. The longer trial period and not sleeping hot like my current mattress made it the pick over Purple and Casper."
+    },
+    {
+      "speaker": "user",
+      "text": "It should arrive sometime next week."
+    }
+  ],
+  "query": "Which mattress did the user decide to buy?",
+  "expected": {
+    "answer_contains": [
+      "Saatva",
+      "longer trial period",
+      "not sleeping hot"
+    ],
+    "must_not_contain": [
+      "library book"
+    ]
+  }
+}

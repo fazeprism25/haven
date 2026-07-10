@@ -1,0 +1,211 @@
+{
+  "benchmark_id": "resume_coding_basic_003",
+  "category": "resume_coding",
+  "tier": "short",
+  "domain": "haven_slot_allocator",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "The gym was way more crowded than usual today.",
+      "turn_type": "distractor",
+      "turn_index": 0
+    },
+    {
+      "speaker": "user",
+      "text": "I switched to a different brand of coffee and I'm not sure I like it.",
+      "turn_type": "distractor",
+      "turn_index": 1
+    },
+    {
+      "speaker": "user",
+      "text": "The slot allocator needs a real budget -- right now it just takes the top N ranked candidates with no size awareness.",
+      "turn_type": "architecture_discussion",
+      "turn_index": 2
+    },
+    {
+      "speaker": "user",
+      "text": "It's supposed to rain most of next week according to the forecast.",
+      "turn_type": "distractor",
+      "turn_index": 3
+    },
+    {
+      "speaker": "user",
+      "text": "Easiest option: fix N at a constant, like top 10 candidates always.",
+      "turn_type": "rejected_approach",
+      "turn_index": 4
+    },
+    {
+      "speaker": "user",
+      "text": "I still haven't unpacked the last box from the move.",
+      "turn_type": "distractor",
+      "turn_index": 5
+    },
+    {
+      "speaker": "user",
+      "text": "A fixed N either wastes budget on short facts or overflows on long ones -- allocate by an estimated token budget instead, filling slots until the budget is spent.",
+      "turn_type": "decision",
+      "supersedes_turn": 4,
+      "turn_index": 6
+    },
+    {
+      "speaker": "user",
+      "text": "My sister's flight got delayed by a couple of hours.",
+      "turn_type": "distractor",
+      "turn_index": 7
+    },
+    {
+      "speaker": "user",
+      "text": "The office plants finally got watered after being neglected for weeks.",
+      "turn_type": "distractor",
+      "turn_index": 8
+    },
+    {
+      "speaker": "user",
+      "text": "Constraint: constraints and active decisions must never be dropped for budget reasons -- only lower-priority tiers (open questions, completed tasks) can be truncated.",
+      "turn_type": "constraint",
+      "turn_index": 9
+    },
+    {
+      "speaker": "user",
+      "text": "I keep meaning to update my resume but haven't gotten around to it.",
+      "turn_type": "distractor",
+      "turn_index": 10
+    },
+    {
+      "speaker": "user",
+      "text": "Blocked: the token estimate doesn't account for the XML tag overhead StructuredPromptBuilder adds around each entry.",
+      "turn_type": "blocker",
+      "turn_index": 11
+    },
+    {
+      "speaker": "user",
+      "text": "The parking garage near the office is under construction again.",
+      "turn_type": "distractor",
+      "turn_index": 12
+    },
+    {
+      "speaker": "user",
+      "text": "I tried a new recipe for dinner last night, turned out decent.",
+      "turn_type": "distractor",
+      "turn_index": 13
+    },
+    {
+      "speaker": "user",
+      "text": "Decided: reserve a fixed per-entry overhead estimate for tag wrapping before computing how many candidates fit. Unblocks allocation.",
+      "turn_type": "decision",
+      "resolves_turn": 11,
+      "turn_index": 14
+    },
+    {
+      "speaker": "user",
+      "text": "My laptop fan has been louder than usual, might need cleaning.",
+      "turn_type": "distractor",
+      "turn_index": 15
+    },
+    {
+      "speaker": "user",
+      "text": "Implemented tiered allocation: never-drop tier first, then fill remaining budget by rank order.",
+      "turn_type": "implementation",
+      "turn_index": 16
+    },
+    {
+      "speaker": "user",
+      "text": "The dentist appointment I've been putting off is finally scheduled.",
+      "turn_type": "distractor",
+      "turn_index": 17
+    },
+    {
+      "speaker": "user",
+      "text": "Added a budget-exhaustion test that confirms constraints survive even when the candidate list is huge.",
+      "turn_type": "implementation",
+      "turn_index": 18
+    },
+    {
+      "speaker": "user",
+      "text": "I need to return that package before the return window closes.",
+      "turn_type": "distractor",
+      "turn_index": 19
+    },
+    {
+      "speaker": "user",
+      "text": "The wifi in the coffee shop I like to work from has been spotty.",
+      "turn_type": "distractor",
+      "turn_index": 20
+    },
+    {
+      "speaker": "user",
+      "text": "Open question: should the budget be configurable per query or fixed globally?",
+      "turn_type": "open_question",
+      "turn_index": 21
+    },
+    {
+      "speaker": "user",
+      "text": "I finally got around to donating some old clothes I never wear.",
+      "turn_type": "distractor",
+      "turn_index": 22
+    },
+    {
+      "speaker": "user",
+      "text": "Next: profile allocation time on a large candidate set to make sure the budget loop isn't a bottleneck.",
+      "turn_type": "task",
+      "turn_index": 23
+    },
+    {
+      "speaker": "user",
+      "text": "My neighbor's dog barked most of the afternoon, hard to get anything done with the window open.",
+      "turn_type": "distractor",
+      "turn_index": 24
+    }
+  ],
+  "ground_truth": {
+    "current_objective": "Give DeterministicSlotAllocator a real token budget with tiered never-drop guarantees.",
+    "active_decisions": [
+      "Allocate by an estimated token budget, filling slots until spent, not a fixed candidate count.",
+      "Reserve a fixed per-entry overhead estimate for XML tag wrapping before computing how many candidates fit."
+    ],
+    "superseded_or_rejected": [
+      "Fixing the number of allocated candidates at a constant like top 10."
+    ],
+    "constraints": [
+      "Constraints and active decisions must never be dropped for budget reasons -- only lower-priority tiers can be truncated."
+    ],
+    "active_blockers": [],
+    "active_tasks": [
+      "Profile allocation time on a large candidate set."
+    ],
+    "open_questions": [
+      "Should the budget be configurable per query or fixed globally?"
+    ],
+    "top_priority_next_action": "Profile DeterministicSlotAllocator's budget loop on a large candidate set to check for a performance bottleneck.",
+    "resolved_blockers": [
+      "The token estimate not accounting for XML tag overhead."
+    ]
+  },
+  "queries": [
+    {
+      "text": "Continue implementing the project.",
+      "task_mode_hint": "continuation"
+    },
+    {
+      "text": "What should we work on next?",
+      "task_mode_hint": "ambiguous"
+    }
+  ],
+  "expected": {
+    "must_state": [
+      "Allocate by an estimated token budget, filling slots until spent, not a fixed candidate count.",
+      "Reserve a fixed per-entry overhead estimate for XML tag wrapping before computing how many candidates fit.",
+      "Constraints and active decisions must never be dropped for budget reasons -- only lower-priority tiers can be truncated."
+    ],
+    "must_not_state": [
+      "Fixing the number of allocated candidates at a constant like top 10, as a current or recommended approach",
+      "The token estimate not accounting for XML tag overhead, as still open/blocking"
+    ],
+    "forbidden_actions": [
+      "Recommending a fixed top-N candidate count instead of the token-budget allocation."
+    ],
+    "must_prioritize": [
+      "Profile DeterministicSlotAllocator's budget loop on a large candidate set to check for a performance bottleneck."
+    ]
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "benchmark_id": "supersession_basic_035",
+  "category": "supersession",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "The migration project is still in planning."
+    },
+    {
+      "speaker": "user",
+      "text": "The migration project is now in progress."
+    }
+  ],
+  "query": "What is the current status of the migration project?",
+  "expected": {
+    "answer_contains": [
+      "in progress"
+    ],
+    "must_not_contain": [
+      "still in planning"
+    ]
+  }
+}

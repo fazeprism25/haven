@@ -1,0 +1,28 @@
+{
+  "benchmark_id": "concept_consolidation_basic_024",
+  "category": "concept_consolidation",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I live in Toronto."
+    },
+    {
+      "speaker": "assistant",
+      "text": "Noted."
+    },
+    {
+      "speaker": "user",
+      "text": "Work has been busy lately."
+    },
+    {
+      "speaker": "user",
+      "text": "Quick update a few months later: still living in Toronto."
+    }
+  ],
+  "query": "Where does the user currently live?",
+  "expected": {
+    "answer_contains": [
+      "Toronto"
+    ]
+  }
+}

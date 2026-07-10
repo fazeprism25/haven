@@ -1,0 +1,24 @@
+{
+  "benchmark_id": "concept_consolidation_basic_014",
+  "category": "concept_consolidation",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I work on the platform team."
+    },
+    {
+      "speaker": "user",
+      "text": "Platform team is where I work."
+    },
+    {
+      "speaker": "user",
+      "text": "My team is Platform."
+    }
+  ],
+  "query": "Which team does the user work on?",
+  "expected": {
+    "answer_contains": [
+      "platform"
+    ]
+  }
+}

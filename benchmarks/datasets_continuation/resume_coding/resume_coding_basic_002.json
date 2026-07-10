@@ -1,0 +1,211 @@
+{
+  "benchmark_id": "resume_coding_basic_002",
+  "category": "resume_coding",
+  "tier": "short",
+  "domain": "haven_query_rewriter",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "There's a new bakery opening down the street next month.",
+      "turn_type": "distractor",
+      "turn_index": 0
+    },
+    {
+      "speaker": "user",
+      "text": "My phone battery has been draining faster than usual lately.",
+      "turn_type": "distractor",
+      "turn_index": 1
+    },
+    {
+      "speaker": "user",
+      "text": "Single-query retrieval misses paraphrased matches -- 'what did I decide about X' doesn't always surface a memory phrased very differently.",
+      "turn_type": "architecture_discussion",
+      "turn_index": 2
+    },
+    {
+      "speaker": "user",
+      "text": "I need to renew my passport before it expires this winter.",
+      "turn_type": "distractor",
+      "turn_index": 3
+    },
+    {
+      "speaker": "user",
+      "text": "Simplest fix: always run the rewriter and expand every query into three variants before retrieval.",
+      "turn_type": "rejected_approach",
+      "turn_index": 4
+    },
+    {
+      "speaker": "user",
+      "text": "The gym was way more crowded than usual today.",
+      "turn_type": "distractor",
+      "turn_index": 5
+    },
+    {
+      "speaker": "user",
+      "text": "Always rewriting adds latency to every single query even when the original phrasing already matches fine -- only rewrite when initial retrieval confidence is low.",
+      "turn_type": "decision",
+      "supersedes_turn": 4,
+      "turn_index": 6
+    },
+    {
+      "speaker": "user",
+      "text": "I switched to a different brand of coffee and I'm not sure I like it.",
+      "turn_type": "distractor",
+      "turn_index": 7
+    },
+    {
+      "speaker": "user",
+      "text": "It's supposed to rain most of next week according to the forecast.",
+      "turn_type": "distractor",
+      "turn_index": 8
+    },
+    {
+      "speaker": "user",
+      "text": "Constraint: QueryRewriter must fail open -- if QUERY_REWRITER_API_KEY isn't set or the call errors, retrieval proceeds with the original query, never blocks.",
+      "turn_type": "constraint",
+      "turn_index": 9
+    },
+    {
+      "speaker": "user",
+      "text": "I still haven't unpacked the last box from the move.",
+      "turn_type": "distractor",
+      "turn_index": 10
+    },
+    {
+      "speaker": "user",
+      "text": "Blocked: rewriter calls add real latency and we don't want to eat that cost on every low-confidence query either.",
+      "turn_type": "blocker",
+      "turn_index": 11
+    },
+    {
+      "speaker": "user",
+      "text": "My sister's flight got delayed by a couple of hours.",
+      "turn_type": "distractor",
+      "turn_index": 12
+    },
+    {
+      "speaker": "user",
+      "text": "The office plants finally got watered after being neglected for weeks.",
+      "turn_type": "distractor",
+      "turn_index": 13
+    },
+    {
+      "speaker": "user",
+      "text": "Decided: cache rewritten variants per raw query string for the session, so a repeated query doesn't pay the rewrite cost twice. Unblocks moving forward.",
+      "turn_type": "decision",
+      "resolves_turn": 11,
+      "turn_index": 14
+    },
+    {
+      "speaker": "user",
+      "text": "I keep meaning to update my resume but haven't gotten around to it.",
+      "turn_type": "distractor",
+      "turn_index": 15
+    },
+    {
+      "speaker": "user",
+      "text": "Implemented the low-confidence trigger in MemoryEngine's retrieval prefix.",
+      "turn_type": "implementation",
+      "turn_index": 16
+    },
+    {
+      "speaker": "user",
+      "text": "The parking garage near the office is under construction again.",
+      "turn_type": "distractor",
+      "turn_index": 17
+    },
+    {
+      "speaker": "user",
+      "text": "Added the fail-open path with a try/except around the rewriter call.",
+      "turn_type": "implementation",
+      "turn_index": 18
+    },
+    {
+      "speaker": "user",
+      "text": "I tried a new recipe for dinner last night, turned out decent.",
+      "turn_type": "distractor",
+      "turn_index": 19
+    },
+    {
+      "speaker": "user",
+      "text": "My laptop fan has been louder than usual, might need cleaning.",
+      "turn_type": "distractor",
+      "turn_index": 20
+    },
+    {
+      "speaker": "user",
+      "text": "Open question: what confidence threshold actually counts as 'low' -- still tuning against real queries.",
+      "turn_type": "open_question",
+      "turn_index": 21
+    },
+    {
+      "speaker": "user",
+      "text": "The dentist appointment I've been putting off is finally scheduled.",
+      "turn_type": "distractor",
+      "turn_index": 22
+    },
+    {
+      "speaker": "user",
+      "text": "Next: wire the per-session rewrite cache into QueryRewriter itself.",
+      "turn_type": "task",
+      "turn_index": 23
+    },
+    {
+      "speaker": "user",
+      "text": "I need to return that package before the return window closes.",
+      "turn_type": "distractor",
+      "turn_index": 24
+    }
+  ],
+  "ground_truth": {
+    "current_objective": "Add confidence-triggered query rewriting to MemoryEngine's retrieval path.",
+    "active_decisions": [
+      "Only rewrite the query when initial retrieval confidence is low, not on every query.",
+      "Cache rewritten variants per raw query string for the session to avoid repeated rewrite cost."
+    ],
+    "superseded_or_rejected": [
+      "Always rewriting every query into three variants before retrieval."
+    ],
+    "constraints": [
+      "QueryRewriter must fail open -- retrieval proceeds with the original query if the rewriter is unavailable or errors."
+    ],
+    "active_blockers": [],
+    "active_tasks": [
+      "Wire the per-session rewrite cache into QueryRewriter."
+    ],
+    "open_questions": [
+      "What confidence threshold counts as 'low' for triggering a rewrite?"
+    ],
+    "top_priority_next_action": "Wire the per-session rewrite cache into QueryRewriter so repeated queries don't pay the rewrite cost twice.",
+    "resolved_blockers": [
+      "The added latency of rewriting on every low-confidence query."
+    ]
+  },
+  "queries": [
+    {
+      "text": "Continue implementing the project.",
+      "task_mode_hint": "continuation"
+    },
+    {
+      "text": "What should we work on next?",
+      "task_mode_hint": "ambiguous"
+    }
+  ],
+  "expected": {
+    "must_state": [
+      "Only rewrite the query when initial retrieval confidence is low, not on every query.",
+      "Cache rewritten variants per raw query string for the session to avoid repeated rewrite cost.",
+      "QueryRewriter must fail open -- retrieval proceeds with the original query if the rewriter is unavailable or errors."
+    ],
+    "must_not_state": [
+      "Always rewriting every query into three variants before retrieval, as a current or recommended approach",
+      "The added latency of rewriting on every low-confidence query, as still open/blocking"
+    ],
+    "forbidden_actions": [
+      "Recommending that QueryRewriter block retrieval when the rewrite call fails or no API key is set."
+    ],
+    "must_prioritize": [
+      "Wire the per-session rewrite cache into QueryRewriter so repeated queries don't pay the rewrite cost twice."
+    ]
+  }
+}

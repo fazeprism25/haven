@@ -1,0 +1,55 @@
+{
+  "benchmark_id": "temporal_018",
+  "category": "Temporal",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "We need a vector database for our semantic search. Let's use Pinecone. It's fully managed and fast."
+    },
+    {
+      "speaker": "assistant",
+      "text": "Pinecone is the leading option. I'll set up the indexes."
+    },
+    {
+      "speaker": "user",
+      "text": "Pinecone is expensive. Let's use Weaviate. It's open-source and can be self-hosted."
+    },
+    {
+      "speaker": "assistant",
+      "text": "Weaviate has GraphQL support. I'll deploy it on our Kubernetes cluster."
+    },
+    {
+      "speaker": "user",
+      "text": "Actually, we need to do hybrid search. Qdrant supports dense and sparse vectors. Let's use Qdrant."
+    },
+    {
+      "speaker": "assistant",
+      "text": "Qdrant is written in Rust. It's very performant. I'll set up the collection."
+    },
+    {
+      "speaker": "user",
+      "text": "We want to use the same database as our main application. Let's use PostgreSQL with pgvector. It's simple and integrated."
+    },
+    {
+      "speaker": "assistant",
+      "text": "pgvector is easy to use. I'll add the extension and create the tables."
+    },
+    {
+      "speaker": "user",
+      "text": "Actually, our search queries are very complex. We need dedicated indexing. Let's use Qdrant. It has the best filtering capabilities."
+    }
+  ],
+  "query": "What vector database is the team using for semantic search?",
+  "expected": {
+    "answer_contains": [
+      "Qdrant",
+      "vector",
+      "search"
+    ],
+    "must_not_contain": [
+      "Pinecone",
+      "Weaviate",
+      "pgvector"
+    ]
+  }
+}

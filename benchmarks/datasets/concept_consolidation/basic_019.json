@@ -1,0 +1,20 @@
+{
+  "benchmark_id": "concept_consolidation_basic_019",
+  "category": "concept_consolidation",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I'm allergic to peanuts."
+    },
+    {
+      "speaker": "user",
+      "text": "Confirming again, I have a peanut allergy."
+    }
+  ],
+  "query": "What is the user allergic to?",
+  "expected": {
+    "answer_contains": [
+      "peanuts"
+    ]
+  }
+}

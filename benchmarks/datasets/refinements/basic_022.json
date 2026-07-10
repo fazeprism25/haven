@@ -1,0 +1,27 @@
+{
+  "benchmark_id": "refinements_basic_022",
+  "category": "refinements",
+  "refinement_type": "habit",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I go to the gym on Mondays."
+    },
+    {
+      "speaker": "user",
+      "text": "I've been listening to more podcasts during my commute."
+    },
+    {
+      "speaker": "user",
+      "text": "I go to the gym on Mondays and Thursdays."
+    }
+  ],
+  "query": "Which days does the user go to the gym?",
+  "expected": {
+    "answer_contains": [
+      "Mondays",
+      "Thursdays"
+    ],
+    "must_not_contain": []
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "benchmark_id": "refinements_basic_025",
+  "category": "refinements",
+  "refinement_type": "ownership",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I own the deployment pipeline."
+    },
+    {
+      "speaker": "user",
+      "text": "We adopted a new design system at work."
+    },
+    {
+      "speaker": "user",
+      "text": "I own the deployment pipeline and the CI configuration."
+    }
+  ],
+  "query": "What does the user own at work?",
+  "expected": {
+    "answer_contains": [
+      "deployment pipeline",
+      "CI configuration"
+    ],
+    "must_not_contain": []
+  }
+}

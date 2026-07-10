@@ -1,0 +1,32 @@
+{
+  "benchmark_id": "refinements_basic_017",
+  "category": "refinements",
+  "refinement_type": "goal",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "My goal this year is to learn Spanish."
+    },
+    {
+      "speaker": "user",
+      "text": "My goal this year is to learn Spanish well enough to hold a conversation."
+    },
+    {
+      "speaker": "user",
+      "text": "I started a new sketchbook."
+    },
+    {
+      "speaker": "user",
+      "text": "My goal this year is to learn Spanish well enough to hold a conversation, ideally before my trip to Mexico."
+    }
+  ],
+  "query": "What is the user's Spanish learning goal?",
+  "expected": {
+    "answer_contains": [
+      "Spanish",
+      "hold a conversation",
+      "trip to Mexico"
+    ],
+    "must_not_contain": []
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "benchmark_id": "decision_basic_007",
+  "category": "decision",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I decided to use FastEmbed for local testing."
+    }
+  ],
+
+  "query": "Which embedding model should be used for local testing?",
+
+  "expected": {
+    "answer_contains": [
+      "FastEmbed"
+    ]
+  }
+}

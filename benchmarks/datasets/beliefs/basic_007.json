@@ -1,0 +1,18 @@
+{
+  "benchmark_id": "belief_basic_007",
+  "category": "belief",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I believe benchmarks are necessary before optimization."
+    }
+  ],
+
+  "query": "What should happen before optimization?",
+
+  "expected": {
+    "answer_contains": [
+      "benchmarks"
+    ]
+  }
+}

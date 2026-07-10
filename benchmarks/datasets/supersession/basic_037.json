@@ -1,0 +1,32 @@
+{
+  "benchmark_id": "supersession_basic_037",
+  "category": "supersession",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "The API redesign project is blocked on vendor approval."
+    },
+    {
+      "speaker": "assistant",
+      "text": "Noted, I'll keep an eye on it."
+    },
+    {
+      "speaker": "user",
+      "text": "We had a great team lunch today."
+    },
+    {
+      "speaker": "user",
+      "text": "Update: the API redesign project is unblocked and now in progress."
+    }
+  ],
+  "query": "What is the current status of the API redesign project?",
+  "expected": {
+    "answer_contains": [
+      "in progress",
+      "unblocked"
+    ],
+    "must_not_contain": [
+      "blocked"
+    ]
+  }
+}

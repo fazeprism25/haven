@@ -1,0 +1,40 @@
+{
+  "benchmark_id": "refinements_basic_021",
+  "category": "refinements",
+  "refinement_type": "role",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "There's been a reorg at work."
+    },
+    {
+      "speaker": "user",
+      "text": "I'm now the tech lead for the platform team."
+    },
+    {
+      "speaker": "user",
+      "text": "A few people moved teams as part of the change."
+    },
+    {
+      "speaker": "user",
+      "text": "I've been reading a book about engineering management."
+    },
+    {
+      "speaker": "user",
+      "text": "I'm now the tech lead for the platform team, reporting directly to the VP of engineering."
+    },
+    {
+      "speaker": "user",
+      "text": "The team is fully remote."
+    }
+  ],
+  "query": "What is the user's new role and reporting line?",
+  "expected": {
+    "answer_contains": [
+      "tech lead",
+      "platform team",
+      "VP of engineering"
+    ],
+    "must_not_contain": []
+  }
+}

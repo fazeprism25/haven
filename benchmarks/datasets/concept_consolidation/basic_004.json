@@ -1,0 +1,20 @@
+{
+  "benchmark_id": "concept_consolidation_basic_004",
+  "category": "concept_consolidation",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "My favorite editor is Neovim."
+    },
+    {
+      "speaker": "user",
+      "text": "My favorite editor is Neovim."
+    }
+  ],
+  "query": "What is the user's favorite editor?",
+  "expected": {
+    "answer_contains": [
+      "Neovim"
+    ]
+  }
+}

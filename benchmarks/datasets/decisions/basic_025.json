@@ -1,0 +1,20 @@
+{
+  "benchmark_id": "basic_025",
+  "category": "Decisions",
+
+  "conversation": [
+    { "speaker": "user", "text": "I'm deciding how to handle state management in our React app. The options I'm considering are Redux Toolkit, Zustand, and React Query plus Context." },
+    { "speaker": "user", "text": "Redux Toolkit is mature and our senior engineers know it well, but it feels like a lot of boilerplate for what we need." },
+    { "speaker": "user", "text": "Zustand is minimal and elegant. Great for client state." },
+    { "speaker": "user", "text": "React Query is excellent for server state but doesn't really solve client-side global state on its own." },
+    { "speaker": "user", "text": "Most of our state is actually server state — fetching, caching, syncing data from the API." },
+    { "speaker": "user", "text": "Decision: React Query for server state, and Zustand for the small amount of client-only global state we have. No Redux." }
+  ],
+
+  "query": "What did the user decide to use for managing server state in their React app?",
+
+  "expected": {
+    "answer_contains": ["React Query"],
+    "must_not_contain": ["Redux", "Zustand", "Context"]
+  }
+}

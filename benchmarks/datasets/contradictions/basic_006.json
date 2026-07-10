@@ -1,0 +1,23 @@
+{
+  "benchmark_id": "contradictions_basic_006",
+  "category": "contradictions",
+
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "Memory retrieval is the most important problem."
+    },
+    {
+      "speaker": "user",
+      "text": "Actually extraction quality is the most important problem."
+    }
+  ],
+
+  "query": "What is currently considered the most important problem?",
+
+  "expected": {
+    "answer_contains": [
+      "extraction"
+    ]
+  }
+}

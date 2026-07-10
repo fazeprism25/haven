@@ -1,0 +1,40 @@
+{
+  "benchmark_id": "beliefs_011",
+  "category": "Beliefs",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "Honestly, I used to be convinced that NoSQL was the only way to scale modern web apps. Document stores just felt so natural for JSON payloads."
+    },
+    {
+      "speaker": "assistant",
+      "text": "A lot of developers felt that way during the initial NoSQL boom. The schema flexibility is definitely appealing."
+    },
+    {
+      "speaker": "user",
+      "text": "Yeah, but dealing with eventual consistency and lack of robust joins killed it for me over time. I completely flipped my stance last year. Now I strongly believe that a strict, normalized relational database like PostgreSQL is fundamentally superior for maintaining data integrity, even at scale."
+    },
+    {
+      "speaker": "assistant",
+      "text": "PostgreSQL has definitely caught up with excellent JSONB support too."
+    },
+    {
+      "speaker": "user",
+      "text": "Exactly. Though lately, looking at these massive distributed globally active systems we are building, managing sharding in Postgres is a nightmare. I'm starting to think that strict relational constraints are an anti-pattern for global scale, and we actually need to embrace distributed, eventual-consistency document models again to survive."
+    }
+  ],
+  "query": "What is the user's current philosophy regarding the usage of relational versus NoSQL databases for global-scale applications?",
+  "expected": {
+    "answer_contains": [
+      "NoSQL",
+      "distributed",
+      "document",
+      "consistency"
+    ],
+    "must_not_contain": [
+      "relational",
+      "PostgreSQL",
+      "normalized"
+    ]
+  }
+}

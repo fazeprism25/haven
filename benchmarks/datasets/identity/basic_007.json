@@ -1,0 +1,20 @@
+{
+  "benchmark_id": "identity_basic_007",
+  "category": "identity",
+
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I am interested in robotics and artificial intelligence."
+    }
+  ],
+
+  "query": "What fields interest the user?",
+
+  "expected": {
+    "answer_contains": [
+      "robotics",
+      "artificial intelligence"
+    ]
+  }
+}

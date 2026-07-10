@@ -1,0 +1,25 @@
+{
+  "benchmark_id": "concept_consolidation_basic_009",
+  "category": "concept_consolidation",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I'm a product manager."
+    },
+    {
+      "speaker": "user",
+      "text": "My role is product management."
+    },
+    {
+      "speaker": "user",
+      "text": "I manage products for a living."
+    }
+  ],
+  "query": "What is the user's job role?",
+  "expected": {
+    "answer_contains": [
+      "product manager",
+      "product management"
+    ]
+  }
+}

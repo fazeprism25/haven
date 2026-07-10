@@ -1,0 +1,32 @@
+{
+  "benchmark_id": "supersession_basic_045",
+  "category": "supersession",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "My goal is to launch my startup by December."
+    },
+    {
+      "speaker": "assistant",
+      "text": "That's an exciting goal."
+    },
+    {
+      "speaker": "user",
+      "text": "I met an old friend for coffee."
+    },
+    {
+      "speaker": "user",
+      "text": "A few months later: I've pivoted, my new goal is to join an existing startup instead of launching my own."
+    }
+  ],
+  "query": "What is the user's current career goal?",
+  "expected": {
+    "answer_contains": [
+      "join an existing startup"
+    ],
+    "must_not_contain": [
+      "launch my own",
+      "launch my startup"
+    ]
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "benchmark_id": "contradictions_basic_004",
+  "category": "contradictions",
+
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "Features should be built immediately."
+    },
+    {
+      "speaker": "user",
+      "text": "Benchmarks should be built first."
+    }
+  ],
+
+  "query": "What should happen before implementation?",
+
+  "expected": {
+    "answer_contains": [
+      "Benchmarks"
+    ]
+  }
+}

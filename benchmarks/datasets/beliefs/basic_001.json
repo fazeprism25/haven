@@ -1,0 +1,26 @@
+{
+  "benchmark_id": "belief_basic_001",
+  "category": "belief_evolution",
+
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I currently believe GraphRAG is the most important component for improving memory systems."
+    },
+    {
+      "speaker": "user",
+      "text": "After further research, I now believe Manager AI is more important than GraphRAG because extraction quality appears to be a larger bottleneck than retrieval."
+    }
+  ],
+
+  "query": "What is the user's current belief about the most important component?",
+
+  "expected": {
+    "answer_contains": [
+      "Manager AI"
+    ],
+    "must_not_contain": [
+      "GraphRAG is the most important"
+    ]
+  }
+}

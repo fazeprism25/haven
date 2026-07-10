@@ -1,0 +1,26 @@
+{
+  "benchmark_id": "decision_basic_004",
+  "category": "decision_consistency",
+
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "Manager AI is currently a higher priority than GraphRAG."
+    },
+    {
+      "speaker": "user",
+      "text": "The manager architecture should be built first."
+    }
+  ],
+
+  "query": "Which subsystem should be prioritized next?",
+
+  "expected": {
+    "answer_contains": [
+      "Manager AI"
+    ],
+    "must_not_contain": [
+      "GraphRAG should be built first"
+    ]
+  }
+}

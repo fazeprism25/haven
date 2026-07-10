@@ -1,0 +1,31 @@
+{
+  "benchmark_id": "refinements_basic_014",
+  "category": "refinements",
+  "refinement_type": "preference",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I prefer working from home on Mondays."
+    },
+    {
+      "speaker": "user",
+      "text": "I prefer working from home on Mondays and Fridays."
+    },
+    {
+      "speaker": "user",
+      "text": "The office cafeteria changed its menu."
+    },
+    {
+      "speaker": "user",
+      "text": "I prefer working from home on Mondays and Fridays, and going in the rest of the week."
+    }
+  ],
+  "query": "What are the user's work-from-home preferences?",
+  "expected": {
+    "answer_contains": [
+      "Mondays",
+      "Fridays"
+    ],
+    "must_not_contain": []
+  }
+}

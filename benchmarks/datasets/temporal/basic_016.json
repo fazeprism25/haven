@@ -1,0 +1,47 @@
+{
+  "benchmark_id": "temporal_016",
+  "category": "Temporal",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "For the object storage, let's use AWS S3. It's reliable and has great integration with our other services."
+    },
+    {
+      "speaker": "assistant",
+      "text": "S3 is the industry standard. I'll set up the buckets and lifecycle policies."
+    },
+    {
+      "speaker": "user",
+      "text": "But S3 is expensive for data transfer. Let's use Cloudflare R2 instead. It has no egress fees."
+    },
+    {
+      "speaker": "assistant",
+      "text": "R2 is S3-compatible and cheaper. I'll migrate the upload endpoints."
+    },
+    {
+      "speaker": "user",
+      "text": "We need immutable versioning. Google Cloud Storage has better versioning support. Let's use GCS."
+    },
+    {
+      "speaker": "assistant",
+      "text": "GCS is solid. I'll set up the object versioning."
+    },
+    {
+      "speaker": "user",
+      "text": "We want to keep our infrastructure simple. Let's just use S3. The cost difference is negligible for our scale."
+    }
+  ],
+  "query": "What object storage service is being used for file uploads?",
+  "expected": {
+    "answer_contains": [
+      "S3",
+      "storage",
+      "AWS"
+    ],
+    "must_not_contain": [
+      "Cloudflare",
+      "R2",
+      "GCS"
+    ]
+  }
+}

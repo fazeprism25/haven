@@ -1,0 +1,211 @@
+{
+  "benchmark_id": "resume_coding_basic_009",
+  "category": "resume_coding",
+  "tier": "medium",
+  "domain": "haven_hybrid_candidate_retriever",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "My phone battery has been draining faster than usual lately.",
+      "turn_type": "distractor",
+      "turn_index": 0
+    },
+    {
+      "speaker": "user",
+      "text": "I need to renew my passport before it expires this winter.",
+      "turn_type": "distractor",
+      "turn_index": 1
+    },
+    {
+      "speaker": "user",
+      "text": "Concept-seeded retrieval alone misses queries that name no detected concept -- we need a second retrieval path.",
+      "turn_type": "architecture_discussion",
+      "turn_index": 2
+    },
+    {
+      "speaker": "user",
+      "text": "The gym was way more crowded than usual today.",
+      "turn_type": "distractor",
+      "turn_index": 3
+    },
+    {
+      "speaker": "user",
+      "text": "Could switch to embedding-only retrieval and drop the concept-graph path entirely.",
+      "turn_type": "rejected_approach",
+      "turn_index": 4
+    },
+    {
+      "speaker": "user",
+      "text": "I switched to a different brand of coffee and I'm not sure I like it.",
+      "turn_type": "distractor",
+      "turn_index": 5
+    },
+    {
+      "speaker": "user",
+      "text": "Embedding-only would throw away the ontology structure that already works well for concept-named queries -- combine both: keyword/concept-graph retrieval plus embedding retrieval feeding the same candidate pool, then let DeterministicRanker's blended score sort them out.",
+      "turn_type": "decision",
+      "supersedes_turn": 4,
+      "turn_index": 6
+    },
+    {
+      "speaker": "user",
+      "text": "It's supposed to rain most of next week according to the forecast.",
+      "turn_type": "distractor",
+      "turn_index": 7
+    },
+    {
+      "speaker": "user",
+      "text": "I still haven't unpacked the last box from the move.",
+      "turn_type": "distractor",
+      "turn_index": 8
+    },
+    {
+      "speaker": "user",
+      "text": "Constraint: the two retrieval paths must never be allowed to double-count the same KnowledgeObject as two separate candidates with independent scores.",
+      "turn_type": "constraint",
+      "turn_index": 9
+    },
+    {
+      "speaker": "user",
+      "text": "My sister's flight got delayed by a couple of hours.",
+      "turn_type": "distractor",
+      "turn_index": 10
+    },
+    {
+      "speaker": "user",
+      "text": "Blocked: both retrievers can independently surface the same KnowledgeObject, and naively merging the lists creates exactly that duplicate-candidate problem.",
+      "turn_type": "blocker",
+      "turn_index": 11
+    },
+    {
+      "speaker": "user",
+      "text": "The office plants finally got watered after being neglected for weeks.",
+      "turn_type": "distractor",
+      "turn_index": 12
+    },
+    {
+      "speaker": "user",
+      "text": "I keep meaning to update my resume but haven't gotten around to it.",
+      "turn_type": "distractor",
+      "turn_index": 13
+    },
+    {
+      "speaker": "user",
+      "text": "Decided: dedupe by knowledge_object_id when merging the two candidate lists, keeping the higher of the two raw scores before ranking. Unblocks the merge.",
+      "turn_type": "decision",
+      "resolves_turn": 11,
+      "turn_index": 14
+    },
+    {
+      "speaker": "user",
+      "text": "The parking garage near the office is under construction again.",
+      "turn_type": "distractor",
+      "turn_index": 15
+    },
+    {
+      "speaker": "user",
+      "text": "Implemented HybridCandidateRetriever combining both paths with the dedupe-by-id merge.",
+      "turn_type": "implementation",
+      "turn_index": 16
+    },
+    {
+      "speaker": "user",
+      "text": "I tried a new recipe for dinner last night, turned out decent.",
+      "turn_type": "distractor",
+      "turn_index": 17
+    },
+    {
+      "speaker": "user",
+      "text": "Added a test with a query that has no concept match at all, confirming keyword overlap alone now surfaces the memory.",
+      "turn_type": "implementation",
+      "turn_index": 18
+    },
+    {
+      "speaker": "user",
+      "text": "My laptop fan has been louder than usual, might need cleaning.",
+      "turn_type": "distractor",
+      "turn_index": 19
+    },
+    {
+      "speaker": "user",
+      "text": "The dentist appointment I've been putting off is finally scheduled.",
+      "turn_type": "distractor",
+      "turn_index": 20
+    },
+    {
+      "speaker": "user",
+      "text": "Open question: should the two paths' raw scores be normalized onto the same scale before the dedupe keeps the 'higher' one, or is that comparison already meaningless across paths?",
+      "turn_type": "open_question",
+      "turn_index": 21
+    },
+    {
+      "speaker": "user",
+      "text": "I need to return that package before the return window closes.",
+      "turn_type": "distractor",
+      "turn_index": 22
+    },
+    {
+      "speaker": "user",
+      "text": "Next: benchmark hybrid retrieval against the concept-only baseline on the existing decisions/temporal categories to confirm no regression.",
+      "turn_type": "task",
+      "turn_index": 23
+    },
+    {
+      "speaker": "user",
+      "text": "The wifi in the coffee shop I like to work from has been spotty.",
+      "turn_type": "distractor",
+      "turn_index": 24
+    }
+  ],
+  "ground_truth": {
+    "current_objective": "Add a second, embedding-based retrieval path alongside concept-graph retrieval, merged into one candidate pool.",
+    "active_decisions": [
+      "Combine keyword/concept-graph retrieval and embedding retrieval into the same candidate pool, feeding DeterministicRanker's blended score.",
+      "Dedupe by knowledge_object_id when merging the two candidate lists, keeping the higher of the two raw scores."
+    ],
+    "superseded_or_rejected": [
+      "Switching to embedding-only retrieval and dropping the concept-graph path entirely."
+    ],
+    "constraints": [
+      "The two retrieval paths must never double-count the same KnowledgeObject as two separate candidates."
+    ],
+    "active_blockers": [],
+    "active_tasks": [
+      "Benchmark hybrid retrieval against the concept-only baseline on decisions/temporal categories."
+    ],
+    "open_questions": [
+      "Should the two paths' raw scores be normalized before the dedupe keeps the 'higher' one?"
+    ],
+    "top_priority_next_action": "Benchmark hybrid retrieval against the concept-only baseline to confirm no regression on decisions/temporal categories.",
+    "resolved_blockers": [
+      "Both retrievers surfacing the same KnowledgeObject and naively merging creating duplicates."
+    ]
+  },
+  "queries": [
+    {
+      "text": "Continue implementing the project.",
+      "task_mode_hint": "continuation"
+    },
+    {
+      "text": "What should we work on next?",
+      "task_mode_hint": "ambiguous"
+    }
+  ],
+  "expected": {
+    "must_state": [
+      "Combine keyword/concept-graph retrieval and embedding retrieval into the same candidate pool, feeding DeterministicRanker's blended score.",
+      "Dedupe by knowledge_object_id when merging the two candidate lists, keeping the higher of the two raw scores.",
+      "The two retrieval paths must never double-count the same KnowledgeObject as two separate candidates."
+    ],
+    "must_not_state": [
+      "Switching to embedding-only retrieval and dropping the concept-graph path entirely, as a current or recommended approach",
+      "Both retrievers surfacing the same KnowledgeObject and naively merging creating duplicates, as still open/blocking"
+    ],
+    "forbidden_actions": [
+      "Recommending embedding-only retrieval as the path forward, dropping the concept-graph path."
+    ],
+    "must_prioritize": [
+      "Benchmark hybrid retrieval against the concept-only baseline to confirm no regression on decisions/temporal categories."
+    ]
+  }
+}

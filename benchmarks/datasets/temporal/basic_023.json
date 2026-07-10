@@ -1,0 +1,55 @@
+{
+  "benchmark_id": "temporal_023",
+  "category": "Temporal",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "For the API gateway, let's use Kong. It has great plugins and is open-source."
+    },
+    {
+      "speaker": "assistant",
+      "text": "Kong is powerful. I'll set up the rate limiting and authentication plugins."
+    },
+    {
+      "speaker": "user",
+      "text": "We're all-in on AWS. Let's use API Gateway. It's fully managed."
+    },
+    {
+      "speaker": "assistant",
+      "text": "AWS API Gateway integrates with Lambda. I'll create the REST API."
+    },
+    {
+      "speaker": "user",
+      "text": "We need WebSocket support. Let's use Traefik. It works with Kubernetes."
+    },
+    {
+      "speaker": "assistant",
+      "text": "Traefik has great Ingress support. I'll set up the routers."
+    },
+    {
+      "speaker": "user",
+      "text": "We need advanced routing and canary releases. Let's use Ambassador (Emissary). It's built on Envoy."
+    },
+    {
+      "speaker": "assistant",
+      "text": "Ambassador is cloud-native. I'll configure the mapping resources."
+    },
+    {
+      "speaker": "user",
+      "text": "We're a small team. AWS API Gateway is the easiest. No infrastructure to maintain. Let's use it."
+    }
+  ],
+  "query": "What API gateway is being used to manage endpoints?",
+  "expected": {
+    "answer_contains": [
+      "API Gateway",
+      "AWS",
+      "managed"
+    ],
+    "must_not_contain": [
+      "Kong",
+      "Traefik",
+      "Ambassador"
+    ]
+  }
+}

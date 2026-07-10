@@ -1,0 +1,37 @@
+{
+  "benchmark_id": "concept_consolidation_basic_045",
+  "category": "concept_consolidation",
+  "consolidation_pattern": "partial_overlap",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I'm planning a trip to Japan next spring."
+    },
+    {
+      "speaker": "user",
+      "text": "My laptop battery has been draining really fast lately."
+    },
+    {
+      "speaker": "user",
+      "text": "For the Japan trip, I'm thinking of spending most of the time in Kyoto rather than Tokyo."
+    },
+    {
+      "speaker": "user",
+      "text": "I ended up just replacing the laptop battery myself."
+    },
+    {
+      "speaker": "user",
+      "text": "I'm trying to time the Japan trip around the cherry blossoms."
+    }
+  ],
+  "query": "What are the user's plans for the Japan trip?",
+  "expected": {
+    "answer_contains": [
+      "Kyoto",
+      "cherry blossoms"
+    ],
+    "must_not_contain": [
+      "laptop battery"
+    ]
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "benchmark_id": "identity_basic_002",
+  "category": "identity",
+
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I currently study at DTU."
+    }
+  ],
+
+  "query": "Where does the user study?",
+
+  "expected": {
+    "answer_contains": [
+      "DTU"
+    ]
+  }
+}

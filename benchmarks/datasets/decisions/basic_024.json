@@ -1,0 +1,20 @@
+{
+  "benchmark_id": "basic_024",
+  "category": "Decisions",
+
+  "conversation": [
+    { "speaker": "user", "text": "I'm planning the testing strategy for our frontend. I need to pick between Cypress, Playwright, and Selenium for end-to-end tests." },
+    { "speaker": "user", "text": "Selenium is old and slow, crossing it off immediately." },
+    { "speaker": "user", "text": "Cypress is great for single-page apps but has limited support for multiple browser tabs and cross-origin scenarios, which we need." },
+    { "speaker": "user", "text": "Playwright handles multi-tab flows natively and supports all major browsers." },
+    { "speaker": "user", "text": "For unit tests I'll stick with Vitest regardless." },
+    { "speaker": "user", "text": "For E2E: Playwright. The multi-origin support is a hard requirement for our OAuth flows." }
+  ],
+
+  "query": "What end-to-end testing framework did the user decide on?",
+
+  "expected": {
+    "answer_contains": ["Playwright"],
+    "must_not_contain": ["Cypress", "Selenium", "Vitest"]
+  }
+}

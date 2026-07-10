@@ -1,0 +1,64 @@
+{
+  "benchmark_id": "decision_reconstruction_basic_016",
+  "category": "decision_reconstruction",
+  "domain": "diet_plan",
+  "decision_turn_indices": [
+    10
+  ],
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "Talked to my doctor about diet options -- keto, Mediterranean, and intermittent fasting all came up."
+    },
+    {
+      "speaker": "user",
+      "text": "Keto sounds effective short term but I don't think I could sustain cutting carbs that hard long term."
+    },
+    {
+      "speaker": "user",
+      "text": "Intermittent fasting fits my schedule okay but I get pretty irritable if I skip breakfast entirely."
+    },
+    {
+      "speaker": "user",
+      "text": "I need to schedule my car for its annual inspection."
+    },
+    {
+      "speaker": "user",
+      "text": "Mediterranean seems like the easiest to actually stick with, and my doctor specifically recommended it given my cholesterol numbers."
+    },
+    {
+      "speaker": "user",
+      "text": "Got the car inspection scheduled for next Tuesday."
+    },
+    {
+      "speaker": "user",
+      "text": "Read up more on the Mediterranean approach, a lot of it is stuff I already mostly eat anyway."
+    },
+    {
+      "speaker": "user",
+      "text": "Still tempted by how fast people describe results from keto."
+    },
+    {
+      "speaker": "user",
+      "text": "My sister's birthday is coming up, need to figure out a gift."
+    },
+    {
+      "speaker": "user",
+      "text": "Talked to my doctor again and she reiterated Mediterranean was the best fit given my cholesterol and how sustainable it is long term."
+    },
+    {
+      "speaker": "user",
+      "text": "Going with the Mediterranean approach. My doctor's recommendation given my cholesterol numbers, plus how sustainable it is long term, settled it over keto and fasting."
+    }
+  ],
+  "query": "What eating plan did the user decide to follow?",
+  "expected": {
+    "answer_contains": [
+      "Mediterranean",
+      "doctor's recommendation given my cholesterol"
+    ],
+    "must_not_contain": [
+      "car inspection"
+    ]
+  }
+}

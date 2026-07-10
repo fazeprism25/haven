@@ -1,0 +1,211 @@
+{
+  "benchmark_id": "resume_coding_basic_006",
+  "category": "resume_coding",
+  "tier": "medium",
+  "domain": "haven_benchmark_adapter_search",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "My laptop fan has been louder than usual, might need cleaning.",
+      "turn_type": "distractor",
+      "turn_index": 0
+    },
+    {
+      "speaker": "user",
+      "text": "The dentist appointment I've been putting off is finally scheduled.",
+      "turn_type": "distractor",
+      "turn_index": 1
+    },
+    {
+      "speaker": "user",
+      "text": "HavenAdapter.search() currently returns MemoryEngine.query()'s single formatted context string, with type/confidence/importance/valid_from annotations baked in, as the sole result entry.",
+      "turn_type": "architecture_discussion",
+      "turn_index": 2
+    },
+    {
+      "speaker": "user",
+      "text": "I need to return that package before the return window closes.",
+      "turn_type": "distractor",
+      "turn_index": 3
+    },
+    {
+      "speaker": "user",
+      "text": "We could keep returning that annotated string -- it's already implemented and the judge scores it fine.",
+      "turn_type": "rejected_approach",
+      "turn_index": 4
+    },
+    {
+      "speaker": "user",
+      "text": "The wifi in the coffee shop I like to work from has been spotty.",
+      "turn_type": "distractor",
+      "turn_index": 5
+    },
+    {
+      "speaker": "user",
+      "text": "That hands the benchmark's judge a structurally richer answer than every other adapter gets -- mem0 and the baselines all return raw, unannotated text. Switch to one raw canonical_fact entry per accepted candidate instead.",
+      "turn_type": "decision",
+      "supersedes_turn": 4,
+      "turn_index": 6
+    },
+    {
+      "speaker": "user",
+      "text": "I finally got around to donating some old clothes I never wear.",
+      "turn_type": "distractor",
+      "turn_index": 7
+    },
+    {
+      "speaker": "user",
+      "text": "My neighbor's dog barked most of the afternoon, hard to get anything done with the window open.",
+      "turn_type": "distractor",
+      "turn_index": 8
+    },
+    {
+      "speaker": "user",
+      "text": "Constraint: the RetrievalTrace object itself must never be passed to, or serialized into, an LLM prompt -- only its candidates' canonical_fact strings can leave this adapter.",
+      "turn_type": "constraint",
+      "turn_index": 9
+    },
+    {
+      "speaker": "user",
+      "text": "The bus was running about ten minutes late again this morning.",
+      "turn_type": "distractor",
+      "turn_index": 10
+    },
+    {
+      "speaker": "user",
+      "text": "Blocked: query_with_trace's candidate order needs to exactly reproduce what ContextBuilder would have rendered, or the switch silently changes which facts the judge sees.",
+      "turn_type": "blocker",
+      "turn_index": 11
+    },
+    {
+      "speaker": "user",
+      "text": "I finally fixed the wobbly chair leg in the kitchen.",
+      "turn_type": "distractor",
+      "turn_index": 12
+    },
+    {
+      "speaker": "user",
+      "text": "There's a new bakery opening down the street next month.",
+      "turn_type": "distractor",
+      "turn_index": 13
+    },
+    {
+      "speaker": "user",
+      "text": "Confirmed RetrievalTrace.candidates is already produced in DeterministicRanker's final-score order, the same order DeterministicSlotAllocator re-derives -- filtering to accepted entries reproduces the right set and order. Unblocks the switch.",
+      "turn_type": "decision",
+      "resolves_turn": 11,
+      "turn_index": 14
+    },
+    {
+      "speaker": "user",
+      "text": "My phone battery has been draining faster than usual lately.",
+      "turn_type": "distractor",
+      "turn_index": 15
+    },
+    {
+      "speaker": "user",
+      "text": "Rewrote HavenAdapter.search() to call query_with_trace and map accepted candidates to {id, memory: canonical_fact}.",
+      "turn_type": "implementation",
+      "turn_index": 16
+    },
+    {
+      "speaker": "user",
+      "text": "I need to renew my passport before it expires this winter.",
+      "turn_type": "distractor",
+      "turn_index": 17
+    },
+    {
+      "speaker": "user",
+      "text": "Updated the adapter's tests to assert no confidence:/valid_from: annotations ever appear in a result's memory field.",
+      "turn_type": "implementation",
+      "turn_index": 18
+    },
+    {
+      "speaker": "user",
+      "text": "The gym was way more crowded than usual today.",
+      "turn_type": "distractor",
+      "turn_index": 19
+    },
+    {
+      "speaker": "user",
+      "text": "I switched to a different brand of coffee and I'm not sure I like it.",
+      "turn_type": "distractor",
+      "turn_index": 20
+    },
+    {
+      "speaker": "user",
+      "text": "Open question: does returning one entry per candidate instead of one joined block distort retrieved_memories-count-based diagnostics elsewhere?",
+      "turn_type": "open_question",
+      "turn_index": 21
+    },
+    {
+      "speaker": "user",
+      "text": "It's supposed to rain most of next week according to the forecast.",
+      "turn_type": "distractor",
+      "turn_index": 22
+    },
+    {
+      "speaker": "user",
+      "text": "Next: check classify_failure.py's NO_RETRIEVAL heuristic against the new per-candidate result count.",
+      "turn_type": "task",
+      "turn_index": 23
+    },
+    {
+      "speaker": "user",
+      "text": "I still haven't unpacked the last box from the move.",
+      "turn_type": "distractor",
+      "turn_index": 24
+    }
+  ],
+  "ground_truth": {
+    "current_objective": "Fix HavenAdapter.search() so it stops leaking metadata annotations into the benchmark judge's answer.",
+    "active_decisions": [
+      "Return one raw canonical_fact entry per accepted candidate from query_with_trace, not a single annotated formatted-context string.",
+      "RetrievalTrace.candidates' existing final-score order (from DeterministicRanker) is reused as-is when filtering to accepted entries."
+    ],
+    "superseded_or_rejected": [
+      "Keeping the annotated formatted-context string as the adapter's search() result."
+    ],
+    "constraints": [
+      "The RetrievalTrace object itself must never be passed to, or serialized into, an LLM prompt."
+    ],
+    "active_blockers": [],
+    "active_tasks": [
+      "Check classify_failure.py's NO_RETRIEVAL heuristic against the new per-candidate result count."
+    ],
+    "open_questions": [
+      "Does returning one entry per candidate distort other retrieved_memories-count-based diagnostics?"
+    ],
+    "top_priority_next_action": "Check whether classify_failure.py's NO_RETRIEVAL heuristic still behaves correctly now that search() returns one entry per accepted candidate.",
+    "resolved_blockers": [
+      "Whether query_with_trace's candidate order reproduces what ContextBuilder would have rendered."
+    ]
+  },
+  "queries": [
+    {
+      "text": "Continue implementing the project.",
+      "task_mode_hint": "continuation"
+    },
+    {
+      "text": "What should we work on next?",
+      "task_mode_hint": "ambiguous"
+    }
+  ],
+  "expected": {
+    "must_state": [
+      "Return one raw canonical_fact entry per accepted candidate from query_with_trace, not a single annotated formatted-context string.",
+      "RetrievalTrace.candidates' existing final-score order (from DeterministicRanker) is reused as-is when filtering to accepted entries.",
+      "The RetrievalTrace object itself must never be passed to, or serialized into, an LLM prompt."
+    ],
+    "must_not_state": [
+      "Keeping the annotated formatted-context string as the adapter's search() result, as a current or recommended approach",
+      "Whether query_with_trace's candidate order reproduces what ContextBuilder would have rendered, as still open/blocking"
+    ],
+    "forbidden_actions": [
+      "Recommending that RetrievalTrace be serialized directly into an LLM prompt for debugging."
+    ],
+    "must_prioritize": [
+      "Check whether classify_failure.py's NO_RETRIEVAL heuristic still behaves correctly now that search() returns one entry per accepted candidate."
+    ]
+  }
+}

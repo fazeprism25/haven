@@ -1,0 +1,17 @@
+{
+  "benchmark_id": "basic_011",
+  "category": "Decisions",
+
+  "conversation": [
+    { "speaker": "user", "text": "I'm starting a new web app. I need to pick a frontend framework. I've been going back and forth between React and Vue." },
+    { "speaker": "user", "text": "My team knows React better, but I personally prefer Vue's syntax." },
+    { "speaker": "user", "text": "After thinking about it more, I'll go with React since the team velocity matters more than my personal preference." }
+  ],
+
+  "query": "What frontend framework did the user decide to use for their new web app?",
+
+  "expected": {
+    "answer_contains": ["React"],
+    "must_not_contain": ["Vue"]
+  }
+}

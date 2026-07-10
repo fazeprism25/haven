@@ -1,0 +1,39 @@
+{
+  "benchmark_id": "concept_consolidation_basic_061",
+  "category": "concept_consolidation",
+  "consolidation_pattern": "multi_entity",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I'm considering visiting Seoul next year."
+    },
+    {
+      "speaker": "user",
+      "text": "I'm also thinking about a trip to Lisbon at some point."
+    },
+    {
+      "speaker": "user",
+      "text": "For the Seoul trip, I really want to check out the street food markets."
+    },
+    {
+      "speaker": "user",
+      "text": "Lisbon would mostly be about the coastline and day trips to Sintra."
+    },
+    {
+      "speaker": "user",
+      "text": "The Seoul trip would probably be in the spring, around cherry blossom season."
+    }
+  ],
+  "query": "What are the user's plans for Seoul?",
+  "expected": {
+    "answer_contains": [
+      "Seoul",
+      "street food markets",
+      "cherry blossom"
+    ],
+    "must_not_contain": [
+      "Lisbon",
+      "Sintra"
+    ]
+  }
+}

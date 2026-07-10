@@ -1,0 +1,229 @@
+{
+  "benchmark_id": "resume_coding_basic_004",
+  "category": "resume_coding",
+  "tier": "medium",
+  "domain": "haven_alias_index",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I still haven't unpacked the last box from the move.",
+      "turn_type": "distractor",
+      "turn_index": 0
+    },
+    {
+      "speaker": "user",
+      "text": "My sister's flight got delayed by a couple of hours.",
+      "turn_type": "distractor",
+      "turn_index": 1
+    },
+    {
+      "speaker": "user",
+      "text": "AliasIndex only matches exact concept-name strings right now, so 'Manager AI' and 'the manager' never resolve to the same concept.",
+      "turn_type": "architecture_discussion",
+      "turn_index": 2
+    },
+    {
+      "speaker": "user",
+      "text": "The office plants finally got watered after being neglected for weeks.",
+      "turn_type": "distractor",
+      "turn_index": 3
+    },
+    {
+      "speaker": "user",
+      "text": "Could just require users to always type the exact canonical concept name.",
+      "turn_type": "rejected_approach",
+      "turn_index": 4
+    },
+    {
+      "speaker": "user",
+      "text": "I keep meaning to update my resume but haven't gotten around to it.",
+      "turn_type": "distractor",
+      "turn_index": 5
+    },
+    {
+      "speaker": "user",
+      "text": "That's not realistic for a personal-memory system -- add a small alias table plus fuzzy matching so near-miss phrasings still resolve.",
+      "turn_type": "decision",
+      "supersedes_turn": 4,
+      "turn_index": 6
+    },
+    {
+      "speaker": "user",
+      "text": "The parking garage near the office is under construction again.",
+      "turn_type": "distractor",
+      "turn_index": 7
+    },
+    {
+      "speaker": "user",
+      "text": "I tried a new recipe for dinner last night, turned out decent.",
+      "turn_type": "distractor",
+      "turn_index": 8
+    },
+    {
+      "speaker": "user",
+      "text": "Constraint: fuzzy matching must never merge two genuinely different concepts just because their names are similar -- false merges are worse than missed matches.",
+      "turn_type": "constraint",
+      "turn_index": 9
+    },
+    {
+      "speaker": "user",
+      "text": "My laptop fan has been louder than usual, might need cleaning.",
+      "turn_type": "distractor",
+      "turn_index": 10
+    },
+    {
+      "speaker": "user",
+      "text": "Blocked: with fuzzy matching on, ambiguous short aliases (like 'MA') start matching multiple concepts with no way to pick.",
+      "turn_type": "blocker",
+      "turn_index": 11
+    },
+    {
+      "speaker": "user",
+      "text": "The dentist appointment I've been putting off is finally scheduled.",
+      "turn_type": "distractor",
+      "turn_index": 12
+    },
+    {
+      "speaker": "user",
+      "text": "I need to return that package before the return window closes.",
+      "turn_type": "distractor",
+      "turn_index": 13
+    },
+    {
+      "speaker": "user",
+      "text": "Decided: when an alias matches multiple concepts, score candidates by confirmation count and co-mention frequency and take the highest, rather than resolving arbitrarily. Unblocks alias resolution.",
+      "turn_type": "decision",
+      "resolves_turn": 11,
+      "turn_index": 14
+    },
+    {
+      "speaker": "user",
+      "text": "The wifi in the coffee shop I like to work from has been spotty.",
+      "turn_type": "distractor",
+      "turn_index": 15
+    },
+    {
+      "speaker": "user",
+      "text": "Implemented the alias table alongside exact matching in AliasIndex.rebuild.",
+      "turn_type": "implementation",
+      "turn_index": 16
+    },
+    {
+      "speaker": "user",
+      "text": "I finally got around to donating some old clothes I never wear.",
+      "turn_type": "distractor",
+      "turn_index": 17
+    },
+    {
+      "speaker": "user",
+      "text": "Added the priority-scoring tie-break for ambiguous alias matches.",
+      "turn_type": "implementation",
+      "turn_index": 18
+    },
+    {
+      "speaker": "user",
+      "text": "My neighbor's dog barked most of the afternoon, hard to get anything done with the window open.",
+      "turn_type": "distractor",
+      "turn_index": 19
+    },
+    {
+      "speaker": "user",
+      "text": "The bus was running about ten minutes late again this morning.",
+      "turn_type": "distractor",
+      "turn_index": 20
+    },
+    {
+      "speaker": "user",
+      "text": "Also cleaned up ConceptParser's docstring while I was in there.",
+      "turn_type": "implementation",
+      "turn_index": 21
+    },
+    {
+      "speaker": "user",
+      "text": "I finally fixed the wobbly chair leg in the kitchen.",
+      "turn_type": "distractor",
+      "turn_index": 22
+    },
+    {
+      "speaker": "user",
+      "text": "Open question: should alias confidence decay over time the way memory confidence does?",
+      "turn_type": "open_question",
+      "turn_index": 23
+    },
+    {
+      "speaker": "user",
+      "text": "There's a new bakery opening down the street next month.",
+      "turn_type": "distractor",
+      "turn_index": 24
+    },
+    {
+      "speaker": "user",
+      "text": "Next: extend the alias table to cover multi-word aliases, not just single tokens.",
+      "turn_type": "task",
+      "turn_index": 25
+    },
+    {
+      "speaker": "user",
+      "text": "My phone battery has been draining faster than usual lately.",
+      "turn_type": "distractor",
+      "turn_index": 26
+    },
+    {
+      "speaker": "user",
+      "text": "I need to renew my passport before it expires this winter.",
+      "turn_type": "distractor",
+      "turn_index": 27
+    }
+  ],
+  "ground_truth": {
+    "current_objective": "Extend AliasIndex from exact-match-only to fuzzy alias resolution.",
+    "active_decisions": [
+      "Add a small alias table plus fuzzy matching so near-miss phrasings resolve to the right concept.",
+      "When an alias matches multiple concepts, score candidates by confirmation count and co-mention frequency and take the highest."
+    ],
+    "superseded_or_rejected": [
+      "Requiring users to always type the exact canonical concept name."
+    ],
+    "constraints": [
+      "Fuzzy matching must never merge two genuinely different concepts just because their names are similar."
+    ],
+    "active_blockers": [],
+    "active_tasks": [
+      "Extend the alias table to cover multi-word aliases, not just single tokens."
+    ],
+    "open_questions": [
+      "Should alias confidence decay over time the way memory confidence does?"
+    ],
+    "top_priority_next_action": "Extend AliasIndex's alias table to support multi-word aliases.",
+    "resolved_blockers": [
+      "Ambiguous short aliases matching multiple concepts with no tie-break."
+    ]
+  },
+  "queries": [
+    {
+      "text": "Continue implementing the project.",
+      "task_mode_hint": "continuation"
+    },
+    {
+      "text": "What should we work on next?",
+      "task_mode_hint": "ambiguous"
+    }
+  ],
+  "expected": {
+    "must_state": [
+      "Add a small alias table plus fuzzy matching so near-miss phrasings resolve to the right concept.",
+      "When an alias matches multiple concepts, score candidates by confirmation count and co-mention frequency and take the highest.",
+      "Fuzzy matching must never merge two genuinely different concepts just because their names are similar."
+    ],
+    "must_not_state": [
+      "Requiring users to always type the exact canonical concept name, as a current or recommended approach",
+      "Ambiguous short aliases matching multiple concepts with no tie-break, as still open/blocking"
+    ],
+    "forbidden_actions": [
+      "Recommending that ambiguous alias matches be resolved arbitrarily (e.g. first match) instead of by the confirmation/co-mention tie-break."
+    ],
+    "must_prioritize": [
+      "Extend AliasIndex's alias table to support multi-word aliases."
+    ]
+  }
+}

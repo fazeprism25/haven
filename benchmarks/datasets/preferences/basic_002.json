@@ -1,0 +1,19 @@
+{
+  "benchmark_id": "preferences_basic_002",
+  "category": "preferences",
+
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I prefer Obsidian over Notion for knowledge management."
+    }
+  ],
+
+  "query": "Which knowledge management tool does the user prefer?",
+
+  "expected": {
+    "answer_contains": [
+      "Obsidian"
+    ]
+  }
+}

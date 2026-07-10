@@ -1,0 +1,32 @@
+{
+  "benchmark_id": "refinements_basic_005",
+  "category": "refinements",
+  "refinement_type": "location",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I'm based in Austin."
+    },
+    {
+      "speaker": "user",
+      "text": "I'm based in Austin, Texas."
+    },
+    {
+      "speaker": "user",
+      "text": "I switched my laptop to a mechanical keyboard last week."
+    },
+    {
+      "speaker": "user",
+      "text": "I'm based in Austin, Texas, near the downtown tech corridor."
+    }
+  ],
+  "query": "Where is the user based?",
+  "expected": {
+    "answer_contains": [
+      "Austin",
+      "Texas",
+      "downtown tech corridor"
+    ],
+    "must_not_contain": []
+  }
+}

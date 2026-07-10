@@ -1,0 +1,22 @@
+{
+  "benchmark_id": "supersession_basic_007",
+  "category": "supersession",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I wanted GraphRAG to be the first major component."
+    },
+    {
+      "speaker": "user",
+      "text": "That decision has been replaced. Manager AI comes first."
+    }
+  ],
+
+  "query": "Which component currently has priority?",
+
+  "expected": {
+    "answer_contains": [
+      "Manager AI"
+    ]
+  }
+}

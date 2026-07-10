@@ -1,0 +1,34 @@
+{
+  "benchmark_id": "concept_consolidation_basic_036",
+  "category": "concept_consolidation",
+  "consolidation_pattern": "different_wording",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I picked up a new pair of running shoes recently."
+    },
+    {
+      "speaker": "user",
+      "text": "Work has been hectic with the quarterly planning cycle."
+    },
+    {
+      "speaker": "user",
+      "text": "Those shoes I got, the Pegasus, have been great for my knees."
+    },
+    {
+      "speaker": "user",
+      "text": "Quarterly planning always drags on longer than it should."
+    }
+  ],
+  "query": "What did the user say about their new running shoes?",
+  "expected": {
+    "answer_contains": [
+      "running shoes",
+      "Pegasus",
+      "knees"
+    ],
+    "must_not_contain": [
+      "quarterly planning"
+    ]
+  }
+}

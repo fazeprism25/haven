@@ -1,0 +1,33 @@
+{
+  "benchmark_id": "concept_consolidation_basic_035",
+  "category": "concept_consolidation",
+  "consolidation_pattern": "different_wording",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I've been using VS Code as my main editor."
+    },
+    {
+      "speaker": "user",
+      "text": "I switched my phone plan to a cheaper carrier this month."
+    },
+    {
+      "speaker": "user",
+      "text": "My go-to code editor lately has been VS Code, especially since I set up the Vim keybindings."
+    },
+    {
+      "speaker": "user",
+      "text": "The new carrier has way better coverage in my area."
+    }
+  ],
+  "query": "What editor does the user use and how have they customized it?",
+  "expected": {
+    "answer_contains": [
+      "VS Code",
+      "Vim keybindings"
+    ],
+    "must_not_contain": [
+      "carrier"
+    ]
+  }
+}

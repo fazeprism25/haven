@@ -1,0 +1,19 @@
+{
+  "benchmark_id": "preferences_basic_010",
+  "category": "preferences",
+
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I prefer keeping raw memories rather than deleting them."
+    }
+  ],
+
+  "query": "How should memories be handled?",
+
+  "expected": {
+    "answer_contains": [
+      "raw memories"
+    ]
+  }
+}

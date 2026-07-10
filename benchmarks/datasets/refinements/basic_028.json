@@ -1,0 +1,27 @@
+{
+  "benchmark_id": "refinements_basic_028",
+  "category": "refinements",
+  "refinement_type": "responsibility",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I am responsible for onboarding new hires."
+    },
+    {
+      "speaker": "user",
+      "text": "The kitchen at the office got a new coffee machine."
+    },
+    {
+      "speaker": "user",
+      "text": "I am responsible for onboarding new hires and running their first week training."
+    }
+  ],
+  "query": "What is the user responsible for?",
+  "expected": {
+    "answer_contains": [
+      "onboarding new hires",
+      "first week training"
+    ],
+    "must_not_contain": []
+  }
+}

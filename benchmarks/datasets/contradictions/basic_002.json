@@ -1,0 +1,23 @@
+{
+  "benchmark_id": "contradictions_basic_002",
+  "category": "contradictions",
+
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I should build retrieval first."
+    },
+    {
+      "speaker": "user",
+      "text": "I should build extraction first."
+    }
+  ],
+
+  "query": "What should the user build first?",
+
+  "expected": {
+    "answer_contains": [
+      "extraction"
+    ]
+  }
+}

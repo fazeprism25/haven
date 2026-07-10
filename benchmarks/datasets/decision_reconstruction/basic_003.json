@@ -1,0 +1,101 @@
+{
+  "benchmark_id": "decision_reconstruction_basic_003",
+  "category": "decision_reconstruction",
+  "domain": "cloud_provider",
+  "decision_turn_indices": [
+    18
+  ],
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "We're evaluating cloud providers for the new analytics platform -- AWS, GCP, and Azure are all on the table."
+    },
+    {
+      "speaker": "user",
+      "text": "My cousin's baby shower is coming up, need to pick a gift."
+    },
+    {
+      "speaker": "user",
+      "text": "My laptop update took forever to install last night."
+    },
+    {
+      "speaker": "user",
+      "text": "AWS is what most of the team has used before, so there's some comfort there."
+    },
+    {
+      "speaker": "user",
+      "text": "I've been trying a new recipe for meal prep this week."
+    },
+    {
+      "speaker": "user",
+      "text": "My upstairs neighbor had some furniture delivered today, lots of noise."
+    },
+    {
+      "speaker": "user",
+      "text": "Azure's enterprise support contracts are apparently great, according to a friend at another company."
+    },
+    {
+      "speaker": "user",
+      "text": "I need to renew my gym membership before it lapses."
+    },
+    {
+      "speaker": "user",
+      "text": "I've been trying to cut back on caffeine, going to just one coffee a day now."
+    },
+    {
+      "speaker": "user",
+      "text": "GCP's BigQuery keeps coming up when I look at what other analytics-heavy teams use."
+    },
+    {
+      "speaker": "user",
+      "text": "I need to schedule a haircut, it's overdue at this point."
+    },
+    {
+      "speaker": "user",
+      "text": "The caffeine cutback gave me a headache for like three days straight."
+    },
+    {
+      "speaker": "user",
+      "text": "The weather's been unusually warm for this time of year."
+    },
+    {
+      "speaker": "user",
+      "text": "AWS's Redshift is solid but the pricing model for our expected query volume looks rough."
+    },
+    {
+      "speaker": "user",
+      "text": "Not sure yet, still comparing GCP and AWS mostly, Azure feels like a stretch for our use case."
+    },
+    {
+      "speaker": "user",
+      "text": "I need to call the insurance company about a claim this week."
+    },
+    {
+      "speaker": "user",
+      "text": "The headaches finally went away once I started drinking more water."
+    },
+    {
+      "speaker": "user",
+      "text": "I ran the numbers and BigQuery's on-demand pricing came out noticeably cheaper for our workload than Redshift."
+    },
+    {
+      "speaker": "user",
+      "text": "We've decided to go with GCP for the analytics platform, mainly because of BigQuery's pricing for our query patterns and how well it handled the cost estimate."
+    },
+    {
+      "speaker": "user",
+      "text": "I'll start the account setup process this week."
+    }
+  ],
+  "query": "Which cloud provider did the team choose for the analytics platform?",
+  "expected": {
+    "answer_contains": [
+      "GCP",
+      "BigQuery's pricing",
+      "cost estimate"
+    ],
+    "must_not_contain": [
+      "caffeine"
+    ]
+  }
+}

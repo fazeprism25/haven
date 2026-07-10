@@ -1,0 +1,33 @@
+{
+  "benchmark_id": "concept_consolidation_basic_039",
+  "category": "concept_consolidation",
+  "consolidation_pattern": "different_contexts",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "During my lunch break today I practiced guitar for twenty minutes."
+    },
+    {
+      "speaker": "user",
+      "text": "The team decided to move standup to 10am."
+    },
+    {
+      "speaker": "user",
+      "text": "My sister asked if I could play guitar at her wedding next year."
+    },
+    {
+      "speaker": "user",
+      "text": "Standup moving to 10am actually works better for the folks on the west coast."
+    }
+  ],
+  "query": "What is going on with the user and guitar?",
+  "expected": {
+    "answer_contains": [
+      "practiced guitar",
+      "wedding"
+    ],
+    "must_not_contain": [
+      "standup"
+    ]
+  }
+}

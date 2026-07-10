@@ -1,0 +1,117 @@
+{
+  "benchmark_id": "decision_reconstruction_basic_009",
+  "category": "decision_reconstruction",
+  "domain": "laptop_purchase",
+  "decision_turn_indices": [
+    22
+  ],
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "My sister called to catch up, hadn't talked in a few weeks."
+    },
+    {
+      "speaker": "user",
+      "text": "I need to drop off some old clothes at the donation center."
+    },
+    {
+      "speaker": "user",
+      "text": "I need to renew my gym membership before it lapses."
+    },
+    {
+      "speaker": "user",
+      "text": "Need a new laptop for work -- deciding between a MacBook, a ThinkPad, and a Dell XPS."
+    },
+    {
+      "speaker": "user",
+      "text": "The elevator in my building has been out of service since Monday."
+    },
+    {
+      "speaker": "user",
+      "text": "My upstairs neighbor had some furniture delivered today, lots of noise."
+    },
+    {
+      "speaker": "user",
+      "text": "I've been meaning to reorganize the garage for weeks now."
+    },
+    {
+      "speaker": "user",
+      "text": "The MacBook has the best battery life of the three by most reviews."
+    },
+    {
+      "speaker": "user",
+      "text": "I need to call the insurance company about a claim this week."
+    },
+    {
+      "speaker": "user",
+      "text": "The Dell XPS has a nicer screen but I've heard mixed things about the trackpad."
+    },
+    {
+      "speaker": "user",
+      "text": "There's construction starting on the street outside my building."
+    },
+    {
+      "speaker": "user",
+      "text": "I keep forgetting to water the plants in my office, half of them look rough."
+    },
+    {
+      "speaker": "user",
+      "text": "I've been meaning to water the plants on my desk more consistently."
+    },
+    {
+      "speaker": "user",
+      "text": "The ThinkPad's keyboard is supposed to be excellent, and its Linux compatibility is supposed to be great too, which matters for my side projects."
+    },
+    {
+      "speaker": "user",
+      "text": "I need to schedule a haircut, it's overdue at this point."
+    },
+    {
+      "speaker": "user",
+      "text": "Watered all the plants finally, hopefully they bounce back."
+    },
+    {
+      "speaker": "user",
+      "text": "I switched my podcast subscription to a cheaper plan."
+    },
+    {
+      "speaker": "user",
+      "text": "Tried a ThinkPad at the store, the keyboard really is noticeably better than the other two."
+    },
+    {
+      "speaker": "user",
+      "text": "Still comparing specs, the Dell XPS is tempting for the screen alone."
+    },
+    {
+      "speaker": "user",
+      "text": "My phone's storage is almost full again, need to clear out old photos."
+    },
+    {
+      "speaker": "user",
+      "text": "My neighbor's kid has been selling cookies for a school fundraiser, bought a few boxes."
+    },
+    {
+      "speaker": "user",
+      "text": "Confirmed the ThinkPad's Linux support is genuinely first-class, not just an afterthought like some of the others."
+    },
+    {
+      "speaker": "user",
+      "text": "Went with the ThinkPad. The keyboard feel and the solid Linux support for my side projects made the difference over the MacBook and the Dell XPS."
+    },
+    {
+      "speaker": "user",
+      "text": "Ordering it today so it should arrive before my start date."
+    }
+  ],
+  "query": "Which laptop did the user decide to buy?",
+  "expected": {
+    "answer_contains": [
+      "ThinkPad",
+      "keyboard feel",
+      "solid Linux support"
+    ],
+    "must_not_contain": [
+      "cookies"
+    ]
+  }
+}

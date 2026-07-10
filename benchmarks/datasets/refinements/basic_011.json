@@ -1,0 +1,32 @@
+{
+  "benchmark_id": "refinements_basic_011",
+  "category": "refinements",
+  "refinement_type": "technology",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I use PostgreSQL as my main database."
+    },
+    {
+      "speaker": "user",
+      "text": "I use PostgreSQL as my main database for the analytics service."
+    },
+    {
+      "speaker": "user",
+      "text": "My favorite tea brand changed recently."
+    },
+    {
+      "speaker": "user",
+      "text": "I use PostgreSQL as my main database for the analytics service, with read replicas for reporting."
+    }
+  ],
+  "query": "How does the user use PostgreSQL?",
+  "expected": {
+    "answer_contains": [
+      "PostgreSQL",
+      "analytics service",
+      "read replicas"
+    ],
+    "must_not_contain": []
+  }
+}

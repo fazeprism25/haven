@@ -1,0 +1,19 @@
+{
+  "benchmark_id": "preferences_basic_005",
+  "category": "preferences",
+
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I prefer open source tools over proprietary tools."
+    }
+  ],
+
+  "query": "What type of tools does the user prefer?",
+
+  "expected": {
+    "answer_contains": [
+      "open source"
+    ]
+  }
+}

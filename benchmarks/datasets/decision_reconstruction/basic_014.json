@@ -1,0 +1,64 @@
+{
+  "benchmark_id": "decision_reconstruction_basic_014",
+  "category": "decision_reconstruction",
+  "domain": "startup_name",
+  "decision_turn_indices": [
+    10
+  ],
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "Trying to land on a name for the startup, top three are Lumen, Northbeam, and Fieldstone."
+    },
+    {
+      "speaker": "user",
+      "text": "Lumen sounds clean but there are already a couple of companies using something close to it."
+    },
+    {
+      "speaker": "user",
+      "text": "Fieldstone has a nice grounded feel to it, fits the brand direction we're going for."
+    },
+    {
+      "speaker": "user",
+      "text": "I need to renew my car registration this week."
+    },
+    {
+      "speaker": "user",
+      "text": "Northbeam tested well with a few people we showed it to, easy to say and remember."
+    },
+    {
+      "speaker": "user",
+      "text": "Got the registration renewed, took way less time than expected at the office."
+    },
+    {
+      "speaker": "user",
+      "text": "Checked domain availability and Northbeam was the only one of the three with the .com actually free."
+    },
+    {
+      "speaker": "user",
+      "text": "Fieldstone's domain would need a workaround like adding 'hq' or something to the name."
+    },
+    {
+      "speaker": "user",
+      "text": "My cousin asked me to help him move apartments next weekend."
+    },
+    {
+      "speaker": "user",
+      "text": "Lumen is basically out at this point given the naming conflicts we found."
+    },
+    {
+      "speaker": "user",
+      "text": "We're going with Northbeam. It was the only one with the domain available, and it tested well with people outside the company too."
+    }
+  ],
+  "query": "What name did they decide on for the startup?",
+  "expected": {
+    "answer_contains": [
+      "Northbeam",
+      "only one with the domain available"
+    ],
+    "must_not_contain": [
+      "registration"
+    ]
+  }
+}

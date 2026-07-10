@@ -1,0 +1,33 @@
+{
+  "benchmark_id": "concept_consolidation_basic_038",
+  "category": "concept_consolidation",
+  "consolidation_pattern": "different_wording",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I bought a used hybrid car last month."
+    },
+    {
+      "speaker": "user",
+      "text": "My neighbor's dog barks a lot in the mornings."
+    },
+    {
+      "speaker": "user",
+      "text": "The hybrid I got has been getting way better mileage than I expected, close to 55 mpg."
+    },
+    {
+      "speaker": "user",
+      "text": "The dog next door seems to calm down after around 9am."
+    }
+  ],
+  "query": "What does the user think of their new car?",
+  "expected": {
+    "answer_contains": [
+      "hybrid",
+      "55 mpg"
+    ],
+    "must_not_contain": [
+      "dog"
+    ]
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "benchmark_id": "decision_basic_010",
+  "category": "decision",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I decided to build a Manager AI layer on top of Mem0."
+    }
+  ],
+
+  "query": "What will be built on top of Mem0?",
+
+  "expected": {
+    "answer_contains": [
+      "Manager AI"
+    ]
+  }
+}

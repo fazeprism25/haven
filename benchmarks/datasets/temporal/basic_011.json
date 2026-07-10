@@ -1,0 +1,63 @@
+{
+  "benchmark_id": "temporal_011",
+  "category": "Temporal",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "For deployment, let's use Kubernetes. It's the standard for container orchestration."
+    },
+    {
+      "speaker": "assistant",
+      "text": "Kubernetes gives us auto-scaling and self-healing. I'll set up the clusters."
+    },
+    {
+      "speaker": "user",
+      "text": "Kubernetes is too complex for our needs. Let's use Docker Compose. It's simpler for our single-node setup."
+    },
+    {
+      "speaker": "assistant",
+      "text": "Docker Compose is much easier to manage. I'll create the compose file."
+    },
+    {
+      "speaker": "user",
+      "text": "We need high availability. Docker Swarm is simpler than Kubernetes and provides HA. Let's use Swarm."
+    },
+    {
+      "speaker": "assistant",
+      "text": "Swarm is a good middle ground. I'll set up the swarm cluster."
+    },
+    {
+      "speaker": "user",
+      "text": "Actually, our cloud provider has managed Kubernetes. EKS simplifies everything. Let's use EKS."
+    },
+    {
+      "speaker": "assistant",
+      "text": "EKS is well-supported. I'll migrate to managed Kubernetes."
+    },
+    {
+      "speaker": "user",
+      "text": "We just realized our workload is stateful. EKS with stateful sets is complicated. Let's use Nomad. It handles stateful workloads better."
+    },
+    {
+      "speaker": "assistant",
+      "text": "Nomad is a HashiCorp tool. I'll learn it."
+    },
+    {
+      "speaker": "user",
+      "text": "No, this is too much. Let's stick with Kubernetes. It's the most transferable skill and we can always simplify later. Use EKS."
+    }
+  ],
+  "query": "What orchestration platform is the team using for the production deployment?",
+  "expected": {
+    "answer_contains": [
+      "EKS",
+      "Kubernetes",
+      "orchestration"
+    ],
+    "must_not_contain": [
+      "Docker Compose",
+      "Docker Swarm",
+      "Nomad"
+    ]
+  }
+}

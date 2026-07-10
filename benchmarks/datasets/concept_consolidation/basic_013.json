@@ -1,0 +1,25 @@
+{
+  "benchmark_id": "concept_consolidation_basic_013",
+  "category": "concept_consolidation",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I enjoy rock climbing."
+    },
+    {
+      "speaker": "user",
+      "text": "Rock climbing is my hobby."
+    },
+    {
+      "speaker": "user",
+      "text": "On weekends I go climbing."
+    }
+  ],
+  "query": "What hobby does the user enjoy?",
+  "expected": {
+    "answer_contains": [
+      "rock climbing",
+      "climbing"
+    ]
+  }
+}

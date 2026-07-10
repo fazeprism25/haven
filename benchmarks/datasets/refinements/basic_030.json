@@ -1,0 +1,39 @@
+{
+  "benchmark_id": "refinements_basic_030",
+  "category": "refinements",
+  "refinement_type": "responsibility",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "My responsibilities shifted a bit this quarter."
+    },
+    {
+      "speaker": "user",
+      "text": "I'm responsible for security reviews on new features."
+    },
+    {
+      "speaker": "user",
+      "text": "It's a lot more work than I expected."
+    },
+    {
+      "speaker": "user",
+      "text": "I've been using a checklist to keep track."
+    },
+    {
+      "speaker": "user",
+      "text": "I'm responsible for security reviews on new features, specifically anything touching authentication."
+    },
+    {
+      "speaker": "user",
+      "text": "The checklist has been really helpful."
+    }
+  ],
+  "query": "What security responsibility does the user have?",
+  "expected": {
+    "answer_contains": [
+      "security reviews",
+      "authentication"
+    ],
+    "must_not_contain": []
+  }
+}

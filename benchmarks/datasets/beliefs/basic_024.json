@@ -1,0 +1,40 @@
+{
+  "benchmark_id": "beliefs_024",
+  "category": "Beliefs",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I used to be convinced that DevOps should be a specialized, dedicated team handling all CI/CD pipelines and infrastructure deployments so developers could focus exclusively on feature code."
+    },
+    {
+      "speaker": "assistant",
+      "text": "An isolated DevOps team can build highly specialized, robust infrastructure rails."
+    },
+    {
+      "speaker": "user",
+      "text": "The downside is that it creates a massive silo and throwing code 'over the wall' leads to deployment friction. I changed my mind and spent the last year believing that every software engineer should be fully 'You Build It, You Run It'—meaning developers manage their own Terraform and infrastructure directly."
+    },
+    {
+      "speaker": "assistant",
+      "text": "Full-stack ownership definitely increases accountability and operational context for developers."
+    },
+    {
+      "speaker": "user",
+      "text": "But forcing product engineers to learn advanced Kubernetes networking is an absurd waste of their time. My evolved view is that Platform Engineering is the correct model: a dedicated platform team builds internal developer platforms (IDPs) that offer self-service golden paths for developers."
+    }
+  ],
+  "query": "What is the user's current belief regarding how software infrastructure and operations should be organized?",
+  "expected": {
+    "answer_contains": [
+      "Platform Engineering",
+      "IDP",
+      "golden paths",
+      "self-service"
+    ],
+    "must_not_contain": [
+      "isolated DevOps",
+      "You Build It, You Run It",
+      "own Terraform"
+    ]
+  }
+}

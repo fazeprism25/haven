@@ -1,0 +1,39 @@
+{
+  "benchmark_id": "concept_consolidation_basic_059",
+  "category": "concept_consolidation",
+  "consolidation_pattern": "multi_entity",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I use Python for backend services."
+    },
+    {
+      "speaker": "user",
+      "text": "I use Go for the command-line tools we ship."
+    },
+    {
+      "speaker": "user",
+      "text": "I've been meaning to learn Rust at some point."
+    },
+    {
+      "speaker": "user",
+      "text": "Python is also what I use for our internal data pipelines."
+    },
+    {
+      "speaker": "user",
+      "text": "Go has been great for how fast our CLI startup time is."
+    }
+  ],
+  "query": "What does the user use Python for?",
+  "expected": {
+    "answer_contains": [
+      "Python",
+      "backend",
+      "data pipelines"
+    ],
+    "must_not_contain": [
+      "command-line tools",
+      "Rust"
+    ]
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "benchmark_id": "supersession_basic_055",
+  "category": "supersession",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "The beta launch is scheduled for June, and marketing starts in May."
+    },
+    {
+      "speaker": "user",
+      "text": "The beta launch slipped to August; the marketing timing is unchanged."
+    }
+  ],
+  "query": "When does marketing start?",
+  "expected": {
+    "answer_contains": [
+      "May"
+    ]
+  }
+}

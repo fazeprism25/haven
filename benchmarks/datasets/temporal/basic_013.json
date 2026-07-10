@@ -1,0 +1,55 @@
+{
+  "benchmark_id": "temporal_013",
+  "category": "Temporal",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "For the message queue, I want to use Amazon SQS. It's fully managed and integrates with our AWS stack."
+    },
+    {
+      "speaker": "assistant",
+      "text": "SQS is reliable. I'll set up the dead-letter queues."
+    },
+    {
+      "speaker": "user",
+      "text": "We need exactly-once delivery. SQS doesn't guarantee that. Let's use Kafka."
+    },
+    {
+      "speaker": "assistant",
+      "text": "Kafka with idempotent producers can achieve that. I'll set up the brokers."
+    },
+    {
+      "speaker": "user",
+      "text": "Kafka has high latency for our real-time processing. Let's use RabbitMQ instead."
+    },
+    {
+      "speaker": "assistant",
+      "text": "RabbitMQ has low latency and good routing. I'll configure the exchanges."
+    },
+    {
+      "speaker": "user",
+      "text": "I just learned about NATS. It has even lower latency than RabbitMQ and is cloud-native. Let's use NATS."
+    },
+    {
+      "speaker": "assistant",
+      "text": "NATS is newer but promising. I'll set up the JetStream persistence."
+    },
+    {
+      "speaker": "user",
+      "text": "We're a small team. We don't need the complexity. SQS is fine. Latency is acceptable. Let's just use SQS."
+    }
+  ],
+  "query": "What message queue is the team currently using for asynchronous tasks?",
+  "expected": {
+    "answer_contains": [
+      "SQS",
+      "Amazon",
+      "queue"
+    ],
+    "must_not_contain": [
+      "Kafka",
+      "RabbitMQ",
+      "NATS"
+    ]
+  }
+}

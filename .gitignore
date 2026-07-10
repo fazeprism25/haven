@@ -1,0 +1,25 @@
+__pycache__/
+*.pyc
+.venv/
+.env
+.aider*
+haven_data/
+
+# Real local config (see config/*.env.example for the committed templates)
+config/*.env
+
+# The user's chosen Obsidian vault root (see POST /api/v1/vault) -- machine-
+# specific, never something to commit.
+config/vault_selection.json
+
+# Memory Spaces registry (see obsidian/server/README.md) -- machine-specific,
+# supersedes vault_selection.json above.
+config/spaces.json
+
+# Regeneratable output of benchmarks/analysis/classify_failure.py -- the
+# authoritative benchmark report is benchmarks/results/final_report.md.
+benchmarks/reports/
+
+# Per-run benchmark logs -- regeneratable, and leak the local machine's
+# absolute file paths via Python DeprecationWarning stack traces.
+benchmarks/results/deepseek_run_logs/

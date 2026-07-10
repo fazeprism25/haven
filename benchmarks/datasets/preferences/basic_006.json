@@ -1,0 +1,19 @@
+{
+  "benchmark_id": "preferences_basic_006",
+  "category": "preferences",
+
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I prefer local inference over cloud inference whenever possible."
+    }
+  ],
+
+  "query": "What type of inference does the user prefer?",
+
+  "expected": {
+    "answer_contains": [
+      "local"
+    ]
+  }
+}

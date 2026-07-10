@@ -1,0 +1,23 @@
+{
+  "benchmark_id": "supersession_basic_026",
+  "category": "supersession",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I live in London."
+    },
+    {
+      "speaker": "user",
+      "text": "I moved to Berlin."
+    }
+  ],
+  "query": "Where does the user live?",
+  "expected": {
+    "answer_contains": [
+      "Berlin"
+    ],
+    "must_not_contain": [
+      "London"
+    ]
+  }
+}

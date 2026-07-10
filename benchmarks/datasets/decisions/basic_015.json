@@ -1,0 +1,18 @@
+{
+  "benchmark_id": "basic_015",
+  "category": "Decisions",
+
+  "conversation": [
+    { "speaker": "user", "text": "I need to set up a CI/CD pipeline. Options are GitHub Actions, CircleCI, and Jenkins." },
+    { "speaker": "user", "text": "Jenkins is powerful but requires too much maintenance overhead for a small team." },
+    { "speaker": "user", "text": "CircleCI is nice but the pricing is getting expensive as we scale." },
+    { "speaker": "user", "text": "We're already on GitHub for source control, so GitHub Actions is the natural choice. Going with that." }
+  ],
+
+  "query": "Which CI/CD tool did the user decide to use?",
+
+  "expected": {
+    "answer_contains": ["GitHub Actions"],
+    "must_not_contain": ["Jenkins", "CircleCI"]
+  }
+}

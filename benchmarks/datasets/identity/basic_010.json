@@ -1,0 +1,20 @@
+{
+  "benchmark_id": "identity_basic_010",
+  "category": "identity",
+
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I like combining engineering thinking with AI systems."
+    }
+  ],
+
+  "query": "What disciplines does the user combine?",
+
+  "expected": {
+    "answer_contains": [
+      "engineering",
+      "AI"
+    ]
+  }
+}

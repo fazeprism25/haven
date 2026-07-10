@@ -1,0 +1,22 @@
+{
+  "benchmark_id": "temporal_basic_008",
+  "category": "temporal",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "Last month I thought retrieval quality was the biggest issue."
+    },
+    {
+      "speaker": "user",
+      "text": "Today I think memory extraction quality is the biggest issue."
+    }
+  ],
+
+  "query": "What is currently considered the biggest issue?",
+
+  "expected": {
+    "answer_contains": [
+      "extraction quality"
+    ]
+  }
+}

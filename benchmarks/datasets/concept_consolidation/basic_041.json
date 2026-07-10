@@ -1,0 +1,33 @@
+{
+  "benchmark_id": "concept_consolidation_basic_041",
+  "category": "concept_consolidation",
+  "consolidation_pattern": "different_contexts",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I've been playing chess online most evenings after work."
+    },
+    {
+      "speaker": "user",
+      "text": "I need to renew my passport before the trip."
+    },
+    {
+      "speaker": "user",
+      "text": "I joined an in-person chess club that meets at the library on Saturdays."
+    },
+    {
+      "speaker": "user",
+      "text": "Passport renewal is apparently taking longer than usual right now."
+    }
+  ],
+  "query": "How is the user playing chess these days?",
+  "expected": {
+    "answer_contains": [
+      "chess online",
+      "chess club"
+    ],
+    "must_not_contain": [
+      "passport"
+    ]
+  }
+}

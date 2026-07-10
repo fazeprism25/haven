@@ -1,0 +1,28 @@
+{
+  "benchmark_id": "supersession_basic_039",
+  "category": "supersession",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "The deadline is March 1st."
+    },
+    {
+      "speaker": "user",
+      "text": "It slipped to March 15th."
+    },
+    {
+      "speaker": "user",
+      "text": "Final word, it's now April 1st."
+    }
+  ],
+  "query": "What is the current deadline?",
+  "expected": {
+    "answer_contains": [
+      "April 1"
+    ],
+    "must_not_contain": [
+      "March 1",
+      "March 15"
+    ]
+  }
+}

@@ -1,0 +1,63 @@
+{
+  "benchmark_id": "temporal_012",
+  "category": "Temporal",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I'm considering using gRPC instead of REST. It's faster and supports streaming."
+    },
+    {
+      "speaker": "assistant",
+      "text": "gRPC has better performance for microservices. I'll design the protobufs."
+    },
+    {
+      "speaker": "user",
+      "text": "But our clients are web browsers. gRPC-web is still maturing. Let's use REST for the external API."
+    },
+    {
+      "speaker": "assistant",
+      "text": "We can use gRPC internally and REST for the public endpoints."
+    },
+    {
+      "speaker": "user",
+      "text": "That's too much complexity. Let's just use REST for everything."
+    },
+    {
+      "speaker": "assistant",
+      "text": "REST is consistent. I'll continue with JSON endpoints."
+    },
+    {
+      "speaker": "user",
+      "text": "Actually, I want to use GraphQL for the public API and gRPC for internal services."
+    },
+    {
+      "speaker": "assistant",
+      "text": "That's a multi-protocol architecture. It'll be a lot of work."
+    },
+    {
+      "speaker": "user",
+      "text": "GraphQL gives us flexibility and gRPC gives performance. It's the best of both."
+    },
+    {
+      "speaker": "assistant",
+      "text": "I'll set up both protocols with the appropriate gateways."
+    },
+    {
+      "speaker": "user",
+      "text": "After going through the complexity, let's just use REST. It's simple, everyone understands it, and we need to ship. REST is final."
+    }
+  ],
+  "query": "What protocol is being used for the main public API?",
+  "expected": {
+    "answer_contains": [
+      "REST",
+      "JSON",
+      "API"
+    ],
+    "must_not_contain": [
+      "gRPC",
+      "GraphQL",
+      "protobuf"
+    ]
+  }
+}

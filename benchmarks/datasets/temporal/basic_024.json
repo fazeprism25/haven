@@ -1,0 +1,55 @@
+{
+  "benchmark_id": "temporal_024",
+  "category": "Temporal",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "For our notification system, let's use Twilio for SMS and SendGrid for email. They're the best in class."
+    },
+    {
+      "speaker": "assistant",
+      "text": "Twilio and SendGrid are reliable. I'll integrate both APIs."
+    },
+    {
+      "speaker": "user",
+      "text": "Let's use a single platform. SendGrid has SMS too. Let's use SendGrid for everything."
+    },
+    {
+      "speaker": "assistant",
+      "text": "SendGrid can handle both. I'll migrate the SMS logic."
+    },
+    {
+      "speaker": "user",
+      "text": "We need push notifications for mobile. Let's use Firebase Cloud Messaging. It handles everything."
+    },
+    {
+      "speaker": "assistant",
+      "text": "FCM supports Android, iOS, and web. I'll implement the messaging service."
+    },
+    {
+      "speaker": "user",
+      "text": "We want an all-in-one provider. Let's use OneSignal. It has email, SMS, and push."
+    },
+    {
+      "speaker": "assistant",
+      "text": "OneSignal is simple to use. I'll set up the channels."
+    },
+    {
+      "speaker": "user",
+      "text": "We only need email for now. Let's use SendGrid. It's the most mature. We can add other channels later."
+    }
+  ],
+  "query": "What email service is the team using for transactional notifications?",
+  "expected": {
+    "answer_contains": [
+      "SendGrid",
+      "email",
+      "notification"
+    ],
+    "must_not_contain": [
+      "Twilio",
+      "FCM",
+      "OneSignal"
+    ]
+  }
+}

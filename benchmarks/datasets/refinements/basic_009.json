@@ -1,0 +1,39 @@
+{
+  "benchmark_id": "refinements_basic_009",
+  "category": "refinements",
+  "refinement_type": "project",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I started a new initiative at work."
+    },
+    {
+      "speaker": "user",
+      "text": "I'm leading the search relevance project."
+    },
+    {
+      "speaker": "user",
+      "text": "It's a cross-team effort with data science."
+    },
+    {
+      "speaker": "user",
+      "text": "I've been reading about information retrieval in my spare time."
+    },
+    {
+      "speaker": "user",
+      "text": "I'm leading the search relevance project, specifically the query understanding component."
+    },
+    {
+      "speaker": "user",
+      "text": "The rollout is planned for next quarter."
+    }
+  ],
+  "query": "What project is the user leading and which part of it?",
+  "expected": {
+    "answer_contains": [
+      "search relevance",
+      "query understanding"
+    ],
+    "must_not_contain": []
+  }
+}

@@ -1,0 +1,55 @@
+{
+  "benchmark_id": "temporal_019",
+  "category": "Temporal",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "For configuration management, let's use Consul. It has service discovery built-in."
+    },
+    {
+      "speaker": "assistant",
+      "text": "Consul is great for microservices. I'll set up the agents."
+    },
+    {
+      "speaker": "user",
+      "text": "We're only using Kubernetes. Let's use ConfigMaps instead. It's native."
+    },
+    {
+      "speaker": "assistant",
+      "text": "ConfigMaps are simple. I'll mount them as volumes."
+    },
+    {
+      "speaker": "user",
+      "text": "We need secrets management. Let's use HashiCorp Vault. It's more secure."
+    },
+    {
+      "speaker": "assistant",
+      "text": "Vault has dynamic secrets. I'll set up the policies."
+    },
+    {
+      "speaker": "user",
+      "text": "Vault is too much overhead. Let's use AWS Secrets Manager. It's managed and integrates well."
+    },
+    {
+      "speaker": "assistant",
+      "text": "Secrets Manager is simple. I'll use the SDK to fetch secrets."
+    },
+    {
+      "speaker": "user",
+      "text": "We can combine everything. Let's use Consul for config and Vault for secrets. No, that's two systems. Let's just use Kubernetes Secrets and ConfigMaps. It's enough."
+    }
+  ],
+  "query": "What system is being used for configuration and secret management?",
+  "expected": {
+    "answer_contains": [
+      "Kubernetes",
+      "ConfigMaps",
+      "Secrets"
+    ],
+    "must_not_contain": [
+      "Consul",
+      "Vault",
+      "Secrets Manager"
+    ]
+  }
+}

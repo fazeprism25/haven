@@ -1,0 +1,29 @@
+{
+  "benchmark_id": "concept_consolidation_basic_027",
+  "category": "concept_consolidation",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I bike to work."
+    },
+    {
+      "speaker": "assistant",
+      "text": "Nice, healthy commute."
+    },
+    {
+      "speaker": "user",
+      "text": "Traffic was bad today."
+    },
+    {
+      "speaker": "user",
+      "text": "Months later: still biking to work every day."
+    }
+  ],
+  "query": "How does the user commute to work?",
+  "expected": {
+    "answer_contains": [
+      "bike",
+      "biking"
+    ]
+  }
+}

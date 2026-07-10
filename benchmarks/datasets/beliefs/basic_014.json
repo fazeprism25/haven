@@ -1,0 +1,40 @@
+{
+  "benchmark_id": "beliefs_014",
+  "category": "Beliefs",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I'm reviewing our language stack. Historically, I believed dynamic typing in Python was optimal for fast prototyping, and static languages just added unnecessary boilerplate."
+    },
+    {
+      "speaker": "assistant",
+      "text": "Python is legendary for getting ideas off the ground quickly."
+    },
+    {
+      "speaker": "user",
+      "text": "But as our codebase grew, runtime errors ruined our production stability. I swung hard the other way and firmly believed that strict static typing like Rust or Go is mandatory for any serious backend enterprise software."
+    },
+    {
+      "speaker": "assistant",
+      "text": "Compile-time guarantees definitely save a lot of headaches later on."
+    },
+    {
+      "speaker": "user",
+      "text": "True, but the development velocity slowdown in Rust is killing our competitive edge. I've realized that static types aren't a silver bullet. My current philosophy is that gradual typing using TypeScript or Python with strict Mypy configurations strikes the perfect balance between speed and safety."
+    }
+  ],
+  "query": "How does the user currently view the trade-offs between static and dynamic typing systems?",
+  "expected": {
+    "answer_contains": [
+      "gradual",
+      "TypeScript",
+      "Mypy",
+      "balance"
+    ],
+    "must_not_contain": [
+      "Rust",
+      "Go",
+      "strictly dynamic"
+    ]
+  }
+}

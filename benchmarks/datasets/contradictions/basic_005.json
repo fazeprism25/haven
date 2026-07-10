@@ -1,0 +1,23 @@
+{
+  "benchmark_id": "contradictions_basic_005",
+  "category": "contradictions",
+
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "All memories should be treated equally."
+    },
+    {
+      "speaker": "user",
+      "text": "Memories should have importance scores."
+    }
+  ],
+
+  "query": "How should memories be managed?",
+
+  "expected": {
+    "answer_contains": [
+      "importance"
+    ]
+  }
+}

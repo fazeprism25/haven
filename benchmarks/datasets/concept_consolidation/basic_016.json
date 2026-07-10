@@ -1,0 +1,25 @@
+{
+  "benchmark_id": "concept_consolidation_basic_016",
+  "category": "concept_consolidation",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I use macOS."
+    },
+    {
+      "speaker": "user",
+      "text": "My primary OS is macOS."
+    },
+    {
+      "speaker": "user",
+      "text": "I'm on a Mac."
+    }
+  ],
+  "query": "What operating system does the user use?",
+  "expected": {
+    "answer_contains": [
+      "macOS",
+      "Mac"
+    ]
+  }
+}

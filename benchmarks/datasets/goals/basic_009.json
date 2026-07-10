@@ -1,0 +1,19 @@
+{
+  "benchmark_id": "goals_basic_009",
+  "category": "goals",
+
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I want the memory system to surface forgotten ideas."
+    }
+  ],
+
+  "query": "What should the memory system surface?",
+
+  "expected": {
+    "answer_contains": [
+      "forgotten ideas"
+    ]
+  }
+}

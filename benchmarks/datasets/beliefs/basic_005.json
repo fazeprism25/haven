@@ -1,0 +1,30 @@
+{
+  "benchmark_id": "belief_basic_005",
+  "category": "belief_evolution",
+
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I believed storing every memory equally was sufficient."
+    },
+    {
+      "speaker": "user",
+      "text": "I now believe memories should eventually have importance levels, activity scores, and states such as active, dormant, and archived."
+    }
+  ],
+
+  "query": "What is the user's current belief about memory storage?",
+
+  "expected": {
+    "answer_contains": [
+      "importance",
+      "activity",
+      "active",
+      "dormant",
+      "archived"
+    ],
+    "must_not_contain": [
+      "every memory equally"
+    ]
+  }
+}

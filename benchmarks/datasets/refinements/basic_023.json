@@ -1,0 +1,32 @@
+{
+  "benchmark_id": "refinements_basic_023",
+  "category": "refinements",
+  "refinement_type": "habit",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I meditate for ten minutes every morning."
+    },
+    {
+      "speaker": "user",
+      "text": "I meditate for ten minutes every morning before checking my phone."
+    },
+    {
+      "speaker": "user",
+      "text": "I switched my alarm clock app."
+    },
+    {
+      "speaker": "user",
+      "text": "I meditate for ten minutes every morning before checking my phone, using a breathing app."
+    }
+  ],
+  "query": "What is the user's morning meditation habit?",
+  "expected": {
+    "answer_contains": [
+      "ten minutes",
+      "before checking my phone",
+      "breathing app"
+    ],
+    "must_not_contain": []
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "benchmark_id": "temporal_basic_003",
+  "category": "temporal",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "Last month I planned to use OpenAI embeddings."
+    },
+    {
+      "speaker": "user",
+      "text": "Now I plan to use FastEmbed embeddings."
+    }
+  ],
+
+  "query": "Which embeddings does the user currently plan to use?",
+
+  "expected": {
+    "answer_contains": [
+      "FastEmbed"
+    ]
+  }
+}

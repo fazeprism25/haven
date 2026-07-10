@@ -1,0 +1,42 @@
+{
+  "benchmark_id": "concept_consolidation_basic_051",
+  "category": "concept_consolidation",
+  "consolidation_pattern": "long_gap",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I started volunteering at the animal shelter on Saturdays."
+    },
+    {
+      "speaker": "user",
+      "text": "I reorganized my closet this weekend."
+    },
+    {
+      "speaker": "user",
+      "text": "Work has been busy with the year-end review process."
+    },
+    {
+      "speaker": "user",
+      "text": "I tried a new recipe for dinner, a Thai curry."
+    },
+    {
+      "speaker": "user",
+      "text": "My car needed an oil change."
+    },
+    {
+      "speaker": "user",
+      "text": "The shelter volunteering has been really rewarding, especially walking the dogs."
+    }
+  ],
+  "query": "What has the user been doing at the animal shelter?",
+  "expected": {
+    "answer_contains": [
+      "volunteering",
+      "animal shelter",
+      "walking the dogs"
+    ],
+    "must_not_contain": [
+      "oil change"
+    ]
+  }
+}

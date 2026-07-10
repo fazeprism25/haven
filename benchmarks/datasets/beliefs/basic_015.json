@@ -1,0 +1,39 @@
+{
+  "benchmark_id": "beliefs_015",
+  "category": "Beliefs",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I used to be a massive proponent of microservices. I genuinely believed breaking everything into isolated, independent services was the only way to avoid a spaghetti codebase."
+    },
+    {
+      "speaker": "assistant",
+      "text": "Microservices definitely help isolate domain logic and scale teams independently."
+    },
+    {
+      "speaker": "user",
+      "text": "Until you hit the distributed monolith problem. The network latency and deployment coordination became a nightmare. I completely abandoned that view and became convinced that a modular monolith is the single best architectural pattern for 95% of businesses."
+    },
+    {
+      "speaker": "assistant",
+      "text": "Modular monoliths have seen a huge resurgence lately for exactly those reasons."
+    },
+    {
+      "speaker": "user",
+      "text": "But you know what? As our infrastructure team scaled, the merge conflicts and deployment bottlenecks in our single codebase returned. I've come to believe that neither extreme works; a service-per-team architecture, where bounded contexts align exactly with organizational reporting lines, is the correct mental model."
+    }
+  ],
+  "query": "What is the user's latest viewpoint on microservices versus monolithic architectures?",
+  "expected": {
+    "answer_contains": [
+      "team",
+      "organizational",
+      "boundaries",
+      "align"
+    ],
+    "must_not_contain": [
+      "microservices are the only way",
+      "modular monolith is the single best"
+    ]
+  }
+}

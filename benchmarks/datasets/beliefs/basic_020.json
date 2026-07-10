@@ -1,0 +1,40 @@
+{
+  "benchmark_id": "beliefs_020",
+  "category": "Beliefs",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "In terms of product management, I used to believe that detailed, 12-month product roadmaps were essential for aligning engineering teams and stakeholders."
+    },
+    {
+      "speaker": "assistant",
+      "text": "Stakeholders love predictability and long-term planning."
+    },
+    {
+      "speaker": "user",
+      "text": "The problem is markets change too fast. I shifted to believing that long roadmaps are a trap, and we should instead use a strict, ultra-agile 2-week sprint cycle where priorities are re-evaluated continuously based entirely on immediate feedback."
+    },
+    {
+      "speaker": "assistant",
+      "text": "Continuous adaptation helps teams pivot quickly when assumptions are proven wrong."
+    },
+    {
+      "speaker": "user",
+      "text": "But 2-week horizons mean the team loses sight of the broader vision and just ships incremental fixes. My settled belief now is that outcome-driven themes organized around quarterly OKRs—focusing on user problems to solve rather than specific feature timelines—is the correct approach."
+    }
+  ],
+  "query": "What is the user's current belief regarding product roadmapping and planning horizons?",
+  "expected": {
+    "answer_contains": [
+      "outcome",
+      "OKR",
+      "quarterly",
+      "problems"
+    ],
+    "must_not_contain": [
+      "12-month",
+      "2-week sprint",
+      "feature timelines"
+    ]
+  }
+}

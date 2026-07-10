@@ -1,0 +1,100 @@
+{
+  "benchmark_id": "decision_reconstruction_basic_021",
+  "category": "decision_reconstruction",
+  "domain": "dog_breed",
+  "decision_turn_indices": [
+    18
+  ],
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "Looking into getting a dog -- narrowed it down to a Labrador, a Border Collie, or a Corgi."
+    },
+    {
+      "speaker": "user",
+      "text": "I've been meaning to reorganize the garage for weeks now."
+    },
+    {
+      "speaker": "user",
+      "text": "I finally fixed the squeaky hinge on my front door."
+    },
+    {
+      "speaker": "user",
+      "text": "Labradors are supposed to be pretty easygoing and good with kids, which matters since my niece visits a lot."
+    },
+    {
+      "speaker": "user",
+      "text": "My car's tire pressure light came on this morning."
+    },
+    {
+      "speaker": "user",
+      "text": "The office is switching to a new time-tracking tool next month."
+    },
+    {
+      "speaker": "user",
+      "text": "Corgis are small enough for the apartment but I've read they can be more stubborn to train."
+    },
+    {
+      "speaker": "user",
+      "text": "I switched my podcast subscription to a cheaper plan."
+    },
+    {
+      "speaker": "user",
+      "text": "I need to update my resume before applying to anything new."
+    },
+    {
+      "speaker": "user",
+      "text": "Border Collies need a ton of exercise, but that actually matches my hiking habit pretty well since I'm out most weekends anyway."
+    },
+    {
+      "speaker": "user",
+      "text": "I need to schedule a haircut, it's overdue at this point."
+    },
+    {
+      "speaker": "user",
+      "text": "Finally updated the resume, took longer than expected to word everything right."
+    },
+    {
+      "speaker": "user",
+      "text": "Got a reminder that my credit card statement is due soon."
+    },
+    {
+      "speaker": "user",
+      "text": "Visited a Border Collie rescue and the energy level in person was honestly intense, in a good way for my lifestyle."
+    },
+    {
+      "speaker": "user",
+      "text": "The Labrador is probably the safer, easier choice overall though."
+    },
+    {
+      "speaker": "user",
+      "text": "My laptop update took forever to install last night."
+    },
+    {
+      "speaker": "user",
+      "text": "My favorite coffee shop started doing a loyalty card program."
+    },
+    {
+      "speaker": "user",
+      "text": "Talked to the rescue about how much daily exercise a Border Collie actually needs and it lines up almost exactly with my weekend hiking routine."
+    },
+    {
+      "speaker": "user",
+      "text": "Decided on a Border Collie. The energy level really does match my hiking habit, more than the Labrador or the Corgi would."
+    },
+    {
+      "speaker": "user",
+      "text": "Going to fill out the adoption application this week."
+    }
+  ],
+  "query": "Which breed did the user decide to adopt?",
+  "expected": {
+    "answer_contains": [
+      "Border Collie",
+      "energy level really does match my hiking habit"
+    ],
+    "must_not_contain": [
+      "loyalty card"
+    ]
+  }
+}

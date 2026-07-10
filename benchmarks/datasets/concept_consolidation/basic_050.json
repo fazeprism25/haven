@@ -1,0 +1,37 @@
+{
+  "benchmark_id": "concept_consolidation_basic_050",
+  "category": "concept_consolidation",
+  "consolidation_pattern": "repeated_confirmation",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I have a cat named Biscuit."
+    },
+    {
+      "speaker": "user",
+      "text": "I switched my email provider recently."
+    },
+    {
+      "speaker": "user",
+      "text": "Biscuit, my cat, is doing well, still causing chaos as usual."
+    },
+    {
+      "speaker": "user",
+      "text": "The new email provider has way better spam filtering."
+    },
+    {
+      "speaker": "user",
+      "text": "Yeah, Biscuit is still my one and only cat."
+    }
+  ],
+  "query": "Does the user have a pet, and what is its name?",
+  "expected": {
+    "answer_contains": [
+      "cat",
+      "Biscuit"
+    ],
+    "must_not_contain": [
+      "email provider"
+    ]
+  }
+}

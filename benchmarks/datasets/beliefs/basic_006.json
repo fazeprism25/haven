@@ -1,0 +1,18 @@
+{
+  "benchmark_id": "belief_basic_006",
+  "category": "belief",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I believe extraction quality influences memory quality more than retrieval quality."
+    }
+  ],
+
+  "query": "What influences memory quality most?",
+
+  "expected": {
+    "answer_contains": [
+      "extraction"
+    ]
+  }
+}

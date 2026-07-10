@@ -1,0 +1,101 @@
+{
+  "benchmark_id": "decision_reconstruction_basic_011",
+  "category": "decision_reconstruction",
+  "domain": "service_language",
+  "decision_turn_indices": [
+    18
+  ],
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "For the new notification service we're deciding between Go, Rust, and Python."
+    },
+    {
+      "speaker": "user",
+      "text": "My sister called to catch up, hadn't talked in a few weeks."
+    },
+    {
+      "speaker": "user",
+      "text": "I've been trying a new recipe for meal prep this week."
+    },
+    {
+      "speaker": "user",
+      "text": "Python would be fastest to write but the throughput requirements here are pretty demanding."
+    },
+    {
+      "speaker": "user",
+      "text": "I've been meaning to water the plants on my desk more consistently."
+    },
+    {
+      "speaker": "user",
+      "text": "I finally organized the pile of mail that's been sitting on my counter."
+    },
+    {
+      "speaker": "user",
+      "text": "Rust would give us the best performance ceiling but the team's Rust experience is basically zero."
+    },
+    {
+      "speaker": "user",
+      "text": "The package I ordered got delayed by a couple of days."
+    },
+    {
+      "speaker": "user",
+      "text": "I need to submit my expense report before the end of the month."
+    },
+    {
+      "speaker": "user",
+      "text": "Go has a gentler learning curve than Rust and its concurrency model fits this kind of fan-out workload well."
+    },
+    {
+      "speaker": "user",
+      "text": "My laptop update took forever to install last night."
+    },
+    {
+      "speaker": "user",
+      "text": "Finally submitted the expense report, forgot two receipts and had to go back for them."
+    },
+    {
+      "speaker": "user",
+      "text": "Got a reminder that my credit card statement is due soon."
+    },
+    {
+      "speaker": "user",
+      "text": "Prototyped the core loop in Go and the team picked it up within a couple days, way faster than I expected for a new language."
+    },
+    {
+      "speaker": "user",
+      "text": "Still a little tempted by Rust's performance numbers from the benchmarks I read."
+    },
+    {
+      "speaker": "user",
+      "text": "I've been meaning to reorganize the garage for weeks now."
+    },
+    {
+      "speaker": "user",
+      "text": "The office is switching coffee vendors next month apparently."
+    },
+    {
+      "speaker": "user",
+      "text": "Ran a load test on the Go prototype and the results came in well above what we actually need."
+    },
+    {
+      "speaker": "user",
+      "text": "We're going with Go for the notification service. The team ramped up on it in days, and the load test comfortably cleared our throughput target."
+    },
+    {
+      "speaker": "user",
+      "text": "I'll start breaking the work into tickets this week."
+    }
+  ],
+  "query": "What language did the team choose for the notification service?",
+  "expected": {
+    "answer_contains": [
+      "Go",
+      "team ramped up on it in days",
+      "comfortably cleared our throughput target"
+    ],
+    "must_not_contain": [
+      "coffee vendors"
+    ]
+  }
+}

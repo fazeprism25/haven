@@ -1,0 +1,35 @@
+{
+  "benchmark_id": "supersession_basic_027",
+  "category": "supersession",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I live in London."
+    },
+    {
+      "speaker": "assistant",
+      "text": "Got it."
+    },
+    {
+      "speaker": "user",
+      "text": "I tried a new restaurant this weekend."
+    },
+    {
+      "speaker": "user",
+      "text": "My internet has been slow lately."
+    },
+    {
+      "speaker": "user",
+      "text": "Eight months later: I've relocated to Lisbon."
+    }
+  ],
+  "query": "Where does the user currently live?",
+  "expected": {
+    "answer_contains": [
+      "Lisbon"
+    ],
+    "must_not_contain": [
+      "London"
+    ]
+  }
+}

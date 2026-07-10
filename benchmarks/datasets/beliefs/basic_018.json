@@ -1,0 +1,41 @@
+{
+  "benchmark_id": "beliefs_018",
+  "category": "Beliefs",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "When we started the cloud migration, I believed that AWS was the only viable provider for enterprise-grade infrastructure. Their ecosystem is just unmatched."
+    },
+    {
+      "speaker": "assistant",
+      "text": "AWS certainly has the dominant market share and the deepest catalog of services."
+    },
+    {
+      "speaker": "user",
+      "text": "But their pricing complexity and data egress fees are predatory. I changed my stance completely last quarter and became a vocal advocate for moving everything to a multi-cloud setup spanning GCP and Azure to avoid vendor lock-in."
+    },
+    {
+      "speaker": "assistant",
+      "text": "Multi-cloud can mitigate lock-in risks, though it introduces operational complexity."
+    },
+    {
+      "speaker": "user",
+      "text": "You're not wrong about the complexity. Managing Kubernetes clusters across two cloud giants doubled our DevOps overhead. My current, definitive belief is that bare-metal on-premise infrastructure paired with an open-source private cloud stack is the only way to achieve predictable performance and cost control."
+    }
+  ],
+  "query": "What does the user believe is the ideal infrastructure deployment environment?",
+  "expected": {
+    "answer_contains": [
+      "bare-metal",
+      "on-premise",
+      "private",
+      "own"
+    ],
+    "must_not_contain": [
+      "AWS",
+      "multi-cloud",
+      "GCP",
+      "Azure"
+    ]
+  }
+}

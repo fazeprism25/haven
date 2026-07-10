@@ -1,0 +1,23 @@
+{
+  "benchmark_id": "supersession_basic_050",
+  "category": "supersession",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I go to the gym in the mornings."
+    },
+    {
+      "speaker": "user",
+      "text": "I've switched to evening gym sessions."
+    }
+  ],
+  "query": "When does the user currently go to the gym?",
+  "expected": {
+    "answer_contains": [
+      "evening"
+    ],
+    "must_not_contain": [
+      "mornings"
+    ]
+  }
+}

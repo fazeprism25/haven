@@ -1,0 +1,18 @@
+{
+  "benchmark_id": "decision_basic_009",
+  "category": "decision",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I decided to use dedicated benchmark datasets instead of real conversations."
+    }
+  ],
+
+  "query": "What type of dataset should be used for benchmarks?",
+
+  "expected": {
+    "answer_contains": [
+      "benchmark datasets"
+    ]
+  }
+}

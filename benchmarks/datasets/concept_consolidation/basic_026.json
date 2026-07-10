@@ -1,0 +1,28 @@
+{
+  "benchmark_id": "concept_consolidation_basic_026",
+  "category": "concept_consolidation",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I work at Initech."
+    },
+    {
+      "speaker": "assistant",
+      "text": "Got it."
+    },
+    {
+      "speaker": "user",
+      "text": "Had a long meeting today."
+    },
+    {
+      "speaker": "user",
+      "text": "Months later, just checking in: still at Initech."
+    }
+  ],
+  "query": "Where does the user currently work?",
+  "expected": {
+    "answer_contains": [
+      "Initech"
+    ]
+  }
+}

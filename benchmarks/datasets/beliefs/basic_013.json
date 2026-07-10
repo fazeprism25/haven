@@ -1,0 +1,40 @@
+{
+  "benchmark_id": "beliefs_013",
+  "category": "Beliefs",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "When it comes to AI development, I've always thought closed-source API models like OpenAI's GPT-4 were vastly superior in reasoning and safety compared to open-weight alternatives."
+    },
+    {
+      "speaker": "assistant",
+      "text": "They certainly set the early performance benchmarks."
+    },
+    {
+      "speaker": "user",
+      "text": "Right, but the data privacy risks are too high. I changed my mind completely and started preaching that small, locally-hosted open models like Llama-3 8B are the future because complete data control trumps marginal intelligence gains."
+    },
+    {
+      "speaker": "assistant",
+      "text": "Local data sovereignty is a huge driver for many enterprises."
+    },
+    {
+      "speaker": "user",
+      "text": "However, after looking at the actual total cost of ownership, maintaining local infrastructure for open weights is a nightmare. My definitive stance now is that hybrid architectures—where a local open model handles initial screening but complex reasoning is routed to frontier closed APIs—is the only pragmatic way forward."
+    }
+  ],
+  "query": "What is the user's current conviction regarding the optimal deployment strategy for AI models?",
+  "expected": {
+    "answer_contains": [
+      "hybrid",
+      "both",
+      "local",
+      "closed API"
+    ],
+    "must_not_contain": [
+      "only open source",
+      "purely local",
+      "strictly closed"
+    ]
+  }
+}

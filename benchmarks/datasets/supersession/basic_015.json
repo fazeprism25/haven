@@ -1,0 +1,27 @@
+{
+  "benchmark_id": "supersession_basic_015",
+  "category": "supersession",
+
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "Originally I planned to keep every memory forever."
+    },
+    {
+      "speaker": "user",
+      "text": "I've replaced that idea. Memories should eventually decay or become archived."
+    }
+  ],
+
+  "query": "How should old memories be handled?",
+
+  "expected": {
+    "answer_contains": [
+      "archived",
+      "decay"
+    ],
+    "must_not_contain": [
+      "keep every memory forever"
+    ]
+  }
+}

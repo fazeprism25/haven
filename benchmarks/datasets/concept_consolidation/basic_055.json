@@ -1,0 +1,46 @@
+{
+  "benchmark_id": "concept_consolidation_basic_055",
+  "category": "concept_consolidation",
+  "consolidation_pattern": "distractor_heavy",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I signed a lease on a new apartment downtown."
+    },
+    {
+      "speaker": "user",
+      "text": "I've been trying out a new productivity app."
+    },
+    {
+      "speaker": "user",
+      "text": "My favorite band announced a tour."
+    },
+    {
+      "speaker": "user",
+      "text": "I need to get a flu shot soon."
+    },
+    {
+      "speaker": "user",
+      "text": "I've been meal prepping on Sundays."
+    },
+    {
+      "speaker": "user",
+      "text": "The new apartment has a lot more natural light and a small balcony."
+    },
+    {
+      "speaker": "user",
+      "text": "I finally beat that video game I've been playing."
+    }
+  ],
+  "query": "What can you tell me about the user's new apartment?",
+  "expected": {
+    "answer_contains": [
+      "new apartment",
+      "natural light",
+      "balcony"
+    ],
+    "must_not_contain": [
+      "flu shot"
+    ]
+  }
+}

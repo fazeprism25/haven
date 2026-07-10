@@ -1,0 +1,65 @@
+{
+  "benchmark_id": "decision_reconstruction_basic_008",
+  "category": "decision_reconstruction",
+  "domain": "wedding_venue",
+  "decision_turn_indices": [
+    10
+  ],
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "Venue hunting for the wedding -- down to a barn, a hotel ballroom, and a beach venue."
+    },
+    {
+      "speaker": "user",
+      "text": "The hotel ballroom is the most convenient for out-of-town guests since there's a hotel attached."
+    },
+    {
+      "speaker": "user",
+      "text": "The beach venue is beautiful but the weather backup plan makes us nervous."
+    },
+    {
+      "speaker": "user",
+      "text": "I need to pick up my dry cleaning before the weekend."
+    },
+    {
+      "speaker": "user",
+      "text": "The barn already has some nice lighting fixtures set up and it's noticeably cheaper for our guest count than the ballroom."
+    },
+    {
+      "speaker": "user",
+      "text": "Dry cleaning place said my jacket has a stain that might not come out completely."
+    },
+    {
+      "speaker": "user",
+      "text": "Toured the barn again, the lighting setup looks even better in person than in the photos."
+    },
+    {
+      "speaker": "user",
+      "text": "Still slightly worried about parking at the barn since it's a bit out of the way."
+    },
+    {
+      "speaker": "user",
+      "text": "Found a shuttle service that could handle guest parking and transport from a lot down the road."
+    },
+    {
+      "speaker": "user",
+      "text": "The ballroom's catering minimum is honestly higher than we expected for our guest count."
+    },
+    {
+      "speaker": "user",
+      "text": "We've booked the barn for the wedding. The string lights and the price for our guest count made it the easy choice over the ballroom and the beach venue."
+    }
+  ],
+  "query": "Which venue did the couple decide on for the wedding?",
+  "expected": {
+    "answer_contains": [
+      "barn",
+      "string lights",
+      "price for our guest count"
+    ],
+    "must_not_contain": [
+      "dry cleaning"
+    ]
+  }
+}

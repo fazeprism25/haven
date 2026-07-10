@@ -1,0 +1,26 @@
+{
+  "benchmark_id": "supersession_basic_005",
+  "category": "supersession",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I decided every memory should be stored equally."
+    },
+    {
+      "speaker": "user",
+      "text": "I replaced that idea. Memories should have importance scores and states."
+    }
+  ],
+
+  "query": "How should memories be handled?",
+
+  "expected": {
+    "answer_contains": [
+      "importance",
+      "states"
+    ],
+    "must_not_contain": [
+      "stored equally"
+    ]
+  }
+}

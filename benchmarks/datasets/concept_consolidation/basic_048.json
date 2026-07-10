@@ -1,0 +1,37 @@
+{
+  "benchmark_id": "concept_consolidation_basic_048",
+  "category": "concept_consolidation",
+  "consolidation_pattern": "repeated_confirmation",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I've been going to bed around 11pm and waking up at 6am."
+    },
+    {
+      "speaker": "user",
+      "text": "The city started construction on the street outside my building."
+    },
+    {
+      "speaker": "user",
+      "text": "My sleep schedule is still 11pm to 6am, pretty consistently."
+    },
+    {
+      "speaker": "user",
+      "text": "That construction has been going on for almost a month now."
+    },
+    {
+      "speaker": "user",
+      "text": "Yep, still on the 11pm to 6am schedule."
+    }
+  ],
+  "query": "What is the user's sleep schedule?",
+  "expected": {
+    "answer_contains": [
+      "11pm",
+      "6am"
+    ],
+    "must_not_contain": [
+      "construction"
+    ]
+  }
+}

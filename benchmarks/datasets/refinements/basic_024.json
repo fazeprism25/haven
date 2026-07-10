@@ -1,0 +1,40 @@
+{
+  "benchmark_id": "refinements_basic_024",
+  "category": "refinements",
+  "refinement_type": "habit",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I've been trying to build better habits."
+    },
+    {
+      "speaker": "user",
+      "text": "I read for thirty minutes before bed."
+    },
+    {
+      "speaker": "user",
+      "text": "I used to scroll my phone instead."
+    },
+    {
+      "speaker": "user",
+      "text": "My sleep has improved a lot."
+    },
+    {
+      "speaker": "user",
+      "text": "I read for thirty minutes before bed, usually nonfiction."
+    },
+    {
+      "speaker": "user",
+      "text": "I keep the book on my nightstand."
+    }
+  ],
+  "query": "What is the user's reading habit before bed?",
+  "expected": {
+    "answer_contains": [
+      "thirty minutes",
+      "before bed",
+      "nonfiction"
+    ],
+    "must_not_contain": []
+  }
+}

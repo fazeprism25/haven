@@ -1,0 +1,23 @@
+{
+  "benchmark_id": "supersession_basic_031",
+  "category": "supersession",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I just accepted a job offer at Globex."
+    },
+    {
+      "speaker": "user",
+      "text": "Actually, I turned down that offer. I'm staying at my current company, Umbrella Corp."
+    }
+  ],
+  "query": "Where does the user currently work?",
+  "expected": {
+    "answer_contains": [
+      "Umbrella Corp"
+    ],
+    "must_not_contain": [
+      "Globex"
+    ]
+  }
+}

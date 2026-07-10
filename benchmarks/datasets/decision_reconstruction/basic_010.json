@@ -1,0 +1,65 @@
+{
+  "benchmark_id": "decision_reconstruction_basic_010",
+  "category": "decision_reconstruction",
+  "domain": "gym_choice",
+  "decision_turn_indices": [
+    10
+  ],
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "Looking at gym options -- a big-box gym, a boutique studio, and just building a home gym."
+    },
+    {
+      "speaker": "user",
+      "text": "The big-box gym is cheapest by far and has the most equipment variety."
+    },
+    {
+      "speaker": "user",
+      "text": "A home gym would be the most convenient but the upfront cost for equipment is steep."
+    },
+    {
+      "speaker": "user",
+      "text": "I need to get my annual eye exam scheduled."
+    },
+    {
+      "speaker": "user",
+      "text": "The boutique studio is pricier but the tiny group sizes seem like they'd keep me more accountable than working out alone."
+    },
+    {
+      "speaker": "user",
+      "text": "Finally scheduled the eye exam for next week."
+    },
+    {
+      "speaker": "user",
+      "text": "Tried a trial class at the boutique studio, the instructor actually remembered my name by the second session."
+    },
+    {
+      "speaker": "user",
+      "text": "Still not sure it's worth the extra cost over the big-box gym membership."
+    },
+    {
+      "speaker": "user",
+      "text": "My car's check engine light came on, need to get that looked at."
+    },
+    {
+      "speaker": "user",
+      "text": "Realized I've skipped the gym way less since starting the boutique studio trial compared to my old big-box membership."
+    },
+    {
+      "speaker": "user",
+      "text": "Signed up for a membership at the boutique studio. The small class sizes and the accountability from the instructor knowing my name made the extra cost worth it."
+    }
+  ],
+  "query": "Which gym did the user decide to join?",
+  "expected": {
+    "answer_contains": [
+      "boutique studio",
+      "small class sizes",
+      "instructor knowing my name"
+    ],
+    "must_not_contain": [
+      "check engine light"
+    ]
+  }
+}

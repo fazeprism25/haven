@@ -1,0 +1,28 @@
+{
+  "benchmark_id": "concept_consolidation_basic_034",
+  "category": "concept_consolidation",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "My favorite editor is Neovim."
+    },
+    {
+      "speaker": "user",
+      "text": "I adopted a new puppy."
+    },
+    {
+      "speaker": "user",
+      "text": "Neovim is the editor I always use."
+    },
+    {
+      "speaker": "user",
+      "text": "I'm training for a 10k race."
+    }
+  ],
+  "query": "What editor does the user prefer?",
+  "expected": {
+    "answer_contains": [
+      "Neovim"
+    ]
+  }
+}

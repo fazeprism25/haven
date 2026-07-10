@@ -1,0 +1,28 @@
+{
+  "benchmark_id": "concept_consolidation_basic_030",
+  "category": "concept_consolidation",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I prefer open source tools."
+    },
+    {
+      "speaker": "user",
+      "text": "My favorite band released a new album."
+    },
+    {
+      "speaker": "user",
+      "text": "I always go with open source over proprietary tools."
+    },
+    {
+      "speaker": "user",
+      "text": "I'm planning a trip next month."
+    }
+  ],
+  "query": "What kind of tools does the user prefer?",
+  "expected": {
+    "answer_contains": [
+      "open source"
+    ]
+  }
+}

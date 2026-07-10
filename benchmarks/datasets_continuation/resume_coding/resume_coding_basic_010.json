@@ -1,0 +1,211 @@
+{
+  "benchmark_id": "resume_coding_basic_010",
+  "category": "resume_coding",
+  "tier": "medium",
+  "domain": "benchmark_base_adapter_interface",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I switched to a different brand of coffee and I'm not sure I like it.",
+      "turn_type": "distractor",
+      "turn_index": 0
+    },
+    {
+      "speaker": "user",
+      "text": "It's supposed to rain most of next week according to the forecast.",
+      "turn_type": "distractor",
+      "turn_index": 1
+    },
+    {
+      "speaker": "user",
+      "text": "Adding new backends to the benchmark runner means every adapter reimplementing the same per-entry add() loop for ingesting a conversation -- that should be shared.",
+      "turn_type": "architecture_discussion",
+      "turn_index": 2
+    },
+    {
+      "speaker": "user",
+      "text": "I still haven't unpacked the last box from the move.",
+      "turn_type": "distractor",
+      "turn_index": 3
+    },
+    {
+      "speaker": "user",
+      "text": "Could make add_conversation abstract and require every adapter, including simple ones, to implement it themselves.",
+      "turn_type": "rejected_approach",
+      "turn_index": 4
+    },
+    {
+      "speaker": "user",
+      "text": "My sister's flight got delayed by a couple of hours.",
+      "turn_type": "distractor",
+      "turn_index": 5
+    },
+    {
+      "speaker": "user",
+      "text": "Making it abstract breaks every existing adapter immediately for no benefit -- give BaseAdapter a concrete default that reproduces the original per-entry loop exactly, and let only adapters with real batch-ingestion needs (like Haven Full's ManagerPipeline) override it.",
+      "turn_type": "decision",
+      "supersedes_turn": 4,
+      "turn_index": 6
+    },
+    {
+      "speaker": "user",
+      "text": "The office plants finally got watered after being neglected for weeks.",
+      "turn_type": "distractor",
+      "turn_index": 7
+    },
+    {
+      "speaker": "user",
+      "text": "I keep meaning to update my resume but haven't gotten around to it.",
+      "turn_type": "distractor",
+      "turn_index": 8
+    },
+    {
+      "speaker": "user",
+      "text": "Constraint: the default implementation must be byte-for-byte identical to what run_benchmark's inline loop already did, so no existing adapter's results change just from this refactor.",
+      "turn_type": "constraint",
+      "turn_index": 9
+    },
+    {
+      "speaker": "user",
+      "text": "The parking garage near the office is under construction again.",
+      "turn_type": "distractor",
+      "turn_index": 10
+    },
+    {
+      "speaker": "user",
+      "text": "Blocked: HavenAdapter needs an optional query_rewriter constructor argument, but the runner's normal construction path goes through from_config(config), a mem0-shaped dict with no slot for it.",
+      "turn_type": "blocker",
+      "turn_index": 11
+    },
+    {
+      "speaker": "user",
+      "text": "I tried a new recipe for dinner last night, turned out decent.",
+      "turn_type": "distractor",
+      "turn_index": 12
+    },
+    {
+      "speaker": "user",
+      "text": "My laptop fan has been louder than usual, might need cleaning.",
+      "turn_type": "distractor",
+      "turn_index": 13
+    },
+    {
+      "speaker": "user",
+      "text": "Decided: let the runner construct the adapter directly with query_rewriter=... when one is supplied, bypassing from_config entirely for that one call; from_config stays the default, unchanged path otherwise. Unblocks the query rewriter integration.",
+      "turn_type": "decision",
+      "resolves_turn": 11,
+      "turn_index": 14
+    },
+    {
+      "speaker": "user",
+      "text": "The dentist appointment I've been putting off is finally scheduled.",
+      "turn_type": "distractor",
+      "turn_index": 15
+    },
+    {
+      "speaker": "user",
+      "text": "Implemented BaseAdapter.add_conversation's default per-entry loop and moved run_benchmark's inline loop to call it.",
+      "turn_type": "implementation",
+      "turn_index": 16
+    },
+    {
+      "speaker": "user",
+      "text": "I need to return that package before the return window closes.",
+      "turn_type": "distractor",
+      "turn_index": 17
+    },
+    {
+      "speaker": "user",
+      "text": "Added the query_rewriter bypass-construction path in run_benchmark and main().",
+      "turn_type": "implementation",
+      "turn_index": 18
+    },
+    {
+      "speaker": "user",
+      "text": "The wifi in the coffee shop I like to work from has been spotty.",
+      "turn_type": "distractor",
+      "turn_index": 19
+    },
+    {
+      "speaker": "user",
+      "text": "I finally got around to donating some old clothes I never wear.",
+      "turn_type": "distractor",
+      "turn_index": 20
+    },
+    {
+      "speaker": "user",
+      "text": "Open question: should other adapters besides Haven eventually accept constructor kwargs the same bypass way, or is this a one-off?",
+      "turn_type": "open_question",
+      "turn_index": 21
+    },
+    {
+      "speaker": "user",
+      "text": "My neighbor's dog barked most of the afternoon, hard to get anything done with the window open.",
+      "turn_type": "distractor",
+      "turn_index": 22
+    },
+    {
+      "speaker": "user",
+      "text": "Next: add regression tests proving the default add_conversation() produces identical calls to the old inline loop.",
+      "turn_type": "task",
+      "turn_index": 23
+    },
+    {
+      "speaker": "user",
+      "text": "The bus was running about ten minutes late again this morning.",
+      "turn_type": "distractor",
+      "turn_index": 24
+    }
+  ],
+  "ground_truth": {
+    "current_objective": "Give BaseAdapter a shared, concrete add_conversation() default and support HavenAdapter's optional query_rewriter constructor argument.",
+    "active_decisions": [
+      "BaseAdapter.add_conversation gets a concrete default reproducing the original per-entry loop; only adapters with real batch-ingestion needs override it.",
+      "The runner constructs the adapter directly with query_rewriter=... when supplied, bypassing from_config for that call only."
+    ],
+    "superseded_or_rejected": [
+      "Making add_conversation abstract and requiring every adapter to implement it."
+    ],
+    "constraints": [
+      "The default add_conversation() implementation must be byte-for-byte identical to the original inline per-entry loop."
+    ],
+    "active_blockers": [],
+    "active_tasks": [
+      "Add regression tests proving default add_conversation() produces identical calls to the old inline loop."
+    ],
+    "open_questions": [
+      "Should other adapters besides Haven eventually accept constructor kwargs the same bypass way?"
+    ],
+    "top_priority_next_action": "Add regression tests confirming BaseAdapter's default add_conversation() produces identical add() calls to the old inline loop.",
+    "resolved_blockers": [
+      "HavenAdapter's query_rewriter constructor argument having no slot in the mem0-shaped from_config(config) path."
+    ]
+  },
+  "queries": [
+    {
+      "text": "Continue implementing the project.",
+      "task_mode_hint": "continuation"
+    },
+    {
+      "text": "What should we work on next?",
+      "task_mode_hint": "ambiguous"
+    }
+  ],
+  "expected": {
+    "must_state": [
+      "BaseAdapter.add_conversation gets a concrete default reproducing the original per-entry loop; only adapters with real batch-ingestion needs override it.",
+      "The runner constructs the adapter directly with query_rewriter=... when supplied, bypassing from_config for that call only.",
+      "The default add_conversation() implementation must be byte-for-byte identical to the original inline per-entry loop."
+    ],
+    "must_not_state": [
+      "Making add_conversation abstract and requiring every adapter to implement it, as a current or recommended approach",
+      "HavenAdapter's query_rewriter constructor argument having no slot in the mem0-shaped from_config(config) path, as still open/blocking"
+    ],
+    "forbidden_actions": [
+      "Recommending that add_conversation be made abstract, requiring every existing adapter to implement it."
+    ],
+    "must_prioritize": [
+      "Add regression tests confirming BaseAdapter's default add_conversation() produces identical add() calls to the old inline loop."
+    ]
+  }
+}

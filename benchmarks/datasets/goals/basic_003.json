@@ -1,0 +1,19 @@
+{
+  "benchmark_id": "goals_basic_003",
+  "category": "goals",
+
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I want my AI to remember ideas that I forget."
+    }
+  ],
+
+  "query": "What capability does the user want from the AI?",
+
+  "expected": {
+    "answer_contains": [
+      "remember ideas"
+    ]
+  }
+}

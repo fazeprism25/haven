@@ -1,0 +1,27 @@
+{
+  "benchmark_id": "supersession_basic_019",
+  "category": "supersession",
+
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I thought semantic search alone would solve memory retrieval."
+    },
+    {
+      "speaker": "user",
+      "text": "I no longer think that's enough. Ranking and memory organization are also necessary."
+    }
+  ],
+
+  "query": "What is the user's current opinion on semantic search?",
+
+  "expected": {
+    "answer_contains": [
+      "ranking",
+      "memory organization"
+    ],
+    "must_not_contain": [
+      "semantic search alone"
+    ]
+  }
+}

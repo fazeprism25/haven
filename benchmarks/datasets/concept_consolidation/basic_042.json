@@ -1,0 +1,29 @@
+{
+  "benchmark_id": "concept_consolidation_basic_042",
+  "category": "concept_consolidation",
+  "consolidation_pattern": "different_contexts",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "For a work project I had to take some product photos of our new packaging."
+    },
+    {
+      "speaker": "user",
+      "text": "I switched my phone's ringtone back to the default."
+    },
+    {
+      "speaker": "user",
+      "text": "On my hiking trip last weekend I took a bunch of landscape photos with my new lens."
+    }
+  ],
+  "query": "What kind of photography has the user been doing?",
+  "expected": {
+    "answer_contains": [
+      "product photos",
+      "landscape photos"
+    ],
+    "must_not_contain": [
+      "ringtone"
+    ]
+  }
+}

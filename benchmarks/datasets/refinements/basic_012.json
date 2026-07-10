@@ -1,0 +1,40 @@
+{
+  "benchmark_id": "refinements_basic_012",
+  "category": "refinements",
+  "refinement_type": "technology",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I've been experimenting with a few new tools."
+    },
+    {
+      "speaker": "user",
+      "text": "I use Rust for the performance-critical parts of the system."
+    },
+    {
+      "speaker": "user",
+      "text": "It took a while to get used to the borrow checker."
+    },
+    {
+      "speaker": "user",
+      "text": "I switched my terminal theme recently."
+    },
+    {
+      "speaker": "user",
+      "text": "I use Rust for the performance-critical parts of the system, specifically the ingestion pipeline."
+    },
+    {
+      "speaker": "user",
+      "text": "The rest of the codebase is still in Python."
+    }
+  ],
+  "query": "What does the user use Rust for?",
+  "expected": {
+    "answer_contains": [
+      "Rust",
+      "performance-critical",
+      "ingestion pipeline"
+    ],
+    "must_not_contain": []
+  }
+}

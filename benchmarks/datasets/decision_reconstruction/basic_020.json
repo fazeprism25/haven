@@ -1,0 +1,65 @@
+{
+  "benchmark_id": "decision_reconstruction_basic_020",
+  "category": "decision_reconstruction",
+  "domain": "renovation_contractor",
+  "decision_turn_indices": [
+    10
+  ],
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "Getting bids for the kitchen renovation -- Meridian Builders, Coastal Renovations, and Hartley and Sons all sent quotes."
+    },
+    {
+      "speaker": "user",
+      "text": "Meridian's quote was the lowest but their earliest availability is almost four months out."
+    },
+    {
+      "speaker": "user",
+      "text": "Coastal Renovations has good reviews online but a couple mentioned delays on past projects."
+    },
+    {
+      "speaker": "user",
+      "text": "I need to get new tires before winter."
+    },
+    {
+      "speaker": "user",
+      "text": "Hartley and Sons could start in about six weeks, and when I called a couple of their references, everything checked out fine."
+    },
+    {
+      "speaker": "user",
+      "text": "Got the tires done, the shop also found a nail in one of the old ones."
+    },
+    {
+      "speaker": "user",
+      "text": "Called two of Hartley and Sons' past clients and both said the timeline estimate held up in practice."
+    },
+    {
+      "speaker": "user",
+      "text": "Meridian's price is tempting but four months is a long time to wait on this."
+    },
+    {
+      "speaker": "user",
+      "text": "My neighbor's fence project finally got finished after weeks of delays."
+    },
+    {
+      "speaker": "user",
+      "text": "Coastal's reviews about delays made me a little more cautious about their timeline promises."
+    },
+    {
+      "speaker": "user",
+      "text": "Going with Hartley and Sons for the kitchen renovation. Their timeline was two months shorter than Meridian's and their references actually checked out."
+    }
+  ],
+  "query": "Which contractor did the user choose for the kitchen renovation?",
+  "expected": {
+    "answer_contains": [
+      "Hartley and Sons",
+      "timeline was two months shorter",
+      "references actually checked out"
+    ],
+    "must_not_contain": [
+      "fence project"
+    ]
+  }
+}

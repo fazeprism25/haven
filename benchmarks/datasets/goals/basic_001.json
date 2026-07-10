@@ -1,0 +1,19 @@
+{
+  "benchmark_id": "goals_basic_001",
+  "category": "goals",
+
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "My goal is to build a personal AI operating system."
+    }
+  ],
+
+  "query": "What is the user's main goal?",
+
+  "expected": {
+    "answer_contains": [
+      "AI operating system"
+    ]
+  }
+}

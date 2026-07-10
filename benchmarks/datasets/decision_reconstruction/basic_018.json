@@ -1,0 +1,64 @@
+{
+  "benchmark_id": "decision_reconstruction_basic_018",
+  "category": "decision_reconstruction",
+  "domain": "cicd_provider",
+  "decision_turn_indices": [
+    10
+  ],
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "Setting up CI/CD for the new repo -- weighing GitHub Actions, CircleCI, and Jenkins."
+    },
+    {
+      "speaker": "user",
+      "text": "Jenkins gives us the most control but somebody has to host and maintain the server ourselves."
+    },
+    {
+      "speaker": "user",
+      "text": "CircleCI has a solid reputation but it's yet another vendor and dashboard to manage."
+    },
+    {
+      "speaker": "user",
+      "text": "I need to pick up a prescription refill from the pharmacy."
+    },
+    {
+      "speaker": "user",
+      "text": "GitHub Actions is already tied into the repo, so we wouldn't need to run a separate service for it."
+    },
+    {
+      "speaker": "user",
+      "text": "Picked up the prescription, pharmacy line was surprisingly short today."
+    },
+    {
+      "speaker": "user",
+      "text": "Set up a quick GitHub Actions workflow and it was running in under twenty minutes."
+    },
+    {
+      "speaker": "user",
+      "text": "Jenkins would take at least a day just to get the server provisioned and configured."
+    },
+    {
+      "speaker": "user",
+      "text": "My upstairs neighbor is having some work done, has been noisy all week."
+    },
+    {
+      "speaker": "user",
+      "text": "Confirmed GitHub Actions supports everything we currently need without any extra plugins."
+    },
+    {
+      "speaker": "user",
+      "text": "Going with GitHub Actions. It's already tied into the repo, there's nothing extra to host, and it does everything we need out of the box."
+    }
+  ],
+  "query": "Which CI/CD provider did the team decide to use?",
+  "expected": {
+    "answer_contains": [
+      "GitHub Actions",
+      "nothing extra to host"
+    ],
+    "must_not_contain": [
+      "prescription"
+    ]
+  }
+}

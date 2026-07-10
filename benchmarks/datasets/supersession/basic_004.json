@@ -1,0 +1,25 @@
+{
+  "benchmark_id": "supersession_basic_004",
+  "category": "supersession",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I thought adding more retrieval systems would solve memory quality."
+    },
+    {
+      "speaker": "user",
+      "text": "I no longer believe that. Extraction quality matters more."
+    }
+  ],
+
+  "query": "What does the user currently believe improves memory quality most?",
+
+  "expected": {
+    "answer_contains": [
+      "extraction"
+    ],
+    "must_not_contain": [
+      "more retrieval systems"
+    ]
+  }
+}

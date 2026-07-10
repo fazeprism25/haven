@@ -1,0 +1,22 @@
+{
+  "benchmark_id": "temporal_basic_005",
+  "category": "temporal",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "Originally I wanted to immediately build new features."
+    },
+    {
+      "speaker": "user",
+      "text": "Now I want benchmark-driven development before adding features."
+    }
+  ],
+
+  "query": "What development approach does the user currently prefer?",
+
+  "expected": {
+    "answer_contains": [
+      "benchmark"
+    ]
+  }
+}

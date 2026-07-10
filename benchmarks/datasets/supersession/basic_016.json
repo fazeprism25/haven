@@ -1,0 +1,26 @@
+{
+  "benchmark_id": "supersession_basic_016",
+  "category": "supersession",
+
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I was planning to use SQLite for everything."
+    },
+    {
+      "speaker": "user",
+      "text": "Now only metadata will stay in SQLite. Vector embeddings will be stored in Qdrant."
+    }
+  ],
+
+  "query": "Where will vector embeddings be stored?",
+
+  "expected": {
+    "answer_contains": [
+      "Qdrant"
+    ],
+    "must_not_contain": [
+      "SQLite for everything"
+    ]
+  }
+}

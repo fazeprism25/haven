@@ -1,0 +1,20 @@
+{
+  "benchmark_id": "concept_consolidation_basic_022",
+  "category": "concept_consolidation",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I go by Alex."
+    },
+    {
+      "speaker": "user",
+      "text": "Just a reminder, call me Alex."
+    }
+  ],
+  "query": "What name does the user go by?",
+  "expected": {
+    "answer_contains": [
+      "Alex"
+    ]
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "benchmark_id": "supersession_basic_041",
+  "category": "supersession",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I prefer tea over coffee."
+    },
+    {
+      "speaker": "user",
+      "text": "I've switched to coffee, tea was giving me headaches."
+    }
+  ],
+  "query": "What does the user currently prefer to drink?",
+  "expected": {
+    "answer_contains": [
+      "coffee"
+    ],
+    "must_not_contain": [
+      "prefer tea"
+    ]
+  }
+}

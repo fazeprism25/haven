@@ -1,0 +1,41 @@
+{
+  "benchmark_id": "concept_consolidation_basic_054",
+  "category": "concept_consolidation",
+  "consolidation_pattern": "long_gap",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I signed up for a marathon in the fall."
+    },
+    {
+      "speaker": "user",
+      "text": "I finally organized my email inbox."
+    },
+    {
+      "speaker": "user",
+      "text": "There's a new coffee shop that opened near my apartment."
+    },
+    {
+      "speaker": "user",
+      "text": "I've been rewatching an old sitcom in the evenings."
+    },
+    {
+      "speaker": "user",
+      "text": "My upstairs neighbor got a new puppy."
+    },
+    {
+      "speaker": "user",
+      "text": "Marathon training is going well, I'm up to running 15 miles on long runs."
+    }
+  ],
+  "query": "How is the user's marathon training going?",
+  "expected": {
+    "answer_contains": [
+      "marathon",
+      "15 miles"
+    ],
+    "must_not_contain": [
+      "puppy"
+    ]
+  }
+}

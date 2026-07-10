@@ -1,0 +1,23 @@
+{
+  "benchmark_id": "supersession_basic_033",
+  "category": "supersession",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I use MongoDB for my database."
+    },
+    {
+      "speaker": "user",
+      "text": "I migrated everything to PostgreSQL."
+    }
+  ],
+  "query": "What database does the user currently use?",
+  "expected": {
+    "answer_contains": [
+      "PostgreSQL"
+    ],
+    "must_not_contain": [
+      "MongoDB"
+    ]
+  }
+}

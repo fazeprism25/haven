@@ -1,0 +1,55 @@
+{
+  "benchmark_id": "temporal_021",
+  "category": "Temporal",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "For our e-commerce site, let's use Shopify. It's the best platform for selling products."
+    },
+    {
+      "speaker": "assistant",
+      "text": "Shopify is turnkey. I'll set up the store and the payment gateways."
+    },
+    {
+      "speaker": "user",
+      "text": "We need custom functionality. Let's use WooCommerce on WordPress. It's more flexible."
+    },
+    {
+      "speaker": "assistant",
+      "text": "WooCommerce gives us full control. I'll set up the PHP environment."
+    },
+    {
+      "speaker": "user",
+      "text": "Our products are digital. Let's use Gumroad. It handles digital delivery perfectly."
+    },
+    {
+      "speaker": "assistant",
+      "text": "Gumroad is simple. I'll upload the products and set up the landing pages."
+    },
+    {
+      "speaker": "user",
+      "text": "We need inventory management and custom checkout. Let's build with Medusa. It's open-source and headless."
+    },
+    {
+      "speaker": "assistant",
+      "text": "Medusa is flexible. I'll build the custom storefront."
+    },
+    {
+      "speaker": "user",
+      "text": "This is taking too long. Let's just use Shopify. It's the fastest way to launch and we can customize later."
+    }
+  ],
+  "query": "What e-commerce platform is the team launching with?",
+  "expected": {
+    "answer_contains": [
+      "Shopify",
+      "e-commerce",
+      "platform"
+    ],
+    "must_not_contain": [
+      "WooCommerce",
+      "Gumroad",
+      "Medusa"
+    ]
+  }
+}

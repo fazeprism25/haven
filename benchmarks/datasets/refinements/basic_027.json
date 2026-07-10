@@ -1,0 +1,40 @@
+{
+  "benchmark_id": "refinements_basic_027",
+  "category": "refinements",
+  "refinement_type": "ownership",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "Ownership got reorganized on my team."
+    },
+    {
+      "speaker": "user",
+      "text": "I now own the billing service."
+    },
+    {
+      "speaker": "user",
+      "text": "It used to be owned by another team."
+    },
+    {
+      "speaker": "user",
+      "text": "There's a migration planned for next quarter."
+    },
+    {
+      "speaker": "user",
+      "text": "I now own the billing service, including the invoicing and refunds modules."
+    },
+    {
+      "speaker": "user",
+      "text": "The on-call rotation changes next sprint."
+    }
+  ],
+  "query": "What does the user own now?",
+  "expected": {
+    "answer_contains": [
+      "billing service",
+      "invoicing",
+      "refunds"
+    ],
+    "must_not_contain": []
+  }
+}

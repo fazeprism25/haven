@@ -1,0 +1,26 @@
+{
+  "benchmark_id": "belief_basic_004",
+  "category": "belief_evolution",
+
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I thought building features immediately was the fastest way to improve the project."
+    },
+    {
+      "speaker": "user",
+      "text": "I now believe benchmarks should be built first so that improvements can be measured objectively."
+    }
+  ],
+
+  "query": "What is the user's current belief about project development?",
+
+  "expected": {
+    "answer_contains": [
+      "benchmarks"
+    ],
+    "must_not_contain": [
+      "build features immediately"
+    ]
+  }
+}

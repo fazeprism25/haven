@@ -1,0 +1,19 @@
+{
+  "benchmark_id": "identity_basic_003",
+  "category": "identity",
+
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I live in Oman."
+    }
+  ],
+
+  "query": "Where does the user live?",
+
+  "expected": {
+    "answer_contains": [
+      "Oman"
+    ]
+  }
+}

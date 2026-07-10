@@ -1,0 +1,19 @@
+{
+  "benchmark_id": "preferences_basic_008",
+  "category": "preferences",
+
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I prefer open benchmarks over subjective evaluations."
+    }
+  ],
+
+  "query": "How should systems be evaluated?",
+
+  "expected": {
+    "answer_contains": [
+      "open benchmarks"
+    ]
+  }
+}

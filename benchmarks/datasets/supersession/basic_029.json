@@ -1,0 +1,23 @@
+{
+  "benchmark_id": "supersession_basic_029",
+  "category": "supersession",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I work as a barista."
+    },
+    {
+      "speaker": "user",
+      "text": "I got a new job as a data analyst."
+    }
+  ],
+  "query": "What is the user's current job?",
+  "expected": {
+    "answer_contains": [
+      "data analyst"
+    ],
+    "must_not_contain": [
+      "barista"
+    ]
+  }
+}

@@ -1,0 +1,125 @@
+{
+  "benchmark_id": "decision_reconstruction_basic_019",
+  "category": "decision_reconstruction",
+  "domain": "notetaking_app",
+  "decision_turn_indices": [
+    24
+  ],
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I finally organized the pile of mail that's been sitting on my counter."
+    },
+    {
+      "speaker": "user",
+      "text": "My phone's storage is almost full again, need to clear out old photos."
+    },
+    {
+      "speaker": "user",
+      "text": "The package I ordered got delayed by a couple of days."
+    },
+    {
+      "speaker": "user",
+      "text": "I finally returned that overdue library book."
+    },
+    {
+      "speaker": "user",
+      "text": "I've been meaning to water the plants on my desk more consistently."
+    },
+    {
+      "speaker": "user",
+      "text": "Trying to settle on a note-taking app -- Notion, Obsidian, and Roam are the ones I keep coming back to."
+    },
+    {
+      "speaker": "user",
+      "text": "Got a reminder that my credit card statement is due soon."
+    },
+    {
+      "speaker": "user",
+      "text": "My favorite coffee shop is testing a new seasonal drink."
+    },
+    {
+      "speaker": "user",
+      "text": "Notion looks the nicest out of the box but everything lives in their cloud, which makes me a little uneasy."
+    },
+    {
+      "speaker": "user",
+      "text": "I need to renew my gym membership before it lapses."
+    },
+    {
+      "speaker": "user",
+      "text": "I switched my podcast subscription to a cheaper plan."
+    },
+    {
+      "speaker": "user",
+      "text": "Roam's linking model is interesting but the learning curve looked steeper than I expected."
+    },
+    {
+      "speaker": "user",
+      "text": "I need to schedule a haircut, it's overdue at this point."
+    },
+    {
+      "speaker": "user",
+      "text": "I need to replace the strings on my guitar, they're way overdue."
+    },
+    {
+      "speaker": "user",
+      "text": "The weather's been unusually warm for this time of year."
+    },
+    {
+      "speaker": "user",
+      "text": "Obsidian stores everything as plain text files on my own machine, so there's no real vendor lock-in if I ever want to switch later."
+    },
+    {
+      "speaker": "user",
+      "text": "My sister called to catch up, hadn't talked in a few weeks."
+    },
+    {
+      "speaker": "user",
+      "text": "Replaced the guitar strings, definitely should have done that months ago."
+    },
+    {
+      "speaker": "user",
+      "text": "Tried Obsidian for about a week and exporting or moving files around was genuinely trivial since it's just plain markdown."
+    },
+    {
+      "speaker": "user",
+      "text": "My upstairs neighbor had some furniture delivered today, lots of noise."
+    },
+    {
+      "speaker": "user",
+      "text": "Notion's collaboration features are nice but I mostly use this for personal notes anyway."
+    },
+    {
+      "speaker": "user",
+      "text": "My car's tire pressure light came on this morning."
+    },
+    {
+      "speaker": "user",
+      "text": "My car insurance is up for renewal next month."
+    },
+    {
+      "speaker": "user",
+      "text": "Compared file sizes and Obsidian's vault was way more portable than expecting to export everything out of Notion later."
+    },
+    {
+      "speaker": "user",
+      "text": "Going with Obsidian. The local markdown files and not being locked into a vendor mattered more to me than Notion's nicer out-of-the-box look."
+    },
+    {
+      "speaker": "user",
+      "text": "I'll start migrating my old notes into it this weekend."
+    }
+  ],
+  "query": "Which note-taking app did the user decide to use?",
+  "expected": {
+    "answer_contains": [
+      "Obsidian",
+      "local markdown files",
+      "not being locked into a vendor"
+    ],
+    "must_not_contain": [
+      "guitar strings"
+    ]
+  }
+}

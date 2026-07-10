@@ -1,0 +1,40 @@
+{
+  "benchmark_id": "beliefs_012",
+  "category": "Beliefs",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I used to think remote work was the absolute pinnacle of software engineering culture. No commutes, total autonomy."
+    },
+    {
+      "speaker": "assistant",
+      "text": "It definitely has major perks for deep focus work."
+    },
+    {
+      "speaker": "user",
+      "text": "But after managing a distributed team for two years, I realized isolation ruins collaboration. I became a hardcore advocate for 100% in-office environments. Real-time whiteboarding is irreplaceable."
+    },
+    {
+      "speaker": "assistant",
+      "text": "So you prefer everyone being in the physical office space now?"
+    },
+    {
+      "speaker": "user",
+      "text": "Well, forcing people in five days a week just causes burnout and resentment. I've landed on a firm conviction now: a structured hybrid model—exactly 3 days in office for collaborative design and 2 days remote for deep work—is the only sustainable way to build high-performing engineering teams."
+    }
+  ],
+  "query": "What does the user believe is the best workplace model for engineering teams?",
+  "expected": {
+    "answer_contains": [
+      "hybrid",
+      "office",
+      "remote",
+      "mix"
+    ],
+    "must_not_contain": [
+      "fully remote",
+      "100% in-office",
+      "entirely"
+    ]
+  }
+}

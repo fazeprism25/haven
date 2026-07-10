@@ -1,0 +1,73 @@
+{
+  "benchmark_id": "decision_reconstruction_basic_002",
+  "category": "decision_reconstruction",
+  "domain": "frontend_framework",
+  "decision_turn_indices": [
+    12
+  ],
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "For the new dashboard rewrite I'm weighing React, Vue, and Svelte."
+    },
+    {
+      "speaker": "user",
+      "text": "React has the biggest ecosystem, that's a plus for hiring."
+    },
+    {
+      "speaker": "user",
+      "text": "Vue's docs are really approachable, might be easier to onboard newer folks."
+    },
+    {
+      "speaker": "user",
+      "text": "I need to book a dentist appointment sometime this week."
+    },
+    {
+      "speaker": "user",
+      "text": "Svelte compiles away most of the runtime, so the bundle would probably be a lot smaller."
+    },
+    {
+      "speaker": "user",
+      "text": "The dashboard does load a ton of charts, so bundle size actually matters more than usual here."
+    },
+    {
+      "speaker": "user",
+      "text": "My upstairs neighbor's washing machine has been leaking into my ceiling."
+    },
+    {
+      "speaker": "user",
+      "text": "Still torn between React for the ecosystem and Svelte for the performance."
+    },
+    {
+      "speaker": "user",
+      "text": "The plumber said the leak was from a loose hose, should be fixed by Thursday."
+    },
+    {
+      "speaker": "user",
+      "text": "I did a quick prototype in Svelte and the initial load time was noticeably faster than the current React version."
+    },
+    {
+      "speaker": "user",
+      "text": "React would mean less retraining but I keep coming back to how much snappier the Svelte version felt."
+    },
+    {
+      "speaker": "user",
+      "text": "I need to renew my library card, it expired last month."
+    },
+    {
+      "speaker": "user",
+      "text": "We've settled on Svelte for the dashboard rewrite. The prototype's load time improvement was the deciding factor, and the smaller bundle size will help on lower-end devices too."
+    }
+  ],
+  "query": "What framework did the user decide to use for the dashboard rewrite?",
+  "expected": {
+    "answer_contains": [
+      "Svelte",
+      "load time improvement",
+      "smaller bundle size"
+    ],
+    "must_not_contain": [
+      "washing machine"
+    ]
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "benchmark_id": "supersession_basic_032",
+  "category": "supersession",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "My favorite language is Rust."
+    },
+    {
+      "speaker": "user",
+      "text": "Actually, I've switched to Go as my favorite language."
+    }
+  ],
+  "query": "What is the user's current favorite programming language?",
+  "expected": {
+    "answer_contains": [
+      "Go"
+    ],
+    "must_not_contain": [
+      "Rust"
+    ]
+  }
+}

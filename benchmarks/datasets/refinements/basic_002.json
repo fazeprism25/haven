@@ -1,0 +1,33 @@
+{
+  "benchmark_id": "refinements_basic_002",
+  "category": "refinements",
+  "refinement_type": "job_title",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I am a product designer at Lumen."
+    },
+    {
+      "speaker": "user",
+      "text": "I am a product designer at Lumen working on the onboarding flow."
+    },
+    {
+      "speaker": "user",
+      "text": "My favorite programming podcast is Software Engineering Daily."
+    },
+    {
+      "speaker": "user",
+      "text": "I am a product designer at Lumen working on the onboarding flow and the new pricing page."
+    }
+  ],
+  "query": "What is the user currently working on at Lumen?",
+  "expected": {
+    "answer_contains": [
+      "product designer",
+      "Lumen",
+      "onboarding flow",
+      "pricing page"
+    ],
+    "must_not_contain": []
+  }
+}

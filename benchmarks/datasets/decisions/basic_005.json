@@ -1,0 +1,26 @@
+{
+  "benchmark_id": "decision_basic_005",
+  "category": "decision_consistency",
+
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I decided to measure systems before optimizing them."
+    },
+    {
+      "speaker": "user",
+      "text": "Features should only be added if benchmarks show they improve performance."
+    }
+  ],
+
+  "query": "Should we build a graph layer before running benchmarks?",
+
+  "expected": {
+    "answer_contains": [
+      "No"
+    ],
+    "must_not_contain": [
+      "build graph layer first"
+    ]
+  }
+}

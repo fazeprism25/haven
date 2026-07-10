@@ -1,0 +1,23 @@
+{
+  "benchmark_id": "supersession_basic_010",
+  "category": "supersession",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I originally thought one AI agent was sufficient."
+    },
+    {
+      "speaker": "user",
+      "text": "I replaced that idea with a manager plus specialized agents."
+    }
+  ],
+
+  "query": "What architecture is currently planned?",
+
+  "expected": {
+    "answer_contains": [
+      "manager",
+      "specialized agents"
+    ]
+  }
+}

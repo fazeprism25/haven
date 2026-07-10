@@ -1,0 +1,27 @@
+{
+  "benchmark_id": "belief_basic_002",
+  "category": "belief_evolution",
+
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I believed adding more retrieval systems would solve memory quality issues."
+    },
+    {
+      "speaker": "user",
+      "text": "I now believe memory organization and extraction quality matter more than adding additional retrieval layers."
+    }
+  ],
+
+  "query": "What is the user's current belief regarding memory quality improvements?",
+
+  "expected": {
+    "answer_contains": [
+      "memory organization",
+      "extraction quality"
+    ],
+    "must_not_contain": [
+      "more retrieval systems will solve memory quality"
+    ]
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "benchmark_id": "concept_consolidation_basic_020",
+  "category": "concept_consolidation",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I prefer async communication."
+    },
+    {
+      "speaker": "user",
+      "text": "Yep, async communication is still my preference."
+    }
+  ],
+  "query": "What communication style does the user prefer?",
+  "expected": {
+    "answer_contains": [
+      "async"
+    ]
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "benchmark_id": "supersession_basic_044",
+  "category": "supersession",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "My goal this year is to run a marathon."
+    },
+    {
+      "speaker": "user",
+      "text": "I've changed my goal to focus on strength training instead."
+    }
+  ],
+  "query": "What is the user's current fitness goal?",
+  "expected": {
+    "answer_contains": [
+      "strength training"
+    ],
+    "must_not_contain": [
+      "marathon"
+    ]
+  }
+}

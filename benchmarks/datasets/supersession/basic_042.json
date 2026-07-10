@@ -1,0 +1,24 @@
+{
+  "benchmark_id": "supersession_basic_042",
+  "category": "supersession",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I like working late at night."
+    },
+    {
+      "speaker": "user",
+      "text": "I've become a daybreak person now, I prefer working early."
+    }
+  ],
+  "query": "When does the user currently prefer to work?",
+  "expected": {
+    "answer_contains": [
+      "daybreak",
+      "early"
+    ],
+    "must_not_contain": [
+      "late at night"
+    ]
+  }
+}

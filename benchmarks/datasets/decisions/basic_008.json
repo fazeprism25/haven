@@ -1,0 +1,18 @@
+{
+  "benchmark_id": "decision_basic_008",
+  "category": "decision",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I decided to keep the benchmark suite independent from production memory."
+    }
+  ],
+
+  "query": "How should benchmarks be separated?",
+
+  "expected": {
+    "answer_contains": [
+      "independent"
+    ]
+  }
+}

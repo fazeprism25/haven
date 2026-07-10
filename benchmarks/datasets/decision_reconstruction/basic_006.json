@@ -1,0 +1,64 @@
+{
+  "benchmark_id": "decision_reconstruction_basic_006",
+  "category": "decision_reconstruction",
+  "domain": "job_offer",
+  "decision_turn_indices": [
+    10
+  ],
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "Got three offers to think through -- a startup, a big company, and a remote-first agency."
+    },
+    {
+      "speaker": "user",
+      "text": "The startup has equity upside but the job security feels shaky given their funding stage."
+    },
+    {
+      "speaker": "user",
+      "text": "The big company pays the most on paper but the office is a rough commute for me."
+    },
+    {
+      "speaker": "user",
+      "text": "I've been meaning to try that new ramen place that opened downtown."
+    },
+    {
+      "speaker": "user",
+      "text": "The remote-first agency pays less than the big company but I could work from anywhere, which matters since my parents are getting older and live a few states away."
+    },
+    {
+      "speaker": "user",
+      "text": "Finally tried that ramen place, honestly a bit overhyped."
+    },
+    {
+      "speaker": "user",
+      "text": "Talked to a couple people who work at the startup, they mentioned some recent layoffs which is a bit concerning."
+    },
+    {
+      "speaker": "user",
+      "text": "Still weighing the big company's salary against the flexibility from the agency."
+    },
+    {
+      "speaker": "user",
+      "text": "My internet was out for most of yesterday, turned out to be a fiber cut somewhere in the neighborhood."
+    },
+    {
+      "speaker": "user",
+      "text": "The more I think about being able to move closer to family without changing jobs, the more the agency offer makes sense."
+    },
+    {
+      "speaker": "user",
+      "text": "Accepted the offer from the remote-first agency. Being able to relocate near family whenever I need to outweighed the bigger salary from the big company."
+    }
+  ],
+  "query": "Which job offer did the user accept?",
+  "expected": {
+    "answer_contains": [
+      "remote-first agency",
+      "relocate near family"
+    ],
+    "must_not_contain": [
+      "ramen"
+    ]
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "benchmark_id": "refinements_basic_020",
+  "category": "refinements",
+  "refinement_type": "role",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I am the on-call engineer this week."
+    },
+    {
+      "speaker": "user",
+      "text": "I am the on-call engineer this week for the payments service."
+    },
+    {
+      "speaker": "user",
+      "text": "I finally fixed that annoying bug in my personal project."
+    },
+    {
+      "speaker": "user",
+      "text": "I am the on-call engineer this week for the payments service, covering nights as well."
+    }
+  ],
+  "query": "What is the user's on-call responsibility this week?",
+  "expected": {
+    "answer_contains": [
+      "on-call",
+      "payments service",
+      "nights"
+    ],
+    "must_not_contain": []
+  }
+}

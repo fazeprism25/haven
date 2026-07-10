@@ -1,0 +1,117 @@
+{
+  "benchmark_id": "decision_reconstruction_basic_023",
+  "category": "decision_reconstruction",
+  "domain": "therapist_approach",
+  "decision_turn_indices": [
+    22
+  ],
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I switched my podcast subscription to a cheaper plan."
+    },
+    {
+      "speaker": "user",
+      "text": "The weather's been unusually warm for this time of year."
+    },
+    {
+      "speaker": "user",
+      "text": "I need to call the insurance company about a claim this week."
+    },
+    {
+      "speaker": "user",
+      "text": "Looking into therapy options -- a CBT-focused therapist, someone more psychodynamic, and an online therapy service."
+    },
+    {
+      "speaker": "user",
+      "text": "My laptop update took forever to install last night."
+    },
+    {
+      "speaker": "user",
+      "text": "I've been meaning to water the plants on my desk more consistently."
+    },
+    {
+      "speaker": "user",
+      "text": "I finally fixed the squeaky hinge on my front door."
+    },
+    {
+      "speaker": "user",
+      "text": "The psychodynamic approach sounds interesting but I'm not sure I have the patience for something that open-ended right now."
+    },
+    {
+      "speaker": "user",
+      "text": "My favorite coffee shop is testing a new seasonal drink."
+    },
+    {
+      "speaker": "user",
+      "text": "The online service is the most convenient but the quality felt inconsistent based on reviews I read."
+    },
+    {
+      "speaker": "user",
+      "text": "The package I ordered got delayed by a couple of days."
+    },
+    {
+      "speaker": "user",
+      "text": "I need to get my flu shot before it's too late in the season."
+    },
+    {
+      "speaker": "user",
+      "text": "I need to renew my gym membership before it lapses."
+    },
+    {
+      "speaker": "user",
+      "text": "The CBT-focused therapist gave me some structured exercises to work through in the first session, which felt more immediately useful than just talking."
+    },
+    {
+      "speaker": "user",
+      "text": "My car's tire pressure light came on this morning."
+    },
+    {
+      "speaker": "user",
+      "text": "Got the flu shot, arm was sore for a couple of days."
+    },
+    {
+      "speaker": "user",
+      "text": "I need to schedule a haircut, it's overdue at this point."
+    },
+    {
+      "speaker": "user",
+      "text": "After a second session with the CBT therapist, the take-home exercises are actually helping me notice patterns during the week."
+    },
+    {
+      "speaker": "user",
+      "text": "The psychodynamic route might still be worth trying eventually, just not right now."
+    },
+    {
+      "speaker": "user",
+      "text": "I finally returned that overdue library book."
+    },
+    {
+      "speaker": "user",
+      "text": "My car's registration sticker is expiring this month."
+    },
+    {
+      "speaker": "user",
+      "text": "Compared notes with a friend who tried the online service and she said the therapist changed on her twice already."
+    },
+    {
+      "speaker": "user",
+      "text": "Sticking with the CBT-focused therapist. The structured worksheets and the homework exercises have felt more useful than just talking would have."
+    },
+    {
+      "speaker": "user",
+      "text": "Booked the next few sessions already."
+    }
+  ],
+  "query": "Which type of therapist did the user decide to stick with?",
+  "expected": {
+    "answer_contains": [
+      "CBT-focused",
+      "structured worksheets",
+      "homework exercises"
+    ],
+    "must_not_contain": [
+      "registration sticker"
+    ]
+  }
+}

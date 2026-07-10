@@ -1,0 +1,27 @@
+{
+  "benchmark_id": "supersession_basic_013",
+  "category": "supersession",
+
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "Initially I wanted to benchmark after implementing new features."
+    },
+    {
+      "speaker": "user",
+      "text": "I've changed that approach. Benchmarks must come prior to adding new features."
+    }
+  ],
+
+  "query": "When should benchmarking happen?",
+
+  "expected": {
+    "answer_contains": [
+      "prior to",
+      "adding new features"
+    ],
+    "must_not_contain": [
+      "after implementing"
+    ]
+  }
+}

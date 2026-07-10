@@ -1,0 +1,28 @@
+{
+  "benchmark_id": "supersession_basic_025",
+  "category": "supersession",
+
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I wanted every memory to have identical importance."
+    },
+    {
+      "speaker": "user",
+      "text": "That idea has changed. Memories should have importance scores, activity levels and lifecycle states."
+    }
+  ],
+
+  "query": "How should memories be managed now?",
+
+  "expected": {
+    "answer_contains": [
+      "importance",
+      "activity",
+      "lifecycle"
+    ],
+    "must_not_contain": [
+      "identical importance"
+    ]
+  }
+}

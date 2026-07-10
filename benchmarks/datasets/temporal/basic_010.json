@@ -1,0 +1,22 @@
+{
+  "benchmark_id": "temporal_basic_010",
+  "category": "temporal",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "In the beginning I preferred a single model."
+    },
+    {
+      "speaker": "user",
+      "text": "Now I prefer multiple specialized models."
+    }
+  ],
+
+  "query": "What model setup is currently preferred?",
+
+  "expected": {
+    "answer_contains": [
+      "multiple specialized"
+    ]
+  }
+}

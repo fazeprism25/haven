@@ -1,0 +1,27 @@
+{
+  "benchmark_id": "supersession_basic_024",
+  "category": "supersession",
+
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "Initially I wanted to use cloud APIs for every AI task."
+    },
+    {
+      "speaker": "user",
+      "text": "I've shifted toward running as much as possible locally with Ollama."
+    }
+  ],
+
+  "query": "What deployment approach is currently preferred?",
+
+  "expected": {
+    "answer_contains": [
+      "locally",
+      "Ollama"
+    ],
+    "must_not_contain": [
+      "cloud APIs for every task"
+    ]
+  }
+}

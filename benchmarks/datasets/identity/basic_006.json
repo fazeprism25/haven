@@ -1,0 +1,19 @@
+{
+  "benchmark_id": "identity_basic_006",
+  "category": "identity",
+
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I am building a personal AI memory system."
+    }
+  ],
+
+  "query": "What kind of project is the user building?",
+
+  "expected": {
+    "answer_contains": [
+      "AI memory system"
+    ]
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "benchmark_id": "identity_basic_008",
+  "category": "identity",
+
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I study mechanical engineering but spend a lot of time learning AI."
+    }
+  ],
+
+  "query": "What does the user study?",
+
+  "expected": {
+    "answer_contains": [
+      "mechanical engineering"
+    ]
+  }
+}

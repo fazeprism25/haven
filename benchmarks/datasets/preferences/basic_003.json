@@ -1,0 +1,19 @@
+{
+  "benchmark_id": "preferences_basic_003",
+  "category": "preferences",
+
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I prefer local AI models whenever possible."
+    }
+  ],
+
+  "query": "What kind of AI models does the user prefer?",
+
+  "expected": {
+    "answer_contains": [
+      "local"
+    ]
+  }
+}

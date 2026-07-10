@@ -1,0 +1,38 @@
+{
+  "benchmark_id": "concept_consolidation_basic_044",
+  "category": "concept_consolidation",
+  "consolidation_pattern": "partial_overlap",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I tried making a new pasta dish last night."
+    },
+    {
+      "speaker": "user",
+      "text": "My upstairs neighbor is renovating their kitchen."
+    },
+    {
+      "speaker": "user",
+      "text": "The pasta dish had a brown butter sage sauce that turned out really well."
+    },
+    {
+      "speaker": "user",
+      "text": "The renovation noise starts around 8am every day."
+    },
+    {
+      "speaker": "user",
+      "text": "I used fresh pasta from the Italian market for that dish instead of dried."
+    }
+  ],
+  "query": "What did the user make and how?",
+  "expected": {
+    "answer_contains": [
+      "pasta dish",
+      "brown butter sage",
+      "fresh pasta"
+    ],
+    "must_not_contain": [
+      "renovation"
+    ]
+  }
+}

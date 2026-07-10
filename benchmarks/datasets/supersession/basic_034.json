@@ -1,0 +1,28 @@
+{
+  "benchmark_id": "supersession_basic_034",
+  "category": "supersession",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I started with Vue for the frontend."
+    },
+    {
+      "speaker": "user",
+      "text": "I switched to React."
+    },
+    {
+      "speaker": "user",
+      "text": "I've now moved the whole team to Svelte."
+    }
+  ],
+  "query": "What frontend framework is the user currently using?",
+  "expected": {
+    "answer_contains": [
+      "Svelte"
+    ],
+    "must_not_contain": [
+      "Vue",
+      "React"
+    ]
+  }
+}

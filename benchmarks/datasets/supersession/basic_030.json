@@ -1,0 +1,21 @@
+{
+  "benchmark_id": "supersession_basic_030",
+  "category": "supersession",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I work as a software engineer at Acme."
+    },
+    {
+      "speaker": "user",
+      "text": "I got promoted to senior software engineer, still at Acme."
+    }
+  ],
+  "query": "What is the user's current job title and company?",
+  "expected": {
+    "answer_contains": [
+      "senior software engineer",
+      "Acme"
+    ]
+  }
+}

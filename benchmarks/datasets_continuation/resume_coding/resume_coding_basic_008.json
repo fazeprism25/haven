@@ -1,0 +1,207 @@
+{
+  "benchmark_id": "resume_coding_basic_008",
+  "category": "resume_coding",
+  "tier": "medium",
+  "domain": "haven_context_planner_task_mode",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "The bus was running about ten minutes late again this morning.",
+      "turn_type": "distractor",
+      "turn_index": 0
+    },
+    {
+      "speaker": "user",
+      "text": "I finally fixed the wobbly chair leg in the kitchen.",
+      "turn_type": "distractor",
+      "turn_index": 1
+    },
+    {
+      "speaker": "user",
+      "text": "ContextPlanner needs to classify each query into a TaskMode so we know whether to build a ProjectState -- right now it's unclear which queries even should trigger that.",
+      "turn_type": "architecture_discussion",
+      "turn_index": 2
+    },
+    {
+      "speaker": "user",
+      "text": "There's a new bakery opening down the street next month.",
+      "turn_type": "distractor",
+      "turn_index": 3
+    },
+    {
+      "speaker": "user",
+      "text": "Simplest approach: one regex checking for the literal phrase 'continue implementing'.",
+      "turn_type": "rejected_approach",
+      "turn_index": 4
+    },
+    {
+      "speaker": "user",
+      "text": "My phone battery has been draining faster than usual lately.",
+      "turn_type": "distractor",
+      "turn_index": 5
+    },
+    {
+      "speaker": "user",
+      "text": "A single literal phrase misses too many real phrasings -- build a five-way lexical classifier (CONTINUATION, POINTED_QA, and three others) with a defined priority order when multiple patterns match.",
+      "turn_type": "decision",
+      "supersedes_turn": 4,
+      "turn_index": 6
+    },
+    {
+      "speaker": "user",
+      "text": "I need to renew my passport before it expires this winter.",
+      "turn_type": "distractor",
+      "turn_index": 7
+    },
+    {
+      "speaker": "user",
+      "text": "The gym was way more crowded than usual today.",
+      "turn_type": "distractor",
+      "turn_index": 8
+    },
+    {
+      "speaker": "user",
+      "text": "Constraint: classification must stay purely lexical and deterministic -- no LLM call in the hot classification path, it needs to run on every query.",
+      "turn_type": "constraint",
+      "turn_index": 9
+    },
+    {
+      "speaker": "user",
+      "text": "I switched to a different brand of coffee and I'm not sure I like it.",
+      "turn_type": "distractor",
+      "turn_index": 10
+    },
+    {
+      "speaker": "user",
+      "text": "Blocker: 'What should I do next?' -- arguably the most orientation-seeking phrasing possible -- currently falls through every CONTINUATION pattern and lands in POINTED_QA, getting no ProjectState at all.",
+      "turn_type": "blocker",
+      "turn_index": 11
+    },
+    {
+      "speaker": "user",
+      "text": "It's supposed to rain most of next week according to the forecast.",
+      "turn_type": "distractor",
+      "turn_index": 12
+    },
+    {
+      "speaker": "user",
+      "text": "I still haven't unpacked the last box from the move.",
+      "turn_type": "distractor",
+      "turn_index": 13
+    },
+    {
+      "speaker": "user",
+      "text": "This is a known, real gap -- not resolved yet. Leaving POINTED_QA as the fallback for now rather than guessing at a fix without more phrasing examples to test against.",
+      "turn_type": "note",
+      "turn_index": 14
+    },
+    {
+      "speaker": "user",
+      "text": "My sister's flight got delayed by a couple of hours.",
+      "turn_type": "distractor",
+      "turn_index": 15
+    },
+    {
+      "speaker": "user",
+      "text": "Implemented the five-way classifier with its priority order in ContextPlanner.",
+      "turn_type": "implementation",
+      "turn_index": 16
+    },
+    {
+      "speaker": "user",
+      "text": "The office plants finally got watered after being neglected for weeks.",
+      "turn_type": "distractor",
+      "turn_index": 17
+    },
+    {
+      "speaker": "user",
+      "text": "Added unit tests for each TaskMode's currently-known trigger phrasings.",
+      "turn_type": "implementation",
+      "turn_index": 18
+    },
+    {
+      "speaker": "user",
+      "text": "I keep meaning to update my resume but haven't gotten around to it.",
+      "turn_type": "distractor",
+      "turn_index": 19
+    },
+    {
+      "speaker": "user",
+      "text": "The parking garage near the office is under construction again.",
+      "turn_type": "distractor",
+      "turn_index": 20
+    },
+    {
+      "speaker": "user",
+      "text": "Open question: should 'what should I do next' route to CONTINUATION, or is POINTED_QA actually fine there and ProjectState should be optional-but-available regardless of mode?",
+      "turn_type": "open_question",
+      "turn_index": 21
+    },
+    {
+      "speaker": "user",
+      "text": "I tried a new recipe for dinner last night, turned out decent.",
+      "turn_type": "distractor",
+      "turn_index": 22
+    },
+    {
+      "speaker": "user",
+      "text": "Next: collect more real ambiguous-phrasing examples before touching the classifier again -- don't want to guess at a fix.",
+      "turn_type": "task",
+      "turn_index": 23
+    },
+    {
+      "speaker": "user",
+      "text": "My laptop fan has been louder than usual, might need cleaning.",
+      "turn_type": "distractor",
+      "turn_index": 24
+    }
+  ],
+  "ground_truth": {
+    "current_objective": "Build ContextPlanner's lexical TaskMode classifier.",
+    "active_decisions": [
+      "Classify queries with a five-way lexical classifier and a defined priority order, not a single literal-phrase regex."
+    ],
+    "superseded_or_rejected": [
+      "Using one regex that checks only for the literal phrase 'continue implementing'."
+    ],
+    "constraints": [
+      "Classification must stay purely lexical and deterministic -- no LLM call in the hot classification path."
+    ],
+    "active_blockers": [
+      "'What should I do next?' falls through every CONTINUATION pattern and lands in POINTED_QA, getting no ProjectState -- known, unresolved gap."
+    ],
+    "active_tasks": [
+      "Collect more real ambiguous-phrasing examples before changing the classifier again."
+    ],
+    "open_questions": [
+      "Should 'what should I do next' route to CONTINUATION, or should ProjectState be available regardless of task mode?"
+    ],
+    "top_priority_next_action": "Collect more real ambiguous-phrasing examples before attempting to fix the 'what should I do next' classification gap.",
+    "resolved_blockers": []
+  },
+  "queries": [
+    {
+      "text": "Continue implementing the project.",
+      "task_mode_hint": "continuation"
+    },
+    {
+      "text": "What should we work on next?",
+      "task_mode_hint": "ambiguous"
+    }
+  ],
+  "expected": {
+    "must_state": [
+      "Classify queries with a five-way lexical classifier and a defined priority order, not a single literal-phrase regex.",
+      "Classification must stay purely lexical and deterministic -- no LLM call in the hot classification path."
+    ],
+    "must_not_state": [
+      "Using one regex that checks only for the literal phrase 'continue implementing', as a current or recommended approach"
+    ],
+    "forbidden_actions": [
+      "Claiming the 'what should I do next' classification gap is already fixed, or proposing a classifier change without first collecting more phrasing examples as decided."
+    ],
+    "must_prioritize": [
+      "Collect more real ambiguous-phrasing examples before attempting to fix the 'what should I do next' classification gap."
+    ]
+  }
+}

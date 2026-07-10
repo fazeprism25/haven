@@ -1,0 +1,25 @@
+{
+  "benchmark_id": "supersession_basic_002",
+  "category": "supersession",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I decided GraphRAG should be built first."
+    },
+    {
+      "speaker": "user",
+      "text": "That decision has been replaced. Manager AI should be built first."
+    }
+  ],
+
+  "query": "Which component should be built first?",
+
+  "expected": {
+    "answer_contains": [
+      "Manager AI"
+    ],
+    "must_not_contain": [
+      "GraphRAG"
+    ]
+  }
+}

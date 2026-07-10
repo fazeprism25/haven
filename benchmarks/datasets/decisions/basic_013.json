@@ -1,0 +1,18 @@
+{
+  "benchmark_id": "basic_013",
+  "category": "Decisions",
+
+  "conversation": [
+    { "speaker": "user", "text": "I have three features to build this sprint: user notifications, export to CSV, and OAuth login." },
+    { "speaker": "user", "text": "OAuth login is the most complex but also the most requested by customers." },
+    { "speaker": "user", "text": "CSV export is trivial but nobody is really asking for it." },
+    { "speaker": "user", "text": "I'll do OAuth login first, then notifications, and leave CSV export for a future sprint." }
+  ],
+
+  "query": "In what order did the user decide to implement the three features?",
+
+  "expected": {
+    "answer_contains": ["OAuth", "notifications", "CSV"],
+    "must_not_contain": ["CSV first", "notifications first"]
+  }
+}

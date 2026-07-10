@@ -1,0 +1,32 @@
+{
+  "benchmark_id": "refinements_basic_029",
+  "category": "refinements",
+  "refinement_type": "responsibility",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I'm responsible for the weekly status report."
+    },
+    {
+      "speaker": "user",
+      "text": "I'm responsible for the weekly status report for the platform team."
+    },
+    {
+      "speaker": "user",
+      "text": "We migrated our docs to a new wiki."
+    },
+    {
+      "speaker": "user",
+      "text": "I'm responsible for the weekly status report for the platform team, including the incident summary."
+    }
+  ],
+  "query": "What is the user responsible for reporting?",
+  "expected": {
+    "answer_contains": [
+      "weekly status report",
+      "platform team",
+      "incident summary"
+    ],
+    "must_not_contain": []
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "benchmark_id": "concept_consolidation_basic_043",
+  "category": "concept_consolidation",
+  "consolidation_pattern": "partial_overlap",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I'm part of the team maintaining the notifications service."
+    },
+    {
+      "speaker": "user",
+      "text": "I switched my coffee order to oat milk lately."
+    },
+    {
+      "speaker": "user",
+      "text": "One thing about the notifications service is that it handles both email and push notifications."
+    },
+    {
+      "speaker": "user",
+      "text": "The new intern started this week and seems sharp."
+    },
+    {
+      "speaker": "user",
+      "text": "The notifications service also has a retry queue that I've been meaning to document better."
+    }
+  ],
+  "query": "What does the user know about the notifications service?",
+  "expected": {
+    "answer_contains": [
+      "email",
+      "push notifications",
+      "retry queue"
+    ],
+    "must_not_contain": [
+      "oat milk"
+    ]
+  }
+}

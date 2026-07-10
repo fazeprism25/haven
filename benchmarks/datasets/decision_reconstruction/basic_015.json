@@ -1,0 +1,92 @@
+{
+  "benchmark_id": "decision_reconstruction_basic_015",
+  "category": "decision_reconstruction",
+  "domain": "moving_city",
+  "decision_turn_indices": [
+    16
+  ],
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "Thinking about relocating -- top options right now are Austin, Denver, and Raleigh."
+    },
+    {
+      "speaker": "user",
+      "text": "Got a reminder that my credit card statement is due soon."
+    },
+    {
+      "speaker": "user",
+      "text": "Austin's job market for my field is strong but the traffic reportedly got a lot worse in the last few years."
+    },
+    {
+      "speaker": "user",
+      "text": "I need to call the insurance company about a claim this week."
+    },
+    {
+      "speaker": "user",
+      "text": "Denver has the mountains close by, which is appealing, but the cost of living has climbed a lot recently."
+    },
+    {
+      "speaker": "user",
+      "text": "The package I ordered got delayed by a couple of days."
+    },
+    {
+      "speaker": "user",
+      "text": "I need to get my bike tuned up before the weather turns."
+    },
+    {
+      "speaker": "user",
+      "text": "My phone's storage is almost full again, need to clear out old photos."
+    },
+    {
+      "speaker": "user",
+      "text": "Raleigh's cost of living is noticeably lower than the other two, and the flights back home to see family are shorter."
+    },
+    {
+      "speaker": "user",
+      "text": "Got the bike tuned up, the shop said the brakes were basically worn out."
+    },
+    {
+      "speaker": "user",
+      "text": "I've been meaning to reorganize the garage for weeks now."
+    },
+    {
+      "speaker": "user",
+      "text": "Looked at direct flight options from each city back to where my parents live, Raleigh wins by a wide margin."
+    },
+    {
+      "speaker": "user",
+      "text": "My cousin's baby shower is coming up, need to pick a gift."
+    },
+    {
+      "speaker": "user",
+      "text": "Still a little drawn to Denver for the outdoor access honestly."
+    },
+    {
+      "speaker": "user",
+      "text": "My favorite coffee shop downtown is closing at the end of the month."
+    },
+    {
+      "speaker": "user",
+      "text": "Cost of living calculator put Raleigh well below both Austin and Denver for a comparable apartment."
+    },
+    {
+      "speaker": "user",
+      "text": "Decided on Raleigh. The shorter flights back home to see family and the lower cost of living made it the clear choice over Austin and Denver."
+    },
+    {
+      "speaker": "user",
+      "text": "Going to start looking at neighborhoods there this weekend."
+    }
+  ],
+  "query": "Which city did the user decide to move to?",
+  "expected": {
+    "answer_contains": [
+      "Raleigh",
+      "shorter flights back home to see family"
+    ],
+    "must_not_contain": [
+      "coffee shop downtown is closing"
+    ]
+  }
+}

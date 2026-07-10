@@ -1,0 +1,23 @@
+{
+  "benchmark_id": "supersession_basic_038",
+  "category": "supersession",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "The report is due Friday."
+    },
+    {
+      "speaker": "user",
+      "text": "The deadline got pushed to next Wednesday."
+    }
+  ],
+  "query": "When is the report currently due?",
+  "expected": {
+    "answer_contains": [
+      "Wednesday"
+    ],
+    "must_not_contain": [
+      "Friday"
+    ]
+  }
+}

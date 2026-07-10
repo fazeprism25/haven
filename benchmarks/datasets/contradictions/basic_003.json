@@ -1,0 +1,23 @@
+{
+  "benchmark_id": "contradictions_basic_003",
+  "category": "contradictions",
+
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "One AI agent is enough."
+    },
+    {
+      "speaker": "user",
+      "text": "Multiple specialized agents are better."
+    }
+  ],
+
+  "query": "What architecture does the user currently prefer?",
+
+  "expected": {
+    "answer_contains": [
+      "Multiple specialized agents"
+    ]
+  }
+}

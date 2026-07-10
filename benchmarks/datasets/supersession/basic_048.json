@@ -1,0 +1,23 @@
+{
+  "benchmark_id": "supersession_basic_048",
+  "category": "supersession",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "We decided to use Stripe for payments."
+    },
+    {
+      "speaker": "user",
+      "text": "We switched payments to Adyen."
+    }
+  ],
+  "query": "What payment processor is currently being used?",
+  "expected": {
+    "answer_contains": [
+      "Adyen"
+    ],
+    "must_not_contain": [
+      "Stripe"
+    ]
+  }
+}

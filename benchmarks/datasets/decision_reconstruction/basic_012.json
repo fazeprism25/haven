@@ -1,0 +1,65 @@
+{
+  "benchmark_id": "decision_reconstruction_basic_012",
+  "category": "decision_reconstruction",
+  "domain": "pm_tool",
+  "decision_turn_indices": [
+    10
+  ],
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "Evaluating project management tools for the team -- Jira, Linear, and Asana are the finalists."
+    },
+    {
+      "speaker": "user",
+      "text": "Jira has the most integrations but it's always felt kind of heavy for a small team."
+    },
+    {
+      "speaker": "user",
+      "text": "Asana's timeline view looked nice in the demo, but pricing per seat adds up with our headcount."
+    },
+    {
+      "speaker": "user",
+      "text": "I need to get a new charger, mine finally died."
+    },
+    {
+      "speaker": "user",
+      "text": "Linear's snappy, mostly keyboard-based interface keeps coming up when I ask other small teams what they use."
+    },
+    {
+      "speaker": "user",
+      "text": "Got a new charger, cheaper brand this time, hope it lasts longer than the last one."
+    },
+    {
+      "speaker": "user",
+      "text": "Trialed Linear for a week and the responsiveness compared to Jira made switching back annoying."
+    },
+    {
+      "speaker": "user",
+      "text": "Still not fully sold since migrating our existing Jira boards would take some effort."
+    },
+    {
+      "speaker": "user",
+      "text": "My internet provider called about a plan change, might switch providers."
+    },
+    {
+      "speaker": "user",
+      "text": "Estimated the Jira migration would only take about a day given how few projects we actually have active."
+    },
+    {
+      "speaker": "user",
+      "text": "We're moving the team to Linear. The keyboard-driven workflow and how fast it loads made the migration effort worth it over sticking with Jira."
+    }
+  ],
+  "query": "Which project management tool did the team decide to switch to?",
+  "expected": {
+    "answer_contains": [
+      "Linear",
+      "keyboard-driven workflow",
+      "how fast it loads"
+    ],
+    "must_not_contain": [
+      "charger"
+    ]
+  }
+}

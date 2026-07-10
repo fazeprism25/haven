@@ -1,0 +1,22 @@
+{
+  "benchmark_id": "temporal_basic_004",
+  "category": "temporal",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "At first I wanted a single agent architecture."
+    },
+    {
+      "speaker": "user",
+      "text": "Now I prefer multiple specialized agents coordinated by a manager."
+    }
+  ],
+
+  "query": "What architecture does the user currently prefer?",
+
+  "expected": {
+    "answer_contains": [
+      "multiple specialized agents"
+    ]
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "benchmark_id": "goals_basic_005",
+  "category": "goals",
+
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I want Manager AI to organize memories before retrieval."
+    }
+  ],
+
+  "query": "What role should Manager AI play?",
+
+  "expected": {
+    "answer_contains": [
+      "organize memories"
+    ]
+  }
+}

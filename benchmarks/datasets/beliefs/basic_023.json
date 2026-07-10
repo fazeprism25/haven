@@ -1,0 +1,40 @@
+{
+  "benchmark_id": "beliefs_023",
+  "category": "Beliefs",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "When we launched our AI startup, I believed that bootstrapping the company from customer revenue was the only way to maintain true operational freedom."
+    },
+    {
+      "speaker": "assistant",
+      "text": "Bootstrapping keeps you in complete control of your equity and product roadmap."
+    },
+    {
+      "speaker": "user",
+      "text": "But compute costs for LLMs are insane. I quickly realized we couldn't compete, so I shifted my belief and argued that raising a massive Venture Capital seed round was mandatory to survive the foundational model race."
+    },
+    {
+      "speaker": "assistant",
+      "text": "VC capital is crucial when you have intensive capital requirements early on."
+    },
+    {
+      "speaker": "user",
+      "text": "The problem with venture capital is the hyper-dilution and loss of control to board members who don't understand the tech. I've completely reframed my perspective. I now strongly believe that venture debt and strategic enterprise partnerships, rather than standard equity-based venture capital, is the correct financing model for modern AI software businesses."
+    }
+  ],
+  "query": "What is the user's current belief regarding the best way to fund an AI startup?",
+  "expected": {
+    "answer_contains": [
+      "debt",
+      "partnerships",
+      "strategic",
+      "alternative"
+    ],
+    "must_not_contain": [
+      "bootstrapping",
+      "equity",
+      "Venture Capital seed"
+    ]
+  }
+}

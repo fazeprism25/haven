@@ -1,0 +1,19 @@
+{
+  "benchmark_id": "basic_021",
+  "category": "Decisions",
+
+  "conversation": [
+    { "speaker": "user", "text": "I have to decide on the deployment strategy for the new service. Candidates are blue-green deployment, canary releases, and rolling updates." },
+    { "speaker": "user", "text": "Blue-green requires double the infrastructure at cutover which is expensive." },
+    { "speaker": "user", "text": "Rolling updates are simple but mean multiple versions run simultaneously, which is a problem because our DB migrations aren't backward compatible." },
+    { "speaker": "user", "text": "Canary lets us test with a small percentage of traffic before fully rolling out, and we can keep the old version stable while validating." },
+    { "speaker": "user", "text": "We'll go with canary releases. The ability to limit blast radius on a bad deploy matters more than the simplicity of rolling updates." }
+  ],
+
+  "query": "Which deployment strategy did the user choose for the new service?",
+
+  "expected": {
+    "answer_contains": ["canary"],
+    "must_not_contain": ["blue-green", "rolling"]
+  }
+}

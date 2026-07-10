@@ -1,0 +1,19 @@
+{
+  "benchmark_id": "identity_basic_009",
+  "category": "identity",
+
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I am trying to build an AI that remembers things better than I do."
+    }
+  ],
+
+  "query": "What is the user's objective?",
+
+  "expected": {
+    "answer_contains": [
+      "remembers things"
+    ]
+  }
+}

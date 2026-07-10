@@ -1,0 +1,24 @@
+{
+  "benchmark_id": "concept_consolidation_basic_010",
+  "category": "concept_consolidation",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I prefer VS Code."
+    },
+    {
+      "speaker": "user",
+      "text": "VS Code is my go-to editor."
+    },
+    {
+      "speaker": "user",
+      "text": "I always code in VS Code."
+    }
+  ],
+  "query": "Which editor does the user prefer?",
+  "expected": {
+    "answer_contains": [
+      "VS Code"
+    ]
+  }
+}

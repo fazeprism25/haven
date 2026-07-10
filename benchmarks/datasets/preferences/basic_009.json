@@ -1,0 +1,19 @@
+{
+  "benchmark_id": "preferences_basic_009",
+  "category": "preferences",
+
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I prefer specialized agents instead of a single general agent."
+    }
+  ],
+
+  "query": "What type of agent architecture does the user prefer?",
+
+  "expected": {
+    "answer_contains": [
+      "specialized agents"
+    ]
+  }
+}

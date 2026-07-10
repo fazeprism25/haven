@@ -1,0 +1,23 @@
+{
+  "benchmark_id": "contradictions_basic_008",
+  "category": "contradictions",
+
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "GraphRAG should be implemented first."
+    },
+    {
+      "speaker": "user",
+      "text": "Manager AI should be implemented first."
+    }
+  ],
+
+  "query": "What should be implemented first?",
+
+  "expected": {
+    "answer_contains": [
+      "Manager AI"
+    ]
+  }
+}

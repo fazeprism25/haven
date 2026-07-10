@@ -1,0 +1,28 @@
+{
+  "benchmark_id": "concept_consolidation_basic_029",
+  "category": "concept_consolidation",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I have a cat named Miso."
+    },
+    {
+      "speaker": "user",
+      "text": "I'm reading a new novel right now."
+    },
+    {
+      "speaker": "user",
+      "text": "My cat's name is Miso."
+    },
+    {
+      "speaker": "user",
+      "text": "I need to buy groceries this weekend."
+    }
+  ],
+  "query": "What is the user's cat's name?",
+  "expected": {
+    "answer_contains": [
+      "Miso"
+    ]
+  }
+}

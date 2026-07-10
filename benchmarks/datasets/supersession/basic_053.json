@@ -1,0 +1,32 @@
+{
+  "benchmark_id": "supersession_basic_053",
+  "category": "supersession",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I work as a nurse."
+    },
+    {
+      "speaker": "assistant",
+      "text": "That's a rewarding field."
+    },
+    {
+      "speaker": "user",
+      "text": "I saw a great movie last night."
+    },
+    {
+      "speaker": "user",
+      "text": "My friend visited this weekend."
+    },
+    {
+      "speaker": "user",
+      "text": "I've since become a nurse practitioner after finishing my certification."
+    }
+  ],
+  "query": "What is the user's current job title?",
+  "expected": {
+    "answer_contains": [
+      "nurse practitioner"
+    ]
+  }
+}

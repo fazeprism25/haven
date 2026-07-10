@@ -1,0 +1,35 @@
+{
+  "benchmark_id": "supersession_basic_054",
+  "category": "supersession",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "We decided to use Jira for tracking."
+    },
+    {
+      "speaker": "assistant",
+      "text": "Sounds good."
+    },
+    {
+      "speaker": "user",
+      "text": "The team had a great offsite last week."
+    },
+    {
+      "speaker": "user",
+      "text": "We fixed a minor bug in the billing page."
+    },
+    {
+      "speaker": "user",
+      "text": "Half a year later: we moved everything to Linear because Jira got too slow for us."
+    }
+  ],
+  "query": "What tracking tool is the team currently using?",
+  "expected": {
+    "answer_contains": [
+      "Linear"
+    ],
+    "must_not_contain": [
+      "Jira"
+    ]
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "benchmark_id": "identity_basic_001",
+  "category": "identity",
+
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I am a mechanical engineering student."
+    }
+  ],
+
+  "query": "What is the user's field of study?",
+
+  "expected": {
+    "answer_contains": [
+      "mechanical"
+    ]
+  }
+}

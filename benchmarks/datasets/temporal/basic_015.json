@@ -1,0 +1,64 @@
+{
+  "benchmark_id": "temporal_015",
+  "category": "Temporal",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I think we should use the Go programming language for our new service. It has great concurrency support."
+    },
+    {
+      "speaker": "assistant",
+      "text": "Go is efficient and compiles to a single binary. I'll write the services."
+    },
+    {
+      "speaker": "user",
+      "text": "But our team knows Python better. Let's use FastAPI with Python. It's more productive."
+    },
+    {
+      "speaker": "assistant",
+      "text": "FastAPI has automatic OpenAPI docs. Python is definitely faster to develop in."
+    },
+    {
+      "speaker": "user",
+      "text": "We need to handle many concurrent connections. Rust with Tokio is better for that. Let's use Rust."
+    },
+    {
+      "speaker": "assistant",
+      "text": "Rust is memory-safe and fast. I'll learn the ownership model."
+    },
+    {
+      "speaker": "user",
+      "text": "I've been looking at Elixir with Phoenix. It handles real-time connections exceptionally well. Let's use Elixir."
+    },
+    {
+      "speaker": "assistant",
+      "text": "Elixir is great for WebSockets. I'll set up the Phoenix channels."
+    },
+    {
+      "speaker": "user",
+      "text": "We need to integrate with existing Java microservices. Let's just use Java with Spring Boot. It's the most compatible."
+    },
+    {
+      "speaker": "assistant",
+      "text": "Spring Boot is mature and has everything. I'll set up the dependency injection."
+    },
+    {
+      "speaker": "user",
+      "text": "This is exhausting. Let's use Go. It's the best balance of performance and simplicity. Our infrastructure team supports it well."
+    }
+  ],
+  "query": "What programming language is the team using for the new backend service?",
+  "expected": {
+    "answer_contains": [
+      "Go",
+      "language",
+      "service"
+    ],
+    "must_not_contain": [
+      "Python",
+      "Rust",
+      "Elixir",
+      "Java"
+    ]
+  }
+}

@@ -1,0 +1,64 @@
+{
+  "benchmark_id": "decision_reconstruction_basic_026",
+  "category": "decision_reconstruction",
+  "domain": "internet_provider",
+  "decision_turn_indices": [
+    10
+  ],
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "Shopping for home internet -- Xfinity, AT&T Fiber, and a local co-op are all available at my new place."
+    },
+    {
+      "speaker": "user",
+      "text": "Xfinity is the cheapest upfront but the reviews mention the upload speeds being pretty asymmetric."
+    },
+    {
+      "speaker": "user",
+      "text": "The local co-op is appealing to support locally but their max speed tier is lower than the other two."
+    },
+    {
+      "speaker": "user",
+      "text": "I need to unpack the last few boxes from the move still."
+    },
+    {
+      "speaker": "user",
+      "text": "AT&T Fiber offers symmetric upload and download speeds, which actually matters since I do a lot of streaming and video calls for work."
+    },
+    {
+      "speaker": "user",
+      "text": "Finally unpacked the last boxes, found a box of old cables I don't even need anymore."
+    },
+    {
+      "speaker": "user",
+      "text": "Tested AT&T Fiber at a friend's place who has it and the upload speed during a video call was noticeably better than my old Xfinity connection."
+    },
+    {
+      "speaker": "user",
+      "text": "The co-op's pricing is attractive but the speed tier probably wouldn't cut it for what I need."
+    },
+    {
+      "speaker": "user",
+      "text": "My new neighbor stopped by to introduce themselves, seem friendly."
+    },
+    {
+      "speaker": "user",
+      "text": "Double-checked AT&T Fiber's coverage map and my new place is confirmed within their fiber footprint."
+    },
+    {
+      "speaker": "user",
+      "text": "Going with AT&T Fiber for the new place. The symmetric upload speeds for streaming and video calls mattered more than the co-op's lower price or Xfinity's asymmetric speeds."
+    }
+  ],
+  "query": "Which internet provider did the user choose for their new place?",
+  "expected": {
+    "answer_contains": [
+      "AT&T Fiber",
+      "symmetric upload speeds"
+    ],
+    "must_not_contain": [
+      "old cables"
+    ]
+  }
+}

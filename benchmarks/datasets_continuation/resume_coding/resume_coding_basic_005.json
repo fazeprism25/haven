@@ -1,0 +1,211 @@
+{
+  "benchmark_id": "resume_coding_basic_005",
+  "category": "resume_coding",
+  "tier": "medium",
+  "domain": "haven_vault_writer",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I keep meaning to update my resume but haven't gotten around to it.",
+      "turn_type": "distractor",
+      "turn_index": 0
+    },
+    {
+      "speaker": "user",
+      "text": "The parking garage near the office is under construction again.",
+      "turn_type": "distractor",
+      "turn_index": 1
+    },
+    {
+      "speaker": "user",
+      "text": "VaultWriter needs a real on-disk format decision -- right now it's ad hoc per KnowledgeObject field.",
+      "turn_type": "architecture_discussion",
+      "turn_index": 2
+    },
+    {
+      "speaker": "user",
+      "text": "I tried a new recipe for dinner last night, turned out decent.",
+      "turn_type": "distractor",
+      "turn_index": 3
+    },
+    {
+      "speaker": "user",
+      "text": "Option: split each fact type (decisions, beliefs, goals) into its own file per type, appending new entries.",
+      "turn_type": "rejected_approach",
+      "turn_index": 4
+    },
+    {
+      "speaker": "user",
+      "text": "My laptop fan has been louder than usual, might need cleaning.",
+      "turn_type": "distractor",
+      "turn_index": 5
+    },
+    {
+      "speaker": "user",
+      "text": "One growing file per type doesn't parallelize and makes partial writes risky -- one Markdown file per KnowledgeObject, with frontmatter for metadata, is simpler and matches how MemoryStore already reads things back.",
+      "turn_type": "decision",
+      "supersedes_turn": 4,
+      "turn_index": 6
+    },
+    {
+      "speaker": "user",
+      "text": "The dentist appointment I've been putting off is finally scheduled.",
+      "turn_type": "distractor",
+      "turn_index": 7
+    },
+    {
+      "speaker": "user",
+      "text": "I need to return that package before the return window closes.",
+      "turn_type": "distractor",
+      "turn_index": 8
+    },
+    {
+      "speaker": "user",
+      "text": "Constraint: a crash or interrupted write must never leave a half-written file that MemoryStore.load() then tries to parse.",
+      "turn_type": "constraint",
+      "turn_index": 9
+    },
+    {
+      "speaker": "user",
+      "text": "The wifi in the coffee shop I like to work from has been spotty.",
+      "turn_type": "distractor",
+      "turn_index": 10
+    },
+    {
+      "speaker": "user",
+      "text": "Blocked: writing directly to the final filename risks exactly that half-written-file scenario if the process dies mid-write.",
+      "turn_type": "blocker",
+      "turn_index": 11
+    },
+    {
+      "speaker": "user",
+      "text": "I finally got around to donating some old clothes I never wear.",
+      "turn_type": "distractor",
+      "turn_index": 12
+    },
+    {
+      "speaker": "user",
+      "text": "My neighbor's dog barked most of the afternoon, hard to get anything done with the window open.",
+      "turn_type": "distractor",
+      "turn_index": 13
+    },
+    {
+      "speaker": "user",
+      "text": "Decided: write to a temp file first, then atomically rename it into place -- rename is atomic on the filesystems we care about. Unblocks the writer.",
+      "turn_type": "decision",
+      "resolves_turn": 11,
+      "turn_index": 14
+    },
+    {
+      "speaker": "user",
+      "text": "The bus was running about ten minutes late again this morning.",
+      "turn_type": "distractor",
+      "turn_index": 15
+    },
+    {
+      "speaker": "user",
+      "text": "Implemented the write-then-rename path in VaultWriter.write.",
+      "turn_type": "implementation",
+      "turn_index": 16
+    },
+    {
+      "speaker": "user",
+      "text": "I finally fixed the wobbly chair leg in the kitchen.",
+      "turn_type": "distractor",
+      "turn_index": 17
+    },
+    {
+      "speaker": "user",
+      "text": "Added a test that kills the write mid-way (simulated) and confirms MemoryStore never sees a partial file.",
+      "turn_type": "implementation",
+      "turn_index": 18
+    },
+    {
+      "speaker": "user",
+      "text": "There's a new bakery opening down the street next month.",
+      "turn_type": "distractor",
+      "turn_index": 19
+    },
+    {
+      "speaker": "user",
+      "text": "My phone battery has been draining faster than usual lately.",
+      "turn_type": "distractor",
+      "turn_index": 20
+    },
+    {
+      "speaker": "user",
+      "text": "Open question: do we ever need to reclaim disk space from superseded KnowledgeObjects, or keep them forever for history?",
+      "turn_type": "open_question",
+      "turn_index": 21
+    },
+    {
+      "speaker": "user",
+      "text": "I need to renew my passport before it expires this winter.",
+      "turn_type": "distractor",
+      "turn_index": 22
+    },
+    {
+      "speaker": "user",
+      "text": "Next: make sure ConceptWriter follows the same write-then-rename pattern -- right now it still writes directly.",
+      "turn_type": "task",
+      "turn_index": 23
+    },
+    {
+      "speaker": "user",
+      "text": "The gym was way more crowded than usual today.",
+      "turn_type": "distractor",
+      "turn_index": 24
+    }
+  ],
+  "ground_truth": {
+    "current_objective": "Settle VaultWriter's on-disk Markdown format and make writes crash-safe.",
+    "active_decisions": [
+      "One Markdown file per KnowledgeObject, with frontmatter for metadata, not one growing file per fact type.",
+      "Write to a temp file first, then atomically rename it into place."
+    ],
+    "superseded_or_rejected": [
+      "Splitting each fact type into its own file per type, appending new entries."
+    ],
+    "constraints": [
+      "A crash or interrupted write must never leave a half-written file that MemoryStore.load() then tries to parse."
+    ],
+    "active_blockers": [],
+    "active_tasks": [
+      "Make ConceptWriter follow the same write-then-rename pattern."
+    ],
+    "open_questions": [
+      "Do we ever need to reclaim disk space from superseded KnowledgeObjects, or keep them forever for history?"
+    ],
+    "top_priority_next_action": "Update ConceptWriter to use the same write-then-rename pattern VaultWriter now uses.",
+    "resolved_blockers": [
+      "Writing directly to the final filename risking a half-written file on crash."
+    ]
+  },
+  "queries": [
+    {
+      "text": "Continue implementing the project.",
+      "task_mode_hint": "continuation"
+    },
+    {
+      "text": "What should we work on next?",
+      "task_mode_hint": "ambiguous"
+    }
+  ],
+  "expected": {
+    "must_state": [
+      "One Markdown file per KnowledgeObject, with frontmatter for metadata, not one growing file per fact type.",
+      "Write to a temp file first, then atomically rename it into place.",
+      "A crash or interrupted write must never leave a half-written file that MemoryStore.load() then tries to parse."
+    ],
+    "must_not_state": [
+      "Splitting each fact type into its own file per type, appending new entries, as a current or recommended approach",
+      "Writing directly to the final filename risking a half-written file on crash, as still open/blocking"
+    ],
+    "forbidden_actions": [
+      "Recommending writing directly to the final filename instead of the write-then-rename pattern."
+    ],
+    "must_prioritize": [
+      "Update ConceptWriter to use the same write-then-rename pattern VaultWriter now uses."
+    ]
+  }
+}

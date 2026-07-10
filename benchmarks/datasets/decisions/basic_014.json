@@ -1,0 +1,18 @@
+{
+  "benchmark_id": "basic_014",
+  "category": "Decisions",
+
+  "conversation": [
+    { "speaker": "user", "text": "I'm working on two projects simultaneously: Project Atlas, a B2B SaaS tool, and Project Nova, an internal analytics dashboard." },
+    { "speaker": "user", "text": "For Project Atlas I need to pick a database. I'm considering Postgres and MongoDB." },
+    { "speaker": "user", "text": "For Project Nova the data is highly relational so I'll definitely use Postgres there." },
+    { "speaker": "user", "text": "Project Atlas stores a lot of unstructured user-generated content, so MongoDB makes more sense for that one." }
+  ],
+
+  "query": "What database did the user choose for Project Atlas?",
+
+  "expected": {
+    "answer_contains": ["MongoDB"],
+    "must_not_contain": ["Postgres", "PostgreSQL"]
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "benchmark_id": "goals_basic_002",
+  "category": "goals",
+
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I want to create a memory system better than current assistants."
+    }
+  ],
+
+  "query": "What long term project goal does the user have?",
+
+  "expected": {
+    "answer_contains": [
+      "memory system"
+    ]
+  }
+}

@@ -1,0 +1,93 @@
+{
+  "benchmark_id": "decision_reconstruction_basic_007",
+  "category": "decision_reconstruction",
+  "domain": "apartment_choice",
+  "decision_turn_indices": [
+    16
+  ],
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "Apartment hunting again -- it's between a downtown loft, a house out in the suburbs, and an old-town walk-up."
+    },
+    {
+      "speaker": "user",
+      "text": "There's construction starting on the street outside my building."
+    },
+    {
+      "speaker": "user",
+      "text": "The downtown loft is closest to work but the rent is noticeably higher than the other two."
+    },
+    {
+      "speaker": "user",
+      "text": "My upstairs neighbor had some furniture delivered today, lots of noise."
+    },
+    {
+      "speaker": "user",
+      "text": "The suburb house has way more space but the commute would be almost an hour each way."
+    },
+    {
+      "speaker": "user",
+      "text": "My favorite coffee shop is testing a new seasonal drink."
+    },
+    {
+      "speaker": "user",
+      "text": "I need to renew my passport, it's expiring in a few months."
+    },
+    {
+      "speaker": "user",
+      "text": "The office is switching to a new time-tracking tool next month."
+    },
+    {
+      "speaker": "user",
+      "text": "The old-town walk-up is smaller than the house but it's a short walk to work and has access to the building's roof deck."
+    },
+    {
+      "speaker": "user",
+      "text": "Passport renewal apparently takes longer than it used to, going to submit that soon."
+    },
+    {
+      "speaker": "user",
+      "text": "My phone's storage is almost full again, need to clear out old photos."
+    },
+    {
+      "speaker": "user",
+      "text": "Toured the old-town walk-up in person, the rooftop actually has a really nice view of the skyline."
+    },
+    {
+      "speaker": "user",
+      "text": "The weather's been unusually warm for this time of year."
+    },
+    {
+      "speaker": "user",
+      "text": "Still going back and forth between the space in the suburbs and the location of the walk-up."
+    },
+    {
+      "speaker": "user",
+      "text": "My coworker recommended a good tailor near the office, need to check that out."
+    },
+    {
+      "speaker": "user",
+      "text": "Realized the suburb commute would eat close to two extra hours a day, which adds up fast."
+    },
+    {
+      "speaker": "user",
+      "text": "Signed the lease on the old-town walk-up. The rooftop access and the short commute made up for the smaller square footage compared to the suburb house."
+    },
+    {
+      "speaker": "user",
+      "text": "Move-in is scheduled for the middle of next month."
+    }
+  ],
+  "query": "Which apartment did the user decide to rent?",
+  "expected": {
+    "answer_contains": [
+      "old-town walk-up",
+      "rooftop access",
+      "short commute"
+    ],
+    "must_not_contain": [
+      "tailor"
+    ]
+  }
+}

@@ -1,0 +1,55 @@
+{
+  "benchmark_id": "temporal_017",
+  "category": "Temporal",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "For task scheduling, let's use Apache Airflow. It has a great UI and supports complex DAGs."
+    },
+    {
+      "speaker": "assistant",
+      "text": "Airflow is powerful. I'll set up the web server and the workers."
+    },
+    {
+      "speaker": "user",
+      "text": "Airflow is too heavy. Let's use Celery with Redis. It's simpler for distributed task queues."
+    },
+    {
+      "speaker": "assistant",
+      "text": "Celery is lightweight. I'll configure the broker and result backend."
+    },
+    {
+      "speaker": "user",
+      "text": "We need cron-like scheduling with retries. Let's use AWS Step Functions. It integrates with our Lambda functions."
+    },
+    {
+      "speaker": "assistant",
+      "text": "Step Functions are serverless. I'll define the state machines."
+    },
+    {
+      "speaker": "user",
+      "text": "I just read about Prefect. It's like Airflow but more modern. Let's use Prefect."
+    },
+    {
+      "speaker": "assistant",
+      "text": "Prefect has better error handling. I'll adopt the new framework."
+    },
+    {
+      "speaker": "user",
+      "text": "We don't need complex DAGs. Celery is sufficient and we already use Redis. Let's stick with Celery."
+    }
+  ],
+  "query": "What task scheduling system is currently in production?",
+  "expected": {
+    "answer_contains": [
+      "Celery",
+      "task",
+      "Redis"
+    ],
+    "must_not_contain": [
+      "Airflow",
+      "Step Functions",
+      "Prefect"
+    ]
+  }
+}

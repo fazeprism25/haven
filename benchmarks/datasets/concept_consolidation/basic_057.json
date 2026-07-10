@@ -1,0 +1,42 @@
+{
+  "benchmark_id": "concept_consolidation_basic_057",
+  "category": "concept_consolidation",
+  "consolidation_pattern": "distractor_heavy",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I set up a small home gym in the garage."
+    },
+    {
+      "speaker": "user",
+      "text": "I've been drinking more water lately."
+    },
+    {
+      "speaker": "user",
+      "text": "My favorite coffee shop closed down."
+    },
+    {
+      "speaker": "user",
+      "text": "I need to schedule a dentist appointment."
+    },
+    {
+      "speaker": "user",
+      "text": "The home gym has a squat rack and an adjustable bench now."
+    },
+    {
+      "speaker": "user",
+      "text": "I re-read one of my favorite childhood books."
+    }
+  ],
+  "query": "What equipment does the user's home gym have?",
+  "expected": {
+    "answer_contains": [
+      "home gym",
+      "squat rack",
+      "adjustable bench"
+    ],
+    "must_not_contain": [
+      "dentist"
+    ]
+  }
+}

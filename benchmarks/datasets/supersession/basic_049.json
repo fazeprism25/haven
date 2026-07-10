@@ -1,0 +1,24 @@
+{
+  "benchmark_id": "supersession_basic_049",
+  "category": "supersession",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "Let's go with a monolith architecture."
+    },
+    {
+      "speaker": "user",
+      "text": "On second thought, let's do microservices."
+    },
+    {
+      "speaker": "user",
+      "text": "Actually, let's compromise with a modular monolith."
+    }
+  ],
+  "query": "What architecture did the team decide on?",
+  "expected": {
+    "answer_contains": [
+      "modular monolith"
+    ]
+  }
+}

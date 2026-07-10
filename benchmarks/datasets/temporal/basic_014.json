@@ -1,0 +1,64 @@
+{
+  "benchmark_id": "temporal_014",
+  "category": "Temporal",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "For the monitoring solution, I want to use Datadog. It has great integrations and dashboards."
+    },
+    {
+      "speaker": "assistant",
+      "text": "Datadog is comprehensive. I'll set up the agents and the APM."
+    },
+    {
+      "speaker": "user",
+      "text": "It's too expensive. Let's use Prometheus and Grafana. They're open-source and customizable."
+    },
+    {
+      "speaker": "assistant",
+      "text": "Prometheus is good for metrics. I'll set up the exporters and Grafana dashboards."
+    },
+    {
+      "speaker": "user",
+      "text": "We need logs as well. Let's use the ELK stack. It's the complete solution."
+    },
+    {
+      "speaker": "assistant",
+      "text": "ELK gives us logs, metrics, and traces. I'll deploy the stack."
+    },
+    {
+      "speaker": "user",
+      "text": "I've been using New Relic. It has the best error tracking. Let's use New Relic."
+    },
+    {
+      "speaker": "assistant",
+      "text": "New Relic is good for developers. I'll switch the instrumentation."
+    },
+    {
+      "speaker": "user",
+      "text": "We need security monitoring too. Let's use Splunk. It's the enterprise standard."
+    },
+    {
+      "speaker": "assistant",
+      "text": "Splunk is powerful but complex. I'll set up the forwarders."
+    },
+    {
+      "speaker": "user",
+      "text": "Actually, the security team already uses Datadog. Let's just use Datadog. It covers everything and it's a single pane of glass."
+    }
+  ],
+  "query": "What observability platform is being used for monitoring and logging?",
+  "expected": {
+    "answer_contains": [
+      "Datadog",
+      "monitoring",
+      "observability"
+    ],
+    "must_not_contain": [
+      "Prometheus",
+      "ELK",
+      "New Relic",
+      "Splunk"
+    ]
+  }
+}

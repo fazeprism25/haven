@@ -1,0 +1,26 @@
+{
+  "benchmark_id": "decision_basic_002",
+  "category": "decision_consistency",
+
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I decided to use GPT for architecture and planning."
+    },
+    {
+      "speaker": "user",
+      "text": "I decided to use Aider and Qwen primarily for implementation and code changes."
+    }
+  ],
+
+  "query": "Which system should design a new benchmark framework?",
+
+  "expected": {
+    "answer_contains": [
+      "GPT"
+    ],
+    "must_not_contain": [
+      "Aider should design the benchmark framework"
+    ]
+  }
+}

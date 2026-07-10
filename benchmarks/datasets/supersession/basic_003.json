@@ -1,0 +1,23 @@
+{
+  "benchmark_id": "supersession_basic_003",
+  "category": "supersession",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I planned to use GPT for all tasks."
+    },
+    {
+      "speaker": "user",
+      "text": "I replaced that plan with GPT for planning and Qwen for coding."
+    }
+  ],
+
+  "query": "What is the current model strategy?",
+
+  "expected": {
+    "answer_contains": [
+      "GPT",
+      "Qwen"
+    ]
+  }
+}

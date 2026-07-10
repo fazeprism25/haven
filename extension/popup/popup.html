@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Haven</title>
+<style>
+  :root {
+    --accent: #10a37f;
+    --accent-dark: #0d8c6d;
+    --danger: #d1242f;
+    --border: #d0d0d0;
+    --text: #202020;
+    --muted: #6b6b6b;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    width: 320px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 13px;
+    color: var(--text);
+  }
+  header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  header h1 {
+    font-size: 15px;
+    margin: 0;
+    flex: 1;
+  }
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #b0b0b0;
+    flex-shrink: 0;
+    transition: background 0.2s ease, box-shadow 0.2s ease;
+  }
+  .status-dot.connected { background: #2ea043; }
+  .status-dot.offline { background: #57606a; }
+  #status-text { color: var(--muted); }
+
+  .intro {
+    padding: 10px 14px;
+    margin: 0;
+    font-size: 12px;
+    color: var(--muted);
+    background: #f7f7f7;
+    border-bottom: 1px solid var(--border);
+  }
+  .intro b { color: var(--text); }
+
+  section {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  section:last-child { border-bottom: none; }
+  section h2 {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--muted);
+    margin: 0 0 10px;
+  }
+
+  label {
+    display: block;
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 3px;
+  }
+  input[type="text"],
+  input[type="url"] {
+    width: 100%;
+    padding: 6px 8px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 13px;
+    font-family: inherit;
+  }
+  .field {
+    margin-bottom: 10px;
+  }
+  .checkbox-field {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+  .checkbox-field label {
+    margin: 0;
+    color: var(--text);
+    font-size: 13px;
+  }
+
+  button {
+    font-family: inherit;
+    font-size: 13px;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: background 0.15s ease, opacity 0.15s ease;
+  }
+  button:disabled {
+    cursor: default;
+    opacity: 0.7;
+  }
+  .primary-button {
+    width: 100%;
+    padding: 6px 14px;
+    border: 1px solid var(--accent);
+    background: var(--accent);
+    color: #ffffff;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .primary-button:hover:not(:disabled) { background: var(--accent-dark); }
+
+  .inline-message {
+    font-size: 12px;
+    margin-top: 6px;
+  }
+  /* Matches the widget's success green (extension/content/haven.css's
+     .haven-message.haven-success) rather than the brand accent shade, so
+     "success" means the same color everywhere in the extension. */
+  .inline-message.success { color: #2ea043; }
+  .inline-message.error { color: var(--danger); }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  .spinner {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid currentColor;
+    border-top-color: transparent;
+    opacity: 0.75;
+    animation: spinner-spin 0.7s linear infinite;
+    flex-shrink: 0;
+    vertical-align: -2px;
+    margin-right: 5px;
+  }
+  @keyframes spinner-spin { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) {
+    .spinner { animation: none; }
+  }
+
+  #search-form {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+  #search-input {
+    flex: 1;
+  }
+  #search-form button {
+    padding: 6px 12px;
+    border: 1px solid var(--border);
+    background: #ffffff;
+  }
+  #search-form button:hover { background: #f5f5f5; }
+
+  #search-results {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 220px;
+    overflow-y: auto;
+  }
+  .result {
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 8px;
+  }
+  .result-fact {
+    font-size: 12.5px;
+    margin-bottom: 4px;
+  }
+  .result-meta {
+    display: flex;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .badge {
+    display: inline-block;
+    padding: 1px 7px;
+    border-radius: 999px;
+    background: #eef2f0;
+    color: var(--text);
+    font-size: 11px;
+  }
+  .empty {
+    color: var(--muted);
+    font-size: 12px;
+    margin: 0;
+  }
+</style>
+</head>
+<body>
+  <header>
+    <h1>Haven</h1>
+    <span class="status-dot" id="status-dot"></span>
+    <span id="status-text">checking…</span>
+  </header>
+
+  <p class="intro">
+    Haven adds a widget to <b>chatgpt.com</b>. Open a chat, then click
+    <b>Use Haven</b> near the message box to pull in context, or
+    <b>Remember</b> to save the conversation.
+  </p>
+
+  <section id="settings">
+    <h2>Settings</h2>
+    <div class="field">
+      <label for="server-url">Haven server URL</label>
+      <input type="url" id="server-url" placeholder="http://127.0.0.1:8765" />
+    </div>
+    <div class="checkbox-field">
+      <input type="checkbox" id="auto-preview" />
+      <label for="auto-preview">Auto-preview context before insert</label>
+    </div>
+    <div class="checkbox-field">
+      <input type="checkbox" id="auto-remember" />
+      <label for="auto-remember">Auto-remember after insert</label>
+    </div>
+    <button type="button" class="primary-button" id="save-settings">Save settings</button>
+    <div class="inline-message success" id="settings-message" hidden>Settings saved.</div>
+  </section>
+
+  <section id="search">
+    <h2>Search memories</h2>
+    <form id="search-form">
+      <input type="text" id="search-input" placeholder="Search your vault…" autocomplete="off" />
+      <button type="submit">Search</button>
+    </form>
+    <div class="inline-message error" id="search-error" hidden></div>
+    <div id="search-results"><p class="empty">Type a question to search your memories.</p></div>
+  </section>
+
+  <script type="module" src="popup.js"></script>
+</body>
+</html>

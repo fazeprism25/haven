@@ -1,0 +1,32 @@
+{
+  "benchmark_id": "refinements_basic_008",
+  "category": "refinements",
+  "refinement_type": "project",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I'm building a recommendation engine."
+    },
+    {
+      "speaker": "user",
+      "text": "I'm building a recommendation engine for the marketplace."
+    },
+    {
+      "speaker": "user",
+      "text": "I finally organized my desktop folders."
+    },
+    {
+      "speaker": "user",
+      "text": "I'm building a recommendation engine for the marketplace, focused on cold-start users."
+    }
+  ],
+  "query": "What is the user building?",
+  "expected": {
+    "answer_contains": [
+      "recommendation engine",
+      "marketplace",
+      "cold-start"
+    ],
+    "must_not_contain": []
+  }
+}

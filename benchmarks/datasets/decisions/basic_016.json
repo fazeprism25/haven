@@ -1,0 +1,19 @@
+{
+  "benchmark_id": "basic_016",
+  "category": "Decisions",
+
+  "conversation": [
+    { "speaker": "user", "text": "I'm designing the auth system for my app. I need to decide between building it myself or using a third-party service like Auth0 or Clerk." },
+    { "speaker": "user", "text": "Building it myself gives full control but auth is notoriously hard to get right." },
+    { "speaker": "user", "text": "Auth0 is enterprise-grade but feels overkill for our startup stage." },
+    { "speaker": "user", "text": "Clerk has great DX and is priced reasonably for our scale." },
+    { "speaker": "user", "text": "We're going with Clerk. Security isn't something I want to cut corners on, and Clerk gets us there fast." }
+  ],
+
+  "query": "What did the user decide to use for authentication in their app?",
+
+  "expected": {
+    "answer_contains": ["Clerk"],
+    "must_not_contain": ["Auth0", "build", "custom", "in-house"]
+  }
+}

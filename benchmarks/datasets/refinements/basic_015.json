@@ -1,0 +1,39 @@
+{
+  "benchmark_id": "refinements_basic_015",
+  "category": "refinements",
+  "refinement_type": "preference",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I've been thinking about my ideal work setup."
+    },
+    {
+      "speaker": "user",
+      "text": "I prefer a standing desk for most of the day."
+    },
+    {
+      "speaker": "user",
+      "text": "My old chair was giving me back pain."
+    },
+    {
+      "speaker": "user",
+      "text": "I bought a new monitor arm."
+    },
+    {
+      "speaker": "user",
+      "text": "I prefer a standing desk for most of the day, but I sit down for calls."
+    },
+    {
+      "speaker": "user",
+      "text": "The desk was a bit expensive but worth it."
+    }
+  ],
+  "query": "What does the user prefer for their desk setup?",
+  "expected": {
+    "answer_contains": [
+      "standing desk",
+      "sit down for calls"
+    ],
+    "must_not_contain": []
+  }
+}

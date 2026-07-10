@@ -1,0 +1,23 @@
+{
+  "benchmark_id": "contradictions_basic_009",
+  "category": "contradictions",
+
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "Every memory should have equal importance."
+    },
+    {
+      "speaker": "user",
+      "text": "Memories should have different importance levels."
+    }
+  ],
+
+  "query": "How should memory importance be handled?",
+
+  "expected": {
+    "answer_contains": [
+      "different importance"
+    ]
+  }
+}

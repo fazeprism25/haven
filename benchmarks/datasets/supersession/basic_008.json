@@ -1,0 +1,22 @@
+{
+  "benchmark_id": "supersession_basic_008",
+  "category": "supersession",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I planned to optimize first."
+    },
+    {
+      "speaker": "user",
+      "text": "I replaced that approach with benchmark-first development."
+    }
+  ],
+
+  "query": "What development approach is currently used?",
+
+  "expected": {
+    "answer_contains": [
+      "benchmark"
+    ]
+  }
+}

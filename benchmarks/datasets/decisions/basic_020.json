@@ -1,0 +1,20 @@
+{
+  "benchmark_id": "basic_020",
+  "category": "Decisions",
+
+  "conversation": [
+    { "speaker": "user", "text": "We're discussing how to handle background jobs. I'm choosing between BullMQ, Sidekiq, and a simple cron-based approach." },
+    { "speaker": "user", "text": "The cron approach doesn't handle retries or job queuing well." },
+    { "speaker": "user", "text": "Sidekiq is Ruby-based and our stack is Node, so that's a mismatch." },
+    { "speaker": "user", "text": "BullMQ is Node-native and uses Redis which we already have. That's the pick." },
+    { "speaker": "user", "text": "Oh wait, I just found out the team is migrating the backend to Python over the next quarter. Let me revisit this." },
+    { "speaker": "user", "text": "Given the Python migration, I'll go with Celery instead. It integrates naturally with our new Python services and Redis still works as the broker." }
+  ],
+
+  "query": "What background job system did the user ultimately decide to use?",
+
+  "expected": {
+    "answer_contains": ["Celery"],
+    "must_not_contain": ["BullMQ", "Sidekiq", "cron"]
+  }
+}

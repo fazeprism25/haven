@@ -1,0 +1,24 @@
+{
+  "benchmark_id": "concept_consolidation_basic_017",
+  "category": "concept_consolidation",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I use Python for scripting."
+    },
+    {
+      "speaker": "user",
+      "text": "Yes, still Python for scripts."
+    },
+    {
+      "speaker": "user",
+      "text": "Just confirming, Python is what I use for scripting."
+    }
+  ],
+  "query": "What language does the user use for scripting?",
+  "expected": {
+    "answer_contains": [
+      "Python"
+    ]
+  }
+}

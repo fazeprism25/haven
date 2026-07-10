@@ -1,0 +1,40 @@
+{
+  "benchmark_id": "refinements_basic_018",
+  "category": "refinements",
+  "refinement_type": "goal",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I've been setting some goals for the year."
+    },
+    {
+      "speaker": "user",
+      "text": "One of my goals is to save more money."
+    },
+    {
+      "speaker": "user",
+      "text": "I cut back on eating out."
+    },
+    {
+      "speaker": "user",
+      "text": "I also started tracking my expenses in a spreadsheet."
+    },
+    {
+      "speaker": "user",
+      "text": "One of my goals is to save more money, specifically enough for a down payment on a house."
+    },
+    {
+      "speaker": "user",
+      "text": "Interest rates have been a concern lately."
+    }
+  ],
+  "query": "What is the user's goal about saving more money?",
+  "expected": {
+    "answer_contains": [
+      "save more money",
+      "down payment",
+      "house"
+    ],
+    "must_not_contain": []
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "benchmark_id": "basic_019",
+  "category": "Decisions",
+
+  "conversation": [
+    { "speaker": "user", "text": "I need to pick a caching strategy for our API. Options on the table are Redis, Memcached, and an in-process cache." },
+    { "speaker": "user", "text": "In-process caching won't work because we run multiple server instances and the caches won't be in sync." },
+    { "speaker": "user", "text": "Memcached is fast but only supports simple key-value storage." },
+    { "speaker": "user", "text": "We need to cache some sorted sets and pub/sub for cache invalidation signals, so Redis is clearly the better fit." },
+    { "speaker": "user", "text": "Going with Redis." },
+    { "speaker": "user", "text": "Actually one more thing — for the rate limiting specifically, I'll use a separate in-memory store per instance since it doesn't need to be globally consistent." }
+  ],
+
+  "query": "What did the user decide to use for general API caching?",
+
+  "expected": {
+    "answer_contains": ["Redis"],
+    "must_not_contain": ["Memcached", "in-process", "in-memory"]
+  }
+}

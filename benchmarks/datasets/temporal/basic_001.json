@@ -1,0 +1,22 @@
+{
+  "benchmark_id": "temporal_basic_001",
+  "category": "temporal",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "In January I wanted to build GraphRAG first."
+    },
+    {
+      "speaker": "user",
+      "text": "Today I want to build Manager AI first."
+    }
+  ],
+
+  "query": "What does the user currently want to build first?",
+
+  "expected": {
+    "answer_contains": [
+      "Manager AI"
+    ]
+  }
+}

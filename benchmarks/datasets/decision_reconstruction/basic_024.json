@@ -1,0 +1,65 @@
+{
+  "benchmark_id": "decision_reconstruction_basic_024",
+  "category": "decision_reconstruction",
+  "domain": "team_offsite",
+  "decision_turn_indices": [
+    10
+  ],
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "Planning the team offsite -- Lake Tahoe, Austin, and Asheville are the top picks."
+    },
+    {
+      "speaker": "user",
+      "text": "Lake Tahoe looks great but flights are expensive and inconvenient for half the team on the east coast."
+    },
+    {
+      "speaker": "user",
+      "text": "Austin is a fun city but a couple people mentioned it's gotten pretty pricey for group bookings lately."
+    },
+    {
+      "speaker": "user",
+      "text": "I need to submit my timesheet before the deadline today."
+    },
+    {
+      "speaker": "user",
+      "text": "Asheville splits the flight time pretty evenly between the east and west coast folks on the team."
+    },
+    {
+      "speaker": "user",
+      "text": "Submitted the timesheet just under the wire."
+    },
+    {
+      "speaker": "user",
+      "text": "Got quotes for a group venue in Asheville and it came in noticeably cheaper than the Austin option."
+    },
+    {
+      "speaker": "user",
+      "text": "Lake Tahoe is probably out just given how spread out the team is geographically."
+    },
+    {
+      "speaker": "user",
+      "text": "My phone update this morning took forever to install."
+    },
+    {
+      "speaker": "user",
+      "text": "Double-checked flight costs from both coasts to Asheville and they're within an hour of each other, unlike Tahoe or Austin."
+    },
+    {
+      "speaker": "user",
+      "text": "We're doing the offsite in Asheville. It splits flight time evenly for both coasts and came in cheaper than Austin."
+    }
+  ],
+  "query": "Where did the team decide to hold the offsite?",
+  "expected": {
+    "answer_contains": [
+      "Asheville",
+      "splits flight time evenly",
+      "cheaper than Austin"
+    ],
+    "must_not_contain": [
+      "phone update"
+    ]
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "benchmark_id": "concept_consolidation_basic_002",
+  "category": "concept_consolidation",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "My home city is Austin."
+    },
+    {
+      "speaker": "user",
+      "text": "My home city is Austin."
+    }
+  ],
+  "query": "What is the user's home city?",
+  "expected": {
+    "answer_contains": [
+      "Austin"
+    ]
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "benchmark_id": "temporal_basic_002",
+  "category": "temporal",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "Earlier I thought retrieval was the biggest bottleneck."
+    },
+    {
+      "speaker": "user",
+      "text": "After testing, I think extraction quality is the biggest bottleneck."
+    }
+  ],
+
+  "query": "What does the user currently think is the biggest bottleneck?",
+
+  "expected": {
+    "answer_contains": [
+      "extraction"
+    ]
+  }
+}

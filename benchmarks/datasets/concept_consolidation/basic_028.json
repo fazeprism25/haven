@@ -1,0 +1,28 @@
+{
+  "benchmark_id": "concept_consolidation_basic_028",
+  "category": "concept_consolidation",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I use Rust."
+    },
+    {
+      "speaker": "user",
+      "text": "I watched a great documentary last night."
+    },
+    {
+      "speaker": "user",
+      "text": "My favorite language is Rust."
+    },
+    {
+      "speaker": "user",
+      "text": "The weather has been nice this week."
+    }
+  ],
+  "query": "What programming language does the user use?",
+  "expected": {
+    "answer_contains": [
+      "Rust"
+    ]
+  }
+}

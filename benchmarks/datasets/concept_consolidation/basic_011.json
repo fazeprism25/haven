@@ -1,0 +1,26 @@
+{
+  "benchmark_id": "concept_consolidation_basic_011",
+  "category": "concept_consolidation",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I'm vegetarian."
+    },
+    {
+      "speaker": "user",
+      "text": "I don't eat meat."
+    },
+    {
+      "speaker": "user",
+      "text": "My diet is meat-free."
+    }
+  ],
+  "query": "What is the user's diet?",
+  "expected": {
+    "answer_contains": [
+      "vegetarian",
+      "meat-free",
+      "no meat"
+    ]
+  }
+}

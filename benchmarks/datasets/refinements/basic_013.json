@@ -1,0 +1,27 @@
+{
+  "benchmark_id": "refinements_basic_013",
+  "category": "refinements",
+  "refinement_type": "preference",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I prefer tea in the morning."
+    },
+    {
+      "speaker": "user",
+      "text": "I've been trying to read more fiction lately."
+    },
+    {
+      "speaker": "user",
+      "text": "I prefer tea in the morning and coffee in the afternoon."
+    }
+  ],
+  "query": "What does the user prefer to drink?",
+  "expected": {
+    "answer_contains": [
+      "tea in the morning",
+      "coffee in the afternoon"
+    ],
+    "must_not_contain": []
+  }
+}

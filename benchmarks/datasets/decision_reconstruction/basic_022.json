@@ -1,0 +1,64 @@
+{
+  "benchmark_id": "decision_reconstruction_basic_022",
+  "category": "decision_reconstruction",
+  "domain": "college_major",
+  "decision_turn_indices": [
+    10
+  ],
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "Trying to decide on a major before registration closes -- Economics, Computer Science, or Mechanical Engineering."
+    },
+    {
+      "speaker": "user",
+      "text": "Economics keeps a lot of doors open but I'm not sure what specific job it leads to."
+    },
+    {
+      "speaker": "user",
+      "text": "Mechanical Engineering has a clear path but the course load looks brutal based on older students I've talked to."
+    },
+    {
+      "speaker": "user",
+      "text": "I need to fix the squeaky door in my dorm room, it's been driving my roommate crazy."
+    },
+    {
+      "speaker": "user",
+      "text": "Computer Science has felt like the most natural fit in the intro classes I've taken so far."
+    },
+    {
+      "speaker": "user",
+      "text": "Fixed the door with some oil, roommate is relieved."
+    },
+    {
+      "speaker": "user",
+      "text": "Applied for a couple of internships out of curiosity and actually landed an interview for a CS-focused one."
+    },
+    {
+      "speaker": "user",
+      "text": "Still a little unsure since Econ would let me explore more before committing fully."
+    },
+    {
+      "speaker": "user",
+      "text": "My meal plan is running low on funds already, need to be more careful."
+    },
+    {
+      "speaker": "user",
+      "text": "Got the internship offer for the CS role, starts as soon as next semester if I take it."
+    },
+    {
+      "speaker": "user",
+      "text": "Declaring Computer Science as my major. Landing that internship offer sealed it over Economics and Mechanical Engineering."
+    }
+  ],
+  "query": "What major did the user decide on?",
+  "expected": {
+    "answer_contains": [
+      "Computer Science",
+      "landing that internship offer"
+    ],
+    "must_not_contain": [
+      "meal plan"
+    ]
+  }
+}

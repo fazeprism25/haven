@@ -1,0 +1,28 @@
+{
+  "benchmark_id": "concept_consolidation_basic_025",
+  "category": "concept_consolidation",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "My favorite database is Postgres."
+    },
+    {
+      "speaker": "assistant",
+      "text": "Good choice."
+    },
+    {
+      "speaker": "user",
+      "text": "I fixed a slow query yesterday."
+    },
+    {
+      "speaker": "user",
+      "text": "A few months later: Postgres is still my database of choice."
+    }
+  ],
+  "query": "What is the user's favorite database?",
+  "expected": {
+    "answer_contains": [
+      "Postgres"
+    ]
+  }
+}

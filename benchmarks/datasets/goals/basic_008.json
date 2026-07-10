@@ -1,0 +1,19 @@
+{
+  "benchmark_id": "goals_basic_008",
+  "category": "goals",
+
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I want benchmark scores to guide future development."
+    }
+  ],
+
+  "query": "What should guide future development?",
+
+  "expected": {
+    "answer_contains": [
+      "benchmark"
+    ]
+  }
+}

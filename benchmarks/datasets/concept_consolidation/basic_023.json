@@ -1,0 +1,28 @@
+{
+  "benchmark_id": "concept_consolidation_basic_023",
+  "category": "concept_consolidation",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I use Rust for systems programming."
+    },
+    {
+      "speaker": "assistant",
+      "text": "Got it, noted."
+    },
+    {
+      "speaker": "user",
+      "text": "We hit a bug in the parser today."
+    },
+    {
+      "speaker": "user",
+      "text": "Six months later: I'm still using Rust for systems programming."
+    }
+  ],
+  "query": "What language does the user use for systems programming?",
+  "expected": {
+    "answer_contains": [
+      "Rust"
+    ]
+  }
+}

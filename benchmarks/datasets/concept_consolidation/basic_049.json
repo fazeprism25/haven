@@ -1,0 +1,37 @@
+{
+  "benchmark_id": "concept_consolidation_basic_049",
+  "category": "concept_consolidation",
+  "consolidation_pattern": "repeated_confirmation",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I've been vegetarian for about five years now."
+    },
+    {
+      "speaker": "user",
+      "text": "I updated my resume this weekend."
+    },
+    {
+      "speaker": "user",
+      "text": "Still vegetarian here, going on five years."
+    },
+    {
+      "speaker": "user",
+      "text": "My resume update took way longer than expected."
+    },
+    {
+      "speaker": "user",
+      "text": "Yep, five years vegetarian and counting."
+    }
+  ],
+  "query": "Is the user vegetarian, and for how long?",
+  "expected": {
+    "answer_contains": [
+      "vegetarian",
+      "five years"
+    ],
+    "must_not_contain": [
+      "resume"
+    ]
+  }
+}

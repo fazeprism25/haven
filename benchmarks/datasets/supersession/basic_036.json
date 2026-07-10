@@ -1,0 +1,23 @@
+{
+  "benchmark_id": "supersession_basic_036",
+  "category": "supersession",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "The launch was delayed to Q3."
+    },
+    {
+      "speaker": "user",
+      "text": "Good news, the launch is back on track for Q2."
+    }
+  ],
+  "query": "When is the launch currently scheduled?",
+  "expected": {
+    "answer_contains": [
+      "Q2"
+    ],
+    "must_not_contain": [
+      "Q3"
+    ]
+  }
+}

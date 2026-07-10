@@ -1,0 +1,20 @@
+{
+  "benchmark_id": "basic_017",
+  "category": "Decisions",
+
+  "conversation": [
+    { "speaker": "user", "text": "I'm refactoring our monolith. I need to decide which service to extract first." },
+    { "speaker": "user", "text": "The billing service, the notification service, and the search service are the main candidates." },
+    { "speaker": "user", "text": "Billing is the most critical but also the riskiest to touch." },
+    { "speaker": "user", "text": "Search is already fairly isolated from the rest of the codebase." },
+    { "speaker": "user", "text": "Notifications are tightly coupled to almost everything — that'll be a nightmare to extract." },
+    { "speaker": "user", "text": "I'll start with search since it's the lowest risk extraction, then move to billing once we have confidence in the process." }
+  ],
+
+  "query": "Which service did the user decide to extract first from the monolith?",
+
+  "expected": {
+    "answer_contains": ["search"],
+    "must_not_contain": ["billing", "notification"]
+  }
+}

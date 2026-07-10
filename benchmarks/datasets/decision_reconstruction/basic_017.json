@@ -1,0 +1,108 @@
+{
+  "benchmark_id": "decision_reconstruction_basic_017",
+  "category": "decision_reconstruction",
+  "domain": "design_tool",
+  "decision_turn_indices": [
+    20
+  ],
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "The package I ordered got delayed by a couple of days."
+    },
+    {
+      "speaker": "user",
+      "text": "Choosing a design tool for the team -- Figma, Sketch, and Adobe XD are the options."
+    },
+    {
+      "speaker": "user",
+      "text": "I finally fixed the squeaky hinge on my front door."
+    },
+    {
+      "speaker": "user",
+      "text": "I switched my podcast subscription to a cheaper plan."
+    },
+    {
+      "speaker": "user",
+      "text": "I need to renew my gym membership before it lapses."
+    },
+    {
+      "speaker": "user",
+      "text": "Sketch is Mac-only which is a problem since a couple of us are on Windows."
+    },
+    {
+      "speaker": "user",
+      "text": "I finally organized the pile of mail that's been sitting on my counter."
+    },
+    {
+      "speaker": "user",
+      "text": "Adobe XD bundles with the rest of the Adobe suite we already pay for, which is appealing cost-wise."
+    },
+    {
+      "speaker": "user",
+      "text": "I've been meaning to reorganize the garage for weeks now."
+    },
+    {
+      "speaker": "user",
+      "text": "I need to change the filter in the air conditioner, it's overdue."
+    },
+    {
+      "speaker": "user",
+      "text": "I've been trying a new recipe for meal prep this week."
+    },
+    {
+      "speaker": "user",
+      "text": "Figma's real-time collaboration is the big draw, especially since half the team is remote."
+    },
+    {
+      "speaker": "user",
+      "text": "The elevator in my building has been out of service since Monday."
+    },
+    {
+      "speaker": "user",
+      "text": "Changed the air filter, definitely should have done that sooner."
+    },
+    {
+      "speaker": "user",
+      "text": "I finally returned that overdue library book."
+    },
+    {
+      "speaker": "user",
+      "text": "Tried co-editing a file in Figma with a remote teammate, it worked way smoother than I expected."
+    },
+    {
+      "speaker": "user",
+      "text": "Adobe XD would save us a bit of money but Sketch is off the table entirely because of the Mac requirement."
+    },
+    {
+      "speaker": "user",
+      "text": "My sister called to catch up, hadn't talked in a few weeks."
+    },
+    {
+      "speaker": "user",
+      "text": "My dentist appointment got rescheduled to next month."
+    },
+    {
+      "speaker": "user",
+      "text": "Showed the Figma prototype to the wider team and the real-time commenting got a really positive reaction."
+    },
+    {
+      "speaker": "user",
+      "text": "We're going with Figma for the team. The real-time collaboration for our remote teammates was worth more to us than the cost savings from bundling with Adobe."
+    },
+    {
+      "speaker": "user",
+      "text": "I'll set up the team workspace this week."
+    }
+  ],
+  "query": "Which design tool did the team decide to use?",
+  "expected": {
+    "answer_contains": [
+      "Figma",
+      "real-time collaboration for our remote teammates"
+    ],
+    "must_not_contain": [
+      "air filter"
+    ]
+  }
+}

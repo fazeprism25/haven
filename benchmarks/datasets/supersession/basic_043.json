@@ -1,0 +1,23 @@
+{
+  "benchmark_id": "supersession_basic_043",
+  "category": "supersession",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "For this trip I want a window seat."
+    },
+    {
+      "speaker": "user",
+      "text": "Actually, I'd rather have an aisle seat this time."
+    }
+  ],
+  "query": "What seat does the user currently want?",
+  "expected": {
+    "answer_contains": [
+      "aisle"
+    ],
+    "must_not_contain": [
+      "window"
+    ]
+  }
+}

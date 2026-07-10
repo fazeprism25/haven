@@ -1,0 +1,20 @@
+{
+  "benchmark_id": "basic_022",
+  "category": "Decisions",
+
+  "conversation": [
+    { "speaker": "user", "text": "I'm setting up observability for our platform. I need to decide on a logging solution: Datadog, the ELK stack, or Grafana Loki." },
+    { "speaker": "user", "text": "Datadog is excellent but very expensive at our log volume." },
+    { "speaker": "user", "text": "ELK is powerful but operationally heavy — we've had painful experiences running Elasticsearch." },
+    { "speaker": "user", "text": "Grafana Loki is cheaper and we already use Grafana for metrics, so it would unify our dashboards." },
+    { "speaker": "user", "text": "For tracing I'm going to use Jaeger regardless of what I pick for logs." },
+    { "speaker": "user", "text": "Final call: Loki for logs because of cost and the Grafana integration, Jaeger for traces." }
+  ],
+
+  "query": "What did the user decide to use for log aggregation?",
+
+  "expected": {
+    "answer_contains": ["Loki", "Grafana Loki"],
+    "must_not_contain": ["Datadog", "ELK", "Elasticsearch", "Jaeger"]
+  }
+}

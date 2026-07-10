@@ -1,0 +1,40 @@
+{
+  "benchmark_id": "refinements_basic_003",
+  "category": "refinements",
+  "refinement_type": "job_title",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I recently switched jobs."
+    },
+    {
+      "speaker": "user",
+      "text": "I'm now a data analyst at Meridian Health."
+    },
+    {
+      "speaker": "user",
+      "text": "The commute is much shorter than my old job."
+    },
+    {
+      "speaker": "user",
+      "text": "I've been getting more into hiking on weekends."
+    },
+    {
+      "speaker": "user",
+      "text": "I'm now a data analyst at Meridian Health, focusing on the patient outcomes dashboard."
+    },
+    {
+      "speaker": "user",
+      "text": "The team uses Looker for most of the reporting."
+    }
+  ],
+  "query": "What is the user's current role and focus at Meridian Health?",
+  "expected": {
+    "answer_contains": [
+      "data analyst",
+      "Meridian Health",
+      "patient outcomes dashboard"
+    ],
+    "must_not_contain": []
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "benchmark_id": "supersession_basic_022",
+  "category": "supersession",
+
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I expected retrieval to become perfect simply by adding GraphRAG."
+    },
+    {
+      "speaker": "user",
+      "text": "I now think GraphRAG is only one improvement and cannot compensate for poor extraction."
+    }
+  ],
+
+  "query": "What is the user's current opinion of GraphRAG?",
+
+  "expected": {
+    "answer_contains": [
+      "one improvement",
+      "poor extraction"
+    ],
+    "must_not_contain": [
+      "GraphRAG alone"
+    ]
+  }
+}

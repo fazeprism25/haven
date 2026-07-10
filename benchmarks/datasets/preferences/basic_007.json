@@ -1,0 +1,19 @@
+{
+  "benchmark_id": "preferences_basic_007",
+  "category": "preferences",
+
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I prefer evidence over intuition when making architecture decisions."
+    }
+  ],
+
+  "query": "How does the user prefer to make architecture decisions?",
+
+  "expected": {
+    "answer_contains": [
+      "evidence"
+    ]
+  }
+}

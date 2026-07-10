@@ -1,0 +1,26 @@
+{
+  "benchmark_id": "supersession_basic_012",
+  "category": "supersession",
+
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I wanted to build GraphRAG first."
+    },
+    {
+      "speaker": "user",
+      "text": "After thinking more, I changed the roadmap. Manager AI comes first and GraphRAG comes later."
+    }
+  ],
+
+  "query": "Which component should be built first?",
+
+  "expected": {
+    "answer_contains": [
+      "Manager AI"
+    ],
+    "must_not_contain": [
+      "GraphRAG"
+    ]
+  }
+}

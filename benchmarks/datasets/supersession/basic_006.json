@@ -1,0 +1,25 @@
+{
+  "benchmark_id": "supersession_basic_006",
+  "category": "supersession",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I planned to use OpenAI embeddings."
+    },
+    {
+      "speaker": "user",
+      "text": "That plan has been replaced with FastEmbed."
+    }
+  ],
+
+  "query": "What embedding solution is currently planned?",
+
+  "expected": {
+    "answer_contains": [
+      "FastEmbed"
+    ],
+    "must_not_contain": [
+      "OpenAI embeddings"
+    ]
+  }
+}

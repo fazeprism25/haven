@@ -1,0 +1,27 @@
+{
+  "benchmark_id": "supersession_basic_018",
+  "category": "supersession",
+
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I planned to use a single large language model."
+    },
+    {
+      "speaker": "user",
+      "text": "I've switched to a multi-agent architecture with specialized models."
+    }
+  ],
+
+  "query": "What architecture is currently planned?",
+
+  "expected": {
+    "answer_contains": [
+      "multi-agent",
+      "specialized"
+    ],
+    "must_not_contain": [
+      "single large language model"
+    ]
+  }
+}

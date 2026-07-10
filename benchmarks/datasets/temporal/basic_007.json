@@ -1,0 +1,22 @@
+{
+  "benchmark_id": "temporal_basic_007",
+  "category": "temporal",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "At first I wanted a simple memory store."
+    },
+    {
+      "speaker": "user",
+      "text": "Now I want a manager layer that reasons about memories."
+    }
+  ],
+
+  "query": "What does the user currently want?",
+
+  "expected": {
+    "answer_contains": [
+      "manager layer"
+    ]
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "benchmark_id": "belief_basic_008",
+  "category": "belief",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I believe memory systems need state tracking."
+    }
+  ],
+
+  "query": "What capability should memory systems have?",
+
+  "expected": {
+    "answer_contains": [
+      "state tracking"
+    ]
+  }
+}

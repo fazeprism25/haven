@@ -1,0 +1,39 @@
+{
+  "benchmark_id": "refinements_basic_006",
+  "category": "refinements",
+  "refinement_type": "location",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I moved recently."
+    },
+    {
+      "speaker": "user",
+      "text": "I now live in Lisbon."
+    },
+    {
+      "speaker": "user",
+      "text": "The weather has been great compared to where I used to live."
+    },
+    {
+      "speaker": "user",
+      "text": "I've been trying different coffee shops nearby."
+    },
+    {
+      "speaker": "user",
+      "text": "I now live in Lisbon, in the Alfama district."
+    },
+    {
+      "speaker": "user",
+      "text": "Rent there is quite reasonable compared to central areas."
+    }
+  ],
+  "query": "Where does the user currently live?",
+  "expected": {
+    "answer_contains": [
+      "Lisbon",
+      "Alfama"
+    ],
+    "must_not_contain": []
+  }
+}

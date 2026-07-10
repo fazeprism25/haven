@@ -1,0 +1,27 @@
+{
+  "benchmark_id": "refinements_basic_019",
+  "category": "refinements",
+  "refinement_type": "role",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I am the lead engineer on this project."
+    },
+    {
+      "speaker": "user",
+      "text": "The office moved to a new building."
+    },
+    {
+      "speaker": "user",
+      "text": "I am the lead engineer on this project, responsible for the API layer."
+    }
+  ],
+  "query": "What is the user's role on this project?",
+  "expected": {
+    "answer_contains": [
+      "lead engineer",
+      "API layer"
+    ],
+    "must_not_contain": []
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "benchmark_id": "supersession_basic_051",
+  "category": "supersession",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I check email first thing when I wake up."
+    },
+    {
+      "speaker": "user",
+      "text": "I've stopped checking email before breakfast, now I check it after finishing breakfast."
+    }
+  ],
+  "query": "When does the user currently check email?",
+  "expected": {
+    "answer_contains": [
+      "after finishing breakfast"
+    ],
+    "must_not_contain": [
+      "first thing when I wake up"
+    ]
+  }
+}

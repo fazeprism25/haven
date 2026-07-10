@@ -1,0 +1,19 @@
+{
+  "benchmark_id": "goals_basic_004",
+  "category": "goals",
+
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I want benchmark-driven development for the memory system."
+    }
+  ],
+
+  "query": "How does the user want to develop the memory system?",
+
+  "expected": {
+    "answer_contains": [
+      "benchmark"
+    ]
+  }
+}

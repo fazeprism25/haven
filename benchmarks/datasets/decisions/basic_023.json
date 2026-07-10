@@ -1,0 +1,19 @@
+{
+  "benchmark_id": "basic_023",
+  "category": "Decisions",
+
+  "conversation": [
+    { "speaker": "user", "text": "I need to pick an ORM for the new Node.js service. I'm looking at Prisma, TypeORM, and Drizzle." },
+    { "speaker": "user", "text": "TypeORM has been around forever but the codebase feels unmaintained and there are a lot of open issues." },
+    { "speaker": "user", "text": "Prisma has the best DX and type safety, but the query engine is a separate binary which adds deployment complexity." },
+    { "speaker": "user", "text": "Drizzle is lightweight, SQL-first, and has no binary dependency." },
+    { "speaker": "user", "text": "Given that we deploy to edge environments where bundling a Prisma binary is problematic, I'll go with Drizzle." }
+  ],
+
+  "query": "Which ORM did the user decide to use for the Node.js service?",
+
+  "expected": {
+    "answer_contains": ["Drizzle"],
+    "must_not_contain": ["Prisma", "TypeORM"]
+  }
+}

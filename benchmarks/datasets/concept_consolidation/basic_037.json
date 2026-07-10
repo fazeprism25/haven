@@ -1,0 +1,33 @@
+{
+  "benchmark_id": "concept_consolidation_basic_037",
+  "category": "concept_consolidation",
+  "consolidation_pattern": "different_wording",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I started reading a book about the history of the Roman Empire."
+    },
+    {
+      "speaker": "user",
+      "text": "The office wifi has been spotty all week."
+    },
+    {
+      "speaker": "user",
+      "text": "That Roman history book is turning out to be more about military logistics than politics."
+    },
+    {
+      "speaker": "user",
+      "text": "IT said they're upgrading the office wifi next week."
+    }
+  ],
+  "query": "What is the user reading and what is it actually about?",
+  "expected": {
+    "answer_contains": [
+      "Roman Empire",
+      "military logistics"
+    ],
+    "must_not_contain": [
+      "wifi"
+    ]
+  }
+}

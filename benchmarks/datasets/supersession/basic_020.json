@@ -1,0 +1,27 @@
+{
+  "benchmark_id": "supersession_basic_020",
+  "category": "supersession",
+
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "Originally I planned to optimize first."
+    },
+    {
+      "speaker": "user",
+      "text": "Now I want to measure first and optimize only after benchmarks expose weaknesses."
+    }
+  ],
+
+  "query": "What is the current optimization strategy?",
+
+  "expected": {
+    "answer_contains": [
+      "measure",
+      "benchmarks"
+    ],
+    "must_not_contain": [
+      "optimize first"
+    ]
+  }
+}

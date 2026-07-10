@@ -1,0 +1,28 @@
+{
+  "benchmark_id": "supersession_basic_028",
+  "category": "supersession",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I live in Chicago."
+    },
+    {
+      "speaker": "user",
+      "text": "I moved to Denver."
+    },
+    {
+      "speaker": "user",
+      "text": "Actually, I've relocated again, now in Seattle."
+    }
+  ],
+  "query": "Where does the user currently live?",
+  "expected": {
+    "answer_contains": [
+      "Seattle"
+    ],
+    "must_not_contain": [
+      "Chicago",
+      "Denver"
+    ]
+  }
+}

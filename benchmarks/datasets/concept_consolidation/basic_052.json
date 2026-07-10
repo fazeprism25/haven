@@ -1,0 +1,42 @@
+{
+  "benchmark_id": "concept_consolidation_basic_052",
+  "category": "concept_consolidation",
+  "consolidation_pattern": "long_gap",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I joined a language exchange group to practice French."
+    },
+    {
+      "speaker": "user",
+      "text": "I've been meaning to fix my bike's flat tire."
+    },
+    {
+      "speaker": "user",
+      "text": "The weather has been unusually cold this week."
+    },
+    {
+      "speaker": "user",
+      "text": "I watched a documentary about deep sea creatures."
+    },
+    {
+      "speaker": "user",
+      "text": "My internet went down for a few hours yesterday."
+    },
+    {
+      "speaker": "user",
+      "text": "The French exchange group meets weekly, and I've been paired with a native speaker named Claire."
+    }
+  ],
+  "query": "What is the user doing to practice French?",
+  "expected": {
+    "answer_contains": [
+      "language exchange",
+      "French",
+      "Claire"
+    ],
+    "must_not_contain": [
+      "flat tire"
+    ]
+  }
+}

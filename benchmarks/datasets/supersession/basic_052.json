@@ -1,0 +1,37 @@
+{
+  "benchmark_id": "supersession_basic_052",
+  "category": "supersession",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I used to smoke."
+    },
+    {
+      "speaker": "assistant",
+      "text": "Thanks for sharing."
+    },
+    {
+      "speaker": "user",
+      "text": "I started a new workout routine."
+    },
+    {
+      "speaker": "user",
+      "text": "I picked up a new video game."
+    },
+    {
+      "speaker": "user",
+      "text": "Update months later: I quit smoking six months ago."
+    }
+  ],
+  "query": "Does the user currently smoke?",
+  "expected": {
+    "answer_contains": [
+      "quit",
+      "doesn't smoke",
+      "no longer smokes"
+    ],
+    "must_not_contain": [
+      "still smoking"
+    ]
+  }
+}

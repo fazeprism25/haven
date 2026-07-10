@@ -1,0 +1,211 @@
+{
+  "benchmark_id": "resume_coding_basic_007",
+  "category": "resume_coding",
+  "tier": "medium",
+  "domain": "haven_project_state_builder",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "The wifi in the coffee shop I like to work from has been spotty.",
+      "turn_type": "distractor",
+      "turn_index": 0
+    },
+    {
+      "speaker": "user",
+      "text": "I finally got around to donating some old clothes I never wear.",
+      "turn_type": "distractor",
+      "turn_index": 1
+    },
+    {
+      "speaker": "user",
+      "text": "We need ProjectState to show current decision status, but nothing today tracks which project phase a decision belongs to.",
+      "turn_type": "architecture_discussion",
+      "turn_index": 2
+    },
+    {
+      "speaker": "user",
+      "text": "My neighbor's dog barked most of the afternoon, hard to get anything done with the window open.",
+      "turn_type": "distractor",
+      "turn_index": 3
+    },
+    {
+      "speaker": "user",
+      "text": "Could infer phase from how recently a decision was mentioned -- recent mentions imply current phase.",
+      "turn_type": "rejected_approach",
+      "turn_index": 4
+    },
+    {
+      "speaker": "user",
+      "text": "The bus was running about ten minutes late again this morning.",
+      "turn_type": "distractor",
+      "turn_index": 5
+    },
+    {
+      "speaker": "user",
+      "text": "Recency of mention isn't the same as current relevance -- a decision made once and never revisited is still current. Build ProjectState purely as a projection of DecisionMetadata.status instead, and leave phase/identity tracking out of scope for now.",
+      "turn_type": "decision",
+      "supersedes_turn": 4,
+      "turn_index": 6
+    },
+    {
+      "speaker": "user",
+      "text": "I finally fixed the wobbly chair leg in the kitchen.",
+      "turn_type": "distractor",
+      "turn_index": 7
+    },
+    {
+      "speaker": "user",
+      "text": "There's a new bakery opening down the street next month.",
+      "turn_type": "distractor",
+      "turn_index": 8
+    },
+    {
+      "speaker": "user",
+      "text": "Constraint: ProjectStateBuilder must only read fields that are MEMORY_DIRECT or DETERMINISTIC -- never infer status from anything an LLM produced.",
+      "turn_type": "constraint",
+      "turn_index": 9
+    },
+    {
+      "speaker": "user",
+      "text": "My phone battery has been draining faster than usual lately.",
+      "turn_type": "distractor",
+      "turn_index": 10
+    },
+    {
+      "speaker": "user",
+      "text": "Blocked: some KnowledgeObjects are beliefs, not decisions, and beliefs don't have a status field to project.",
+      "turn_type": "blocker",
+      "turn_index": 11
+    },
+    {
+      "speaker": "user",
+      "text": "I need to renew my passport before it expires this winter.",
+      "turn_type": "distractor",
+      "turn_index": 12
+    },
+    {
+      "speaker": "user",
+      "text": "The gym was way more crowded than usual today.",
+      "turn_type": "distractor",
+      "turn_index": 13
+    },
+    {
+      "speaker": "user",
+      "text": "Decided: filter to MemoryType.DECISION objects before projecting status; beliefs are handled by a separate WorkingContext tier, not ProjectState. Unblocks the builder.",
+      "turn_type": "decision",
+      "resolves_turn": 11,
+      "turn_index": 14
+    },
+    {
+      "speaker": "user",
+      "text": "I switched to a different brand of coffee and I'm not sure I like it.",
+      "turn_type": "distractor",
+      "turn_index": 15
+    },
+    {
+      "speaker": "user",
+      "text": "Implemented ProjectStateBuilder.build() as a pure projection over DecisionMetadata.status for MemoryType.DECISION objects.",
+      "turn_type": "implementation",
+      "turn_index": 16
+    },
+    {
+      "speaker": "user",
+      "text": "It's supposed to rain most of next week according to the forecast.",
+      "turn_type": "distractor",
+      "turn_index": 17
+    },
+    {
+      "speaker": "user",
+      "text": "Wired ProjectState into query_structured(), rendered only when the ContextPlan classifies as TaskMode.CONTINUATION.",
+      "turn_type": "implementation",
+      "turn_index": 18
+    },
+    {
+      "speaker": "user",
+      "text": "I still haven't unpacked the last box from the move.",
+      "turn_type": "distractor",
+      "turn_index": 19
+    },
+    {
+      "speaker": "user",
+      "text": "My sister's flight got delayed by a couple of hours.",
+      "turn_type": "distractor",
+      "turn_index": 20
+    },
+    {
+      "speaker": "user",
+      "text": "Open question (explicitly out of scope for now): should ProjectState eventually track project phase/milestones? Not solving that here.",
+      "turn_type": "open_question",
+      "turn_index": 21
+    },
+    {
+      "speaker": "user",
+      "text": "The office plants finally got watered after being neglected for weeks.",
+      "turn_type": "distractor",
+      "turn_index": 22
+    },
+    {
+      "speaker": "user",
+      "text": "Next: add a Decisions/SupersededDecisions split test that confirms a superseded decision never appears in the current-decisions list.",
+      "turn_type": "task",
+      "turn_index": 23
+    },
+    {
+      "speaker": "user",
+      "text": "I keep meaning to update my resume but haven't gotten around to it.",
+      "turn_type": "distractor",
+      "turn_index": 24
+    }
+  ],
+  "ground_truth": {
+    "current_objective": "Implement ProjectStateBuilder as a deterministic projection of decision status, no phase/milestone tracking yet.",
+    "active_decisions": [
+      "Build ProjectState as a pure projection of DecisionMetadata.status, not inferred from mention recency.",
+      "Filter to MemoryType.DECISION objects before projecting status; beliefs go through WorkingContext instead."
+    ],
+    "superseded_or_rejected": [
+      "Inferring project phase from how recently a decision was mentioned."
+    ],
+    "constraints": [
+      "ProjectStateBuilder must only read MEMORY_DIRECT or DETERMINISTIC fields, never infer status from LLM output."
+    ],
+    "active_blockers": [],
+    "active_tasks": [
+      "Add a Decisions/SupersededDecisions split test confirming superseded decisions never appear as current."
+    ],
+    "open_questions": [
+      "Should ProjectState eventually track project phase/milestones? (explicitly deferred, not being solved now)"
+    ],
+    "top_priority_next_action": "Add a test confirming ProjectStateBuilder's Decisions/SupersededDecisions split never shows a superseded decision as current.",
+    "resolved_blockers": [
+      "Beliefs not having a status field to project the same way decisions do."
+    ]
+  },
+  "queries": [
+    {
+      "text": "Continue implementing the project.",
+      "task_mode_hint": "continuation"
+    },
+    {
+      "text": "What should we work on next?",
+      "task_mode_hint": "ambiguous"
+    }
+  ],
+  "expected": {
+    "must_state": [
+      "Build ProjectState as a pure projection of DecisionMetadata.status, not inferred from mention recency.",
+      "Filter to MemoryType.DECISION objects before projecting status; beliefs go through WorkingContext instead.",
+      "ProjectStateBuilder must only read MEMORY_DIRECT or DETERMINISTIC fields, never infer status from LLM output."
+    ],
+    "must_not_state": [
+      "Inferring project phase from how recently a decision was mentioned, as a current or recommended approach",
+      "Beliefs not having a status field to project the same way decisions do, as still open/blocking"
+    ],
+    "forbidden_actions": [
+      "Recommending that ProjectState infer phase or status from mention recency instead of DecisionMetadata.status."
+    ],
+    "must_prioritize": [
+      "Add a test confirming ProjectStateBuilder's Decisions/SupersededDecisions split never shows a superseded decision as current."
+    ]
+  }
+}

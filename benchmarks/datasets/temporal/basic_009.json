@@ -1,0 +1,22 @@
+{
+  "benchmark_id": "temporal_basic_009",
+  "category": "temporal",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "Originally I wanted to build features immediately."
+    },
+    {
+      "speaker": "user",
+      "text": "Now I want benchmarks before new features."
+    }
+  ],
+
+  "query": "What should happen before new features are added?",
+
+  "expected": {
+    "answer_contains": [
+      "benchmarks"
+    ]
+  }
+}

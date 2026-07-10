@@ -1,0 +1,26 @@
+{
+  "benchmark_id": "supersession_basic_011",
+  "category": "supersession",
+
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I originally planned to use OpenAI embeddings for my memory system."
+    },
+    {
+      "speaker": "user",
+      "text": "After benchmarking, I replaced OpenAI embeddings with FastEmbed because it runs locally."
+    }
+  ],
+
+  "query": "Which embedding system is currently planned?",
+
+  "expected": {
+    "answer_contains": [
+      "FastEmbed"
+    ],
+    "must_not_contain": [
+      "OpenAI embeddings"
+    ]
+  }
+}

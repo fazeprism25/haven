@@ -1,0 +1,22 @@
+{
+  "benchmark_id": "temporal_basic_006",
+  "category": "temporal",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "Earlier I planned to use OpenAI APIs."
+    },
+    {
+      "speaker": "user",
+      "text": "Now I want to run as much as possible locally."
+    }
+  ],
+
+  "query": "What is the user's current deployment preference?",
+
+  "expected": {
+    "answer_contains": [
+      "locally"
+    ]
+  }
+}

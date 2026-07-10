@@ -1,0 +1,41 @@
+{
+  "benchmark_id": "concept_consolidation_basic_053",
+  "category": "concept_consolidation",
+  "consolidation_pattern": "long_gap",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I started a side project building a budgeting app."
+    },
+    {
+      "speaker": "user",
+      "text": "I re-potted a couple of my houseplants."
+    },
+    {
+      "speaker": "user",
+      "text": "The office got new standing desks."
+    },
+    {
+      "speaker": "user",
+      "text": "I've been listening to a new true crime podcast."
+    },
+    {
+      "speaker": "user",
+      "text": "My phone screen cracked and I had to get it repaired."
+    },
+    {
+      "speaker": "user",
+      "text": "The budgeting app side project now has a working expense-tracking screen."
+    }
+  ],
+  "query": "What is the status of the user's side project?",
+  "expected": {
+    "answer_contains": [
+      "budgeting app",
+      "expense-tracking"
+    ],
+    "must_not_contain": [
+      "houseplants"
+    ]
+  }
+}

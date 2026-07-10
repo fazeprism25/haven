@@ -1,0 +1,129 @@
+{
+  "benchmark_id": "decision_reconstruction_basic_001",
+  "category": "decision_reconstruction",
+  "domain": "database_choice",
+  "decision_turn_indices": [
+    25
+  ],
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "We need to pick a database for the new inventory service. I'm looking at Postgres, MongoDB, and DynamoDB."
+    },
+    {
+      "speaker": "user",
+      "text": "My upstairs neighbor had some furniture delivered today, lots of noise."
+    },
+    {
+      "speaker": "user",
+      "text": "My laptop update took forever to install last night."
+    },
+    {
+      "speaker": "user",
+      "text": "Postgres is nice because most of the team already knows SQL well."
+    },
+    {
+      "speaker": "user",
+      "text": "The weather's been unusually warm for this time of year."
+    },
+    {
+      "speaker": "user",
+      "text": "Mongo's flexible schema might save us some pain early on since the data model isn't fully settled yet."
+    },
+    {
+      "speaker": "user",
+      "text": "The elevator in my building has been out of service since Monday."
+    },
+    {
+      "speaker": "user",
+      "text": "Also, the office is doing a potluck on Friday, I need to figure out what to bring."
+    },
+    {
+      "speaker": "user",
+      "text": "I finally returned that overdue library book."
+    },
+    {
+      "speaker": "user",
+      "text": "DynamoDB would mean one less thing to operate since we're already on AWS, but the query patterns are pretty restrictive."
+    },
+    {
+      "speaker": "user",
+      "text": "I need to schedule a haircut, it's overdue at this point."
+    },
+    {
+      "speaker": "user",
+      "text": "I keep going back and forth between Postgres and Mongo honestly."
+    },
+    {
+      "speaker": "user",
+      "text": "I finally got around to replacing the batteries in the smoke detectors at home."
+    },
+    {
+      "speaker": "user",
+      "text": "My sister called to catch up, hadn't talked in a few weeks."
+    },
+    {
+      "speaker": "user",
+      "text": "Postgres does have some JSON support that might close the gap with Mongo's flexibility."
+    },
+    {
+      "speaker": "user",
+      "text": "Still not 100% sure though, the inventory data does have a lot of nested structure."
+    },
+    {
+      "speaker": "user",
+      "text": "My car's tire pressure light came on this morning."
+    },
+    {
+      "speaker": "user",
+      "text": "The smoke detector chirping was driving me crazy for like two weeks before I fixed it."
+    },
+    {
+      "speaker": "user",
+      "text": "My favorite coffee shop is testing a new seasonal drink."
+    },
+    {
+      "speaker": "user",
+      "text": "I looked at how another team handled a similar inventory model and they seemed happy with a relational setup."
+    },
+    {
+      "speaker": "user",
+      "text": "DynamoDB's pricing model is appealing but I don't think our access patterns are predictable enough for it to pay off yet."
+    },
+    {
+      "speaker": "user",
+      "text": "The package I ordered got delayed by a couple of days."
+    },
+    {
+      "speaker": "user",
+      "text": "I also need to schedule my car for an oil change soon."
+    },
+    {
+      "speaker": "user",
+      "text": "Leaning more towards Postgres at this point but want to sleep on it."
+    },
+    {
+      "speaker": "user",
+      "text": "The potluck got moved to next Friday instead, apparently."
+    },
+    {
+      "speaker": "user",
+      "text": "After going back and forth, we've decided on Postgres for the inventory service. The team's SQL experience plus JSONB columns for the flexible parts of the schema tipped it."
+    },
+    {
+      "speaker": "user",
+      "text": "Good, I'll start setting up the migrations for it next week."
+    }
+  ],
+  "query": "What database did the team decide to use for the inventory service?",
+  "expected": {
+    "answer_contains": [
+      "Postgres",
+      "JSONB columns",
+      "SQL experience"
+    ],
+    "must_not_contain": [
+      "smoke detector"
+    ]
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "benchmark_id": "concept_consolidation_basic_040",
+  "category": "concept_consolidation",
+  "consolidation_pattern": "different_contexts",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I had my first Spanish class at the community college on Tuesday."
+    },
+    {
+      "speaker": "user",
+      "text": "I finally fixed the leaky faucet in the bathroom."
+    },
+    {
+      "speaker": "user",
+      "text": "While planning my trip to Oaxaca, I realized I should practice ordering food in Spanish."
+    },
+    {
+      "speaker": "user",
+      "text": "The faucet parts were surprisingly cheap at the hardware store."
+    }
+  ],
+  "query": "What has the user been doing related to Spanish?",
+  "expected": {
+    "answer_contains": [
+      "Spanish class",
+      "Oaxaca"
+    ],
+    "must_not_contain": [
+      "faucet"
+    ]
+  }
+}

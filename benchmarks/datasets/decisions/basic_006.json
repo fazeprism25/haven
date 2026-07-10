@@ -1,0 +1,18 @@
+{
+  "benchmark_id": "decision_basic_006",
+  "category": "decision",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I decided to benchmark Mem0 before modifying its architecture."
+    }
+  ],
+
+  "query": "What should happen before modifying Mem0?",
+
+  "expected": {
+    "answer_contains": [
+      "benchmark"
+    ]
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "benchmark_id": "beliefs_017",
+  "category": "Beliefs",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I used to think test-driven development (TDD) was a complete religion pushed by purists. Writing tests before code felt like a waste of engineering time."
+    },
+    {
+      "speaker": "assistant",
+      "text": "It can definitely feel slow when you are trying to rapidly iterate on a feature."
+    },
+    {
+      "speaker": "user",
+      "text": "But after debugging a massive regression that cost us thousands, I completely converted. I firmly believed that 100% strict TDD and mandatory 95% test coverage were non-negotiable for producing professional software."
+    },
+    {
+      "speaker": "assistant",
+      "text": "High coverage requirements definitely give teams more confidence during refactoring."
+    },
+    {
+      "speaker": "user",
+      "text": "Actually, I realized that high coverage just leads to developers writing meaningless tests to satisfy the CI gate. I've abandoned that dogmatic view. I now strongly believe that testing should focus entirely on integration boundaries and critical user journeys, completely ignoring unit test coverage metrics."
+    }
+  ],
+  "query": "What is the user's current philosophy regarding software testing and code coverage?",
+  "expected": {
+    "answer_contains": [
+      "integration",
+      "journeys",
+      "ignore",
+      "metrics"
+    ],
+    "must_not_contain": [
+      "100% strict TDD",
+      "95% test coverage",
+      "unit tests are mandatory"
+    ]
+  }
+}

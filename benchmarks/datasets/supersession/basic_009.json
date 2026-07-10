@@ -1,0 +1,22 @@
+{
+  "benchmark_id": "supersession_basic_009",
+  "category": "supersession",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I originally wanted all memories treated equally."
+    },
+    {
+      "speaker": "user",
+      "text": "I replaced that idea with memory importance scoring."
+    }
+  ],
+
+  "query": "How should memories currently be handled?",
+
+  "expected": {
+    "answer_contains": [
+      "importance"
+    ]
+  }
+}

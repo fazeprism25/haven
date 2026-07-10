@@ -1,0 +1,20 @@
+{
+  "benchmark_id": "supersession_basic_040",
+  "category": "supersession",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "The design deadline is Monday and the dev deadline is Thursday."
+    },
+    {
+      "speaker": "user",
+      "text": "The design deadline moved to Wednesday; the dev deadline is unchanged."
+    }
+  ],
+  "query": "What is the dev deadline?",
+  "expected": {
+    "answer_contains": [
+      "Thursday"
+    ]
+  }
+}

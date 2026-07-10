@@ -1,0 +1,19 @@
+{
+  "benchmark_id": "preferences_basic_004",
+  "category": "preferences",
+
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I prefer benchmarking before implementing new features."
+    }
+  ],
+
+  "query": "How does the user prefer to approach improvements?",
+
+  "expected": {
+    "answer_contains": [
+      "benchmarking"
+    ]
+  }
+}

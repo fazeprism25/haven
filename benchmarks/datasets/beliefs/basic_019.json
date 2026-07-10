@@ -1,0 +1,40 @@
+{
+  "benchmark_id": "beliefs_019",
+  "category": "Beliefs",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I used to think that regular expression matching and keyword search engines like Elasticsearch were fully sufficient for building a production-grade documentation search."
+    },
+    {
+      "speaker": "assistant",
+      "text": "Keyword search handles exact matches incredibly fast and reliably."
+    },
+    {
+      "speaker": "user",
+      "text": "But it misses all semantic nuances. Once vector embeddings became mainstream, I completely discarded keyword search. I became convinced that pure dense vector retrieval using cosine similarity on high-dimensional embeddings was the only modern solution."
+    },
+    {
+      "speaker": "assistant",
+      "text": "Vector search is great for capturing user intent and synonyms."
+    },
+    {
+      "speaker": "user",
+      "text": "However, pure vector search fails miserably on exact part numbers and serial codes, which our users search for constantly. I've evolved my viewpoint. I now firmly believe that a hybrid search engine combining BM25 keyword matching with dense vectors via Reciprocal Rank Fusion (RRF) is the absolute best approach."
+    }
+  ],
+  "query": "What is the user's current stance on the best architecture for building a search system?",
+  "expected": {
+    "answer_contains": [
+      "hybrid",
+      "combination",
+      "vectors",
+      "keyword"
+    ],
+    "must_not_contain": [
+      "pure vector",
+      "only Elasticsearch",
+      "strictly keyword"
+    ]
+  }
+}

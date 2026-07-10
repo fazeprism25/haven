@@ -1,0 +1,42 @@
+{
+  "benchmark_id": "concept_consolidation_basic_056",
+  "category": "concept_consolidation",
+  "consolidation_pattern": "distractor_heavy",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I got a job offer from a startup."
+    },
+    {
+      "speaker": "user",
+      "text": "I've been trying a new sleep tracking app."
+    },
+    {
+      "speaker": "user",
+      "text": "My sourdough starter finally worked."
+    },
+    {
+      "speaker": "user",
+      "text": "I need to renew my driver's license."
+    },
+    {
+      "speaker": "user",
+      "text": "The job offer is for a senior role with a decent equity package."
+    },
+    {
+      "speaker": "user",
+      "text": "I switched my podcast app."
+    }
+  ],
+  "query": "What does the user's job offer look like?",
+  "expected": {
+    "answer_contains": [
+      "job offer",
+      "senior role",
+      "equity"
+    ],
+    "must_not_contain": [
+      "driver's license"
+    ]
+  }
+}

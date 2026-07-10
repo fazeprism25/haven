@@ -1,0 +1,40 @@
+{
+  "benchmark_id": "beliefs_016",
+  "category": "Beliefs",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "For frontend state management, I used to swear by Redux. I believed having a single, immutable source of truth was vital for debugging complex UI states."
+    },
+    {
+      "speaker": "assistant",
+      "text": "Redux dev tools are incredible, but the boilerplate can be overwhelming."
+    },
+    {
+      "speaker": "user",
+      "text": "Exactly. The boilerplate made me hate it. I shifted to believing that atomic state libraries like Jotai or Recoil were the absolute best approach because they keep state local and reactive."
+    },
+    {
+      "speaker": "assistant",
+      "text": "Atomic state simplifies component-level re-renders."
+    },
+    {
+      "speaker": "user",
+      "text": "But atomic state becomes completely unmanageable when you need to sync global side effects. I've changed my mind again. My core belief now is that state shouldn't be client-managed at all; server-driven state libraries like React Server Components and URL query params should handle nearly everything."
+    }
+  ],
+  "query": "What is the user's current perspective on managing state in frontend applications?",
+  "expected": {
+    "answer_contains": [
+      "server",
+      "client",
+      "URL",
+      "components"
+    ],
+    "must_not_contain": [
+      "Redux",
+      "Jotai",
+      "atomic"
+    ]
+  }
+}

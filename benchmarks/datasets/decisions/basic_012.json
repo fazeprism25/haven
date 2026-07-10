@@ -1,0 +1,19 @@
+{
+  "benchmark_id": "basic_012",
+  "category": "Decisions",
+
+  "conversation": [
+    { "speaker": "user", "text": "I'm building a microservices backend. I need to decide between REST and GraphQL for the API layer." },
+    { "speaker": "user", "text": "GraphQL sounds appealing because of the flexible querying, but our mobile clients have very predictable data needs." },
+    { "speaker": "user", "text": "Also, most of my backend engineers have never used GraphQL in production." },
+    { "speaker": "user", "text": "I'm going to go with REST. The learning curve for GraphQL isn't worth it right now." },
+    { "speaker": "user", "text": "Actually, one of our services is a reporting dashboard that needs very flexible queries. I'll use GraphQL just for that one service and REST everywhere else." }
+  ],
+
+  "query": "What did the user decide about the API design for their microservices backend?",
+
+  "expected": {
+    "answer_contains": ["GraphQL", "REST", "reporting", "one service"],
+    "must_not_contain": ["REST everywhere", "GraphQL everywhere", "only REST"]
+  }
+}

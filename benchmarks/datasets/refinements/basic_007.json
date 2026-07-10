@@ -1,0 +1,27 @@
+{
+  "benchmark_id": "refinements_basic_007",
+  "category": "refinements",
+  "refinement_type": "project",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I'm working on the checkout redesign."
+    },
+    {
+      "speaker": "user",
+      "text": "We also switched our CI provider last month."
+    },
+    {
+      "speaker": "user",
+      "text": "I'm working on the checkout redesign for the mobile app."
+    }
+  ],
+  "query": "What project is the user working on?",
+  "expected": {
+    "answer_contains": [
+      "checkout redesign",
+      "mobile app"
+    ],
+    "must_not_contain": []
+  }
+}

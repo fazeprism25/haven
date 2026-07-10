@@ -1,0 +1,18 @@
+{
+  "benchmark_id": "belief_basic_009",
+  "category": "belief",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I believe contradictions should be resolved automatically."
+    }
+  ],
+
+  "query": "How should contradictions be handled?",
+
+  "expected": {
+    "answer_contains": [
+      "resolved"
+    ]
+  }
+}

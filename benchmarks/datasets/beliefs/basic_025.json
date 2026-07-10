@@ -1,0 +1,41 @@
+{
+  "benchmark_id": "beliefs_025",
+  "category": "Beliefs",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "Regarding web security, I used to believe that managing our own authentication via custom OAuth2 implementations and local encrypted user tables was the safest approach."
+    },
+    {
+      "speaker": "assistant",
+      "text": "In-house auth gives you complete control over your authentication flows and user data layout."
+    },
+    {
+      "speaker": "user",
+      "text": "But keeping up with compliance and zero-day exploits is terrifying. I flipped my stance and became convinced that outsourcing authentication entirely to identity-as-a-service third parties like Auth0 or Okta was the only responsible option."
+    },
+    {
+      "speaker": "assistant",
+      "text": "Outsourcing offloads a massive compliance burden and security risk to dedicated experts."
+    },
+    {
+      "speaker": "user",
+      "text": "Then Okta got breached, and our vendor risk management team panicked. I realized third-party dependency is a single point of failure. My definitive belief now is that using open-source, self-hosted identity protocols like Keycloak or Ory Kratos is the optimal strategy for balancing absolute control with proven security standards."
+    }
+  ],
+  "query": "What does the user currently believe is the best approach to handling user authentication and identity management?",
+  "expected": {
+    "answer_contains": [
+      "open-source",
+      "self-hosted",
+      "Keycloak",
+      "Ory"
+    ],
+    "must_not_contain": [
+      "Auth0",
+      "Okta",
+      "custom OAuth2",
+      "in-house"
+    ]
+  }
+}

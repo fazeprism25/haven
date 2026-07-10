@@ -1,0 +1,29 @@
+{
+  "benchmark_id": "concept_consolidation_basic_032",
+  "category": "concept_consolidation",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I work as a nurse."
+    },
+    {
+      "speaker": "user",
+      "text": "I saw a great movie last week."
+    },
+    {
+      "speaker": "user",
+      "text": "My job is nursing."
+    },
+    {
+      "speaker": "user",
+      "text": "My friend is visiting this weekend."
+    }
+  ],
+  "query": "What is the user's job?",
+  "expected": {
+    "answer_contains": [
+      "nurse",
+      "nursing"
+    ]
+  }
+}

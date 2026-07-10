@@ -1,0 +1,27 @@
+{
+  "benchmark_id": "decision_basic_003",
+  "category": "decision_consistency",
+
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I decided that benchmarking must happen before modifying Mem0."
+    },
+    {
+      "speaker": "user",
+      "text": "I want baseline measurements before adding any new memory features."
+    }
+  ],
+
+  "query": "Should we add new memory features right now?",
+
+  "expected": {
+    "answer_contains": [
+      "No",
+      "benchmark"
+    ],
+    "must_not_contain": [
+      "add features immediately"
+    ]
+  }
+}

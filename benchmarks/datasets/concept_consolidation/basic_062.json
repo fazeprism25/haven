@@ -1,0 +1,35 @@
+{
+  "benchmark_id": "concept_consolidation_basic_062",
+  "category": "concept_consolidation",
+  "consolidation_pattern": "multi_entity",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I have two cats, Milo and Luna."
+    },
+    {
+      "speaker": "user",
+      "text": "Milo is the more adventurous one, always trying to sneak outside."
+    },
+    {
+      "speaker": "user",
+      "text": "Luna mostly just sleeps all day and avoids the other cat."
+    },
+    {
+      "speaker": "user",
+      "text": "Milo actually figured out how to open the pantry door once."
+    }
+  ],
+  "query": "What is Milo like?",
+  "expected": {
+    "answer_contains": [
+      "Milo",
+      "adventurous",
+      "pantry door"
+    ],
+    "must_not_contain": [
+      "Luna",
+      "sleeps all day"
+    ]
+  }
+}

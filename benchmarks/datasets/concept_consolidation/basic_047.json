@@ -1,0 +1,42 @@
+{
+  "benchmark_id": "concept_consolidation_basic_047",
+  "category": "concept_consolidation",
+  "consolidation_pattern": "repeated_confirmation",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I really only drink black coffee, no sugar or milk."
+    },
+    {
+      "speaker": "user",
+      "text": "I finished setting up my new phone."
+    },
+    {
+      "speaker": "user",
+      "text": "Yeah, still just black coffee for me, nothing added."
+    },
+    {
+      "speaker": "user",
+      "text": "My gym membership renewal is coming up."
+    },
+    {
+      "speaker": "user",
+      "text": "Black coffee, no sugar, no milk -- that's still how I take it."
+    },
+    {
+      "speaker": "user",
+      "text": "I've been trying a new brand of running shoes."
+    }
+  ],
+  "query": "How does the user take their coffee?",
+  "expected": {
+    "answer_contains": [
+      "black coffee",
+      "no sugar",
+      "no milk"
+    ],
+    "must_not_contain": [
+      "gym membership"
+    ]
+  }
+}

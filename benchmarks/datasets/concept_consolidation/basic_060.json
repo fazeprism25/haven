@@ -1,0 +1,38 @@
+{
+  "benchmark_id": "concept_consolidation_basic_060",
+  "category": "concept_consolidation",
+  "consolidation_pattern": "multi_entity",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "My teammate Sara is the one leading the migration project."
+    },
+    {
+      "speaker": "user",
+      "text": "My teammate Devon is helping out with the on-call rotation this month."
+    },
+    {
+      "speaker": "user",
+      "text": "Sara mentioned the migration project should wrap up by the end of the quarter."
+    },
+    {
+      "speaker": "user",
+      "text": "Devon is also picking up some frontend work on the side."
+    },
+    {
+      "speaker": "user",
+      "text": "Sara's been documenting the migration steps as she goes."
+    }
+  ],
+  "query": "What is Sara working on?",
+  "expected": {
+    "answer_contains": [
+      "migration project",
+      "documenting"
+    ],
+    "must_not_contain": [
+      "on-call rotation",
+      "frontend work"
+    ]
+  }
+}

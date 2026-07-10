@@ -1,0 +1,20 @@
+{
+  "benchmark_id": "concept_consolidation_basic_021",
+  "category": "concept_consolidation",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "I prefer tabs over spaces."
+    },
+    {
+      "speaker": "user",
+      "text": "Confirming: tabs, not spaces."
+    }
+  ],
+  "query": "Does the user prefer tabs or spaces?",
+  "expected": {
+    "answer_contains": [
+      "tabs"
+    ]
+  }
+}

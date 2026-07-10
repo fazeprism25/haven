@@ -1,0 +1,64 @@
+{
+  "benchmark_id": "temporal_025",
+  "category": "Temporal",
+  "conversation": [
+    {
+      "speaker": "user",
+      "text": "For the data warehouse, let's use Snowflake. It's cloud-native and handles large datasets well."
+    },
+    {
+      "speaker": "assistant",
+      "text": "Snowflake is enterprise-grade. I'll set up the virtual warehouses."
+    },
+    {
+      "speaker": "user",
+      "text": "Snowflake is expensive. Let's use BigQuery. It's faster and has better integration with Google Cloud."
+    },
+    {
+      "speaker": "assistant",
+      "text": "BigQuery is serverless. I'll migrate the data pipeline."
+    },
+    {
+      "speaker": "user",
+      "text": "We need to keep costs low. Let's use Redshift. It has a predictable pricing model."
+    },
+    {
+      "speaker": "assistant",
+      "text": "Redshift is more affordable for our data volume. I'll set up the clusters."
+    },
+    {
+      "speaker": "user",
+      "text": "I've been using Databricks. It has excellent SQL and ML capabilities. Let's use Databricks."
+    },
+    {
+      "speaker": "assistant",
+      "text": "Databricks is a unified platform. I'll set up the Delta Lake."
+    },
+    {
+      "speaker": "user",
+      "text": "We need real-time analytics. Let's use ClickHouse. It's the fastest for OLAP."
+    },
+    {
+      "speaker": "assistant",
+      "text": "ClickHouse is impressive. I'll deploy it on our cloud."
+    },
+    {
+      "speaker": "user",
+      "text": "We already have BigQuery credits. Let's just use BigQuery. It's good enough and we have budget constraints."
+    }
+  ],
+  "query": "What data warehouse solution is the team using for analytics?",
+  "expected": {
+    "answer_contains": [
+      "BigQuery",
+      "warehouse",
+      "analytics"
+    ],
+    "must_not_contain": [
+      "Snowflake",
+      "Redshift",
+      "Databricks",
+      "ClickHouse"
+    ]
+  }
+}
