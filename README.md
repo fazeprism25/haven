@@ -24,6 +24,7 @@ with a receipt.
 ![Retrieval: deterministic](https://img.shields.io/badge/retrieval-deterministic-8A2BE2)
 ![No API key needed for demo](https://img.shields.io/badge/demo-no%20API%20key-success)
 
+**[Interactive site](https://fazeprism25.github.io/haven/)** ·
 **[Repository layout](#-repository-layout)** ·
 **[Quick start](#-quick-start-5-minutes-no-api-key)** ·
 **[How it works](#-how-it-works)** ·
@@ -32,6 +33,17 @@ with a receipt.
 **[Roadmap](#-roadmap)**
 
 </div>
+
+## 🌐 Interactive project website
+
+Experience Haven as an interactive product page — the architecture, the demo
+walkthrough, and the benchmark story, rendered and scrollable, no clone required:
+
+### **➡️ https://fazeprism25.github.io/haven/**
+
+This is the same material this README covers, built as a standalone article
+([source](obsidian/docs/media/haven-article.html)) — start there for the fastest
+tour, come back here for the runnable quickstart and the repo tour.
 
 ## 🧭 Repository layout
 
