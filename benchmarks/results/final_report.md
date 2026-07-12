@@ -245,13 +245,27 @@ Implemented dashboard exposing:
 
 # Measured Improvements
 
-| Improvement | Result |
-|------------|--------|
-| Accepted candidates | 278 → 110 |
-| Retrieval precision | 0.301 → 0.679 |
-| False-positive rate | 0.500 → 0.100 |
-| Latency increase | ~0 ms |
-| Retrieval explanation | Fully supported |
+The precision/false-positive/accepted-candidates figures previously listed here
+did not trace back to any result file in this repo — see
+`benchmarks/analysis/classify_failure.py`'s module docstring. They have been
+removed rather than corrected in place, since no run reproducing them was ever
+committed.
+
+What is measured and reproducible:
+
+- **Write path** (`benchmarks/incremental_ingestion/`): re-sending an unchanged
+  conversation costs 0 LLM calls vs. 3 for a full reprocess; at 500 turns the
+  extraction prompt holds constant at ~769 est. tokens vs. ~6,800 for full
+  reprocessing. See `benchmarks/incremental_ingestion/results/report.md`.
+- **Read path** (`benchmarks/runners/run_benchmarks.py`): a 288-case,
+  LLM-judged suite comparing Haven's full pipeline against naive baselines
+  (return-everything, most-recent, BM25, embeddings) and a retrieval-only
+  ablation. Haven Full passes 240/288 (83.3%) — beats BM25 (69.8%) and its own
+  retrieval-only ablation (66.0%) by a wide margin, loses on raw pass rate to
+  the two naive baselines on contradiction/supersession-heavy categories for a
+  root-caused, scoped reason (`CanonicalMatcher` doesn't yet detect a
+  differently-phrased contradiction as `SUPERSEDE`). Full breakdown:
+  `benchmarks/reports/archive/deepseek_validation_report.md`.
 
 ---
 

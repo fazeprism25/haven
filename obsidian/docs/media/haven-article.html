@@ -3,7 +3,18 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Memory for AI that can show its work — Haven Engineering</title>
+<title>Haven — Deterministic Context Assembly for AI</title>
+<meta name="description" content="Haven is a deterministic context-assembly engine for LLMs: it distills conversations into knowledge you review, then reconstructs your working context — decisions, goals, open questions — before the model generates a single token. Local-first, explainable, plain Markdown.">
+<meta name="theme-color" content="#0b0e14">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Haven">
+<meta property="og:title" content="Haven — Deterministic Context Assembly for AI">
+<meta property="og:description" content="The AI resumes work exactly where you left off. Deterministic retrieval, explainable ranking, review-before-write, plain-Markdown storage — and a demo that runs offline with no API key.">
+<meta property="og:url" content="https://github.com/fazeprism25/haven">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Haven — Deterministic Context Assembly for AI">
+<meta name="twitter:description" content="The AI resumes work exactly where you left off. Deterministic, explainable, local-first memory for LLMs.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='3' y='3' width='18' height='18' rx='5' fill='none' stroke='%23e3b36a' stroke-width='2.4'/%3E%3Ccircle cx='12' cy='12' r='3.4' fill='%23e3b36a'/%3E%3C/svg%3E">
 <style>
   /* ============ Tokens — committed dark editorial theme ============ */
   :root {
@@ -14,7 +25,7 @@
     --hairline-soft: #1a2130;
     --ink: #e9ecf4;
     --ink-2: #a6afc2;
-    --ink-3: #6f7890;
+    --ink-3: #7d88a3;
     --brass: #e3b36a;
     --brass-deep: #c08327;
     --chart-haven: #c08327;
@@ -30,7 +41,7 @@
   /* This page deliberately commits to a single dark visual world. */
   :root[data-theme="light"], :root[data-theme="dark"] { color-scheme: dark; }
 
-  html { scroll-behavior: smooth; }
+  html { scroll-behavior: smooth; scroll-padding-top: 72px; }
   @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
 
   body {
@@ -47,7 +58,7 @@
 
   a { color: var(--brass); text-decoration: none; }
   a:hover { text-decoration: underline; text-underline-offset: 3px; }
-  a:focus-visible, button:focus-visible {
+  a:focus-visible, button:focus-visible, summary:focus-visible {
     outline: 2px solid var(--brass);
     outline-offset: 3px;
     border-radius: 2px;
@@ -82,7 +93,7 @@
   .hero-inner {
     position: relative;
     max-width: var(--wide); margin: 0 auto;
-    display: grid; grid-template-columns: minmax(0, 1fr) 300px;
+    display: grid; grid-template-columns: minmax(0, 1fr) 360px;
     gap: 48px; align-items: center;
   }
   .eyebrow {
@@ -132,8 +143,8 @@
     padding: 0 24px;
   }
   .toc {
-    position: sticky; top: 0; align-self: start;
-    height: 100vh;
+    position: sticky; top: 58px; align-self: start;
+    height: calc(100vh - 58px);
     padding: 56px 0 40px;
     display: flex; flex-direction: column;
     font-family: var(--mono);
@@ -160,6 +171,8 @@
   article > section > *,
   article > section > details > * { max-width: var(--prose); }
   article .wide { max-width: var(--wide); }
+  article > section > details.wide > * { max-width: none; }
+  article > section > details.wide .dbody > p { max-width: var(--prose); }
 
   section { padding: 8px 0 40px; }
   section + section { border-top: 1px solid var(--hairline-soft); padding-top: 56px; }
@@ -190,7 +203,7 @@
     font-family: var(--mono); font-size: 0.86em;
     background: var(--surface); border: 1px solid var(--hairline-soft);
     padding: 2px 6px; border-radius: 5px; color: #d8b578;
-    white-space: nowrap;
+    overflow-wrap: break-word;
   }
 
   /* ============ Pull quotes ============ */
@@ -362,7 +375,7 @@
   .cand .factor { min-width: 0; }
   .cand .factor .fl {
     display: flex; justify-content: space-between;
-    font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.04em;
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.04em;
     color: var(--ink-3); margin-bottom: 5px; font-variant-numeric: tabular-nums;
   }
   .cand .bar { height: 4px; border-radius: 2px; background: var(--hairline-soft); overflow: hidden; }
@@ -485,7 +498,7 @@
   /* ============ Charts ============ */
   .fig { margin: 34px 0; }
   .fig .fig-head { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; flex-wrap: wrap; margin-bottom: 6px; }
-  .fig h5 { font-size: 16.5px; font-weight: 600; color: var(--ink); }
+  .fig h4 { font-size: 16.5px; font-weight: 600; color: var(--ink); margin: 0; }
   .fig .fig-sub { font-family: var(--mono); font-size: 12px; color: var(--ink-3); margin-bottom: 14px; }
   .legend { display: flex; gap: 18px; font-family: var(--mono); font-size: 12px; color: var(--ink-2); }
   .legend .li { display: inline-flex; align-items: center; gap: 7px; }
@@ -570,7 +583,6 @@
   }
   @media (max-width: 860px) {
     .hero-inner { grid-template-columns: 1fr; }
-    .hero-art { max-width: 340px; }
     .metrics { grid-template-columns: repeat(2, 1fr); }
     .pipe-track { grid-template-columns: repeat(4, 1fr); row-gap: 26px; }
     .pipe-node:nth-child(5n)::after { display: block; }
@@ -588,78 +600,352 @@
     .metrics { grid-template-columns: 1fr 1fr; }
     .pull { font-size: 21px; }
   }
+
+  /* ============ Skip link ============ */
+  .skip {
+    position: absolute; left: -9999px; top: 0; z-index: 100;
+    background: var(--brass); color: #141008; padding: 10px 18px;
+    font-family: var(--mono); font-size: 13px; border-radius: 0 0 10px 0;
+  }
+  .skip:focus { left: 0; }
+
+  /* ============ Top nav ============ */
+  .topnav {
+    position: sticky; top: 0; z-index: 50;
+    display: flex; align-items: center; gap: 20px;
+    height: 58px; padding: 0 24px;
+    background: rgba(11, 14, 20, 0.86);
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--hairline-soft);
+  }
+  .topnav .brand {
+    font-family: var(--serif); font-size: 18.5px; color: var(--ink);
+    display: inline-flex; align-items: center; gap: 10px;
+  }
+  .topnav .brand::before {
+    content: ""; width: 12px; height: 12px; border-radius: 4px;
+    border: 1.5px solid var(--brass); display: inline-block;
+  }
+  .topnav .brand:hover { text-decoration: none; color: var(--brass); }
+  .navlinks { display: flex; gap: 2px; margin-left: auto; }
+  .navlinks a {
+    font-family: var(--mono); font-size: 12px; color: var(--ink-2);
+    padding: 8px 11px; border-radius: 8px; letter-spacing: 0.02em;
+  }
+  .navlinks a:hover { color: var(--ink); background: var(--surface); text-decoration: none; }
+
+  /* ============ Buttons ============ */
+  .cta-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-top: 34px; }
+  .cta-row.center { justify-content: center; }
+  .btn {
+    font-family: var(--mono); font-size: 13.5px; letter-spacing: 0.02em;
+    padding: 12px 22px; border-radius: 10px;
+    display: inline-flex; align-items: center; gap: 9px;
+    transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+  }
+  .btn:hover { text-decoration: none; transform: translateY(-1px); }
+  @media (prefers-reduced-motion: reduce) { .btn { transition: none; } .btn:hover { transform: none; } }
+  .btn-primary { background: var(--brass); color: #141008; font-weight: 600; }
+  .btn-primary:hover { background: #edc27f; }
+  .btn-primary small { font-weight: 400; opacity: 0.75; font-size: 11px; }
+  .btn-ghost { border: 1px solid var(--hairline); color: var(--ink); background: var(--surface); }
+  .btn-ghost:hover { border-color: var(--ink-3); }
+  .btn-sm { padding: 7px 14px; font-size: 12px; border-radius: 8px; }
+  .btn-text { font-family: var(--mono); font-size: 12.5px; color: var(--brass); }
+
+  /* ============ Hero additions ============ */
+  .trust-row {
+    list-style: none; display: flex; flex-wrap: wrap; gap: 8px;
+    margin: 26px 0 0; padding: 0;
+  }
+  .trust-row li {
+    font-family: var(--mono); font-size: 11.5px; color: var(--ink-2);
+    border: 1px solid var(--hairline); border-radius: 999px;
+    padding: 5px 12px; letter-spacing: 0.03em;
+    display: inline-flex; align-items: center; gap: 7px;
+  }
+  .trust-row li::before { content: "◆"; color: var(--brass-deep); font-size: 8px; }
+  .hero-mock { margin: 0; box-shadow: 0 30px 70px -36px rgba(0, 0, 0, 0.8); }
+  .hero-mock .body { padding: 16px; }
+  .hero-mock .xbar { margin-bottom: 12px; }
+  .hero-pipe {
+    margin-top: 12px; font-family: var(--mono); font-size: 11px;
+    color: var(--ink-3); letter-spacing: 0.05em; text-align: center;
+  }
+  .hero-pipe b { color: var(--brass); font-weight: 500; }
+
+  /* ============ Story band ============ */
+  .story {
+    border-bottom: 1px solid var(--hairline-soft);
+    padding: 60px 24px;
+    background: linear-gradient(180deg, rgba(17, 21, 30, 0.6), transparent);
+  }
+  .story-inner {
+    max-width: 1080px; margin: 0 auto;
+    display: grid; grid-template-columns: 1fr auto 1fr auto 1.18fr;
+    gap: 24px; align-items: stretch;
+  }
+  .sbeat { padding: 20px 4px; }
+  .sbeat .stime {
+    font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--ink-3); margin-bottom: 12px;
+  }
+  .sbeat p { font-size: 15.5px; line-height: 1.65; color: var(--ink-2); margin: 0; }
+  .sbeat p b { color: var(--ink); font-weight: 600; }
+  .sbeat.haven {
+    border: 1px solid rgba(227, 179, 106, 0.35); border-radius: 14px;
+    padding: 20px 22px;
+    background: linear-gradient(180deg, rgba(227, 179, 106, 0.05), transparent 60%), var(--surface);
+  }
+  .sbeat.haven .stime { color: var(--brass); }
+  .sarrow {
+    display: flex; align-items: center; font-family: var(--mono);
+    color: var(--ink-3); font-size: 15px; user-select: none;
+  }
+
+  /* ============ Demo theater ============ */
+  .theater { margin: 32px 0 8px; }
+  .th-scene { margin-bottom: 8px; }
+  .theater.js .th-scene { display: none; }
+  .theater.js .th-scene.on { display: block; animation: thIn 0.45s ease; }
+  @keyframes thIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+  @media (prefers-reduced-motion: reduce) { .theater.js .th-scene.on { animation: none; } }
+  .th-scene .scene-label {
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--brass); margin-bottom: 12px;
+  }
+  .bub {
+    border: 1px solid var(--hairline-soft); border-radius: 12px;
+    padding: 12px 16px; font-size: 14.5px; line-height: 1.6;
+    margin-bottom: 10px; max-width: 94%;
+  }
+  .bub.user { background: var(--raised); color: var(--ink); margin-left: auto; }
+  .bub.ai { background: var(--ground); color: var(--ink-2); }
+  .bub b { color: var(--ink); font-weight: 600; }
+  .th-note {
+    font-family: var(--mono); font-size: 11.5px; color: var(--ink-3);
+    margin-top: 10px; line-height: 1.6;
+  }
+  .th-ctx {
+    font-family: var(--mono); font-size: 12px; line-height: 1.8; color: #c6cede;
+    background: var(--ground); border: 1px solid var(--hairline-soft);
+    border-radius: 10px; padding: 12px 16px; overflow-x: auto; white-space: pre;
+  }
+  .th-controls { display: none; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 16px; }
+  .theater.js .th-controls { display: flex; }
+  .th-step {
+    font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.04em;
+    padding: 8px 14px; border-radius: 999px; cursor: pointer;
+    border: 1px solid var(--hairline); background: transparent; color: var(--ink-3);
+  }
+  .th-step:hover { color: var(--ink-2); border-color: var(--ink-3); }
+  .th-step[aria-current="true"] {
+    border-color: var(--brass); color: var(--brass);
+    background: rgba(227, 179, 106, 0.06);
+  }
+  .th-play {
+    margin-left: auto; font-family: var(--mono); font-size: 11.5px;
+    padding: 8px 14px; border-radius: 999px; cursor: pointer;
+    border: 1px solid var(--hairline); background: var(--surface); color: var(--ink-2);
+  }
+  .th-play:hover { border-color: var(--ink-3); }
+  .vh {
+    position: absolute; width: 1px; height: 1px; overflow: hidden;
+    clip-path: inset(50%); white-space: nowrap;
+  }
+
+  /* ============ Failure cards / principles ============ */
+  .fail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 30px 0; }
+  .fcard {
+    border: 1px solid var(--hairline-soft); border-radius: 14px;
+    background: var(--surface); padding: 22px 22px 12px;
+  }
+  .fcard h3 { margin: 0 0 10px; font-size: 18px; }
+  .fcard p { font-size: 15px; margin-bottom: 8px; }
+  .prin { list-style: none; margin: 30px 0 !important; padding: 0; counter-reset: prin; }
+  .prin li {
+    counter-increment: prin; position: relative;
+    border: 1px solid var(--hairline-soft); border-radius: 14px;
+    background: var(--surface); padding: 20px 22px 10px 64px;
+    margin-bottom: 12px !important;
+  }
+  .prin li::marker { content: ""; }
+  .prin li::before {
+    content: "0" counter(prin); position: absolute; left: 22px; top: 24px;
+    font-family: var(--mono); font-size: 12px; color: var(--brass); letter-spacing: 0.08em;
+  }
+  .prin h3 { margin: 0 0 8px; font-size: 18px; }
+  .prin p { font-size: 15px; margin-bottom: 10px; }
+
+  /* ============ Engineering plates (repo SVG diagrams) ============ */
+  .plate { margin: 32px 0; border: 1px solid var(--hairline); border-radius: 14px; overflow: hidden; background: #fff; }
+  .plate img { display: block; width: 100%; height: auto; }
+  .plate figcaption {
+    background: var(--surface); border-top: 1px solid var(--hairline);
+    padding: 10px 16px; font-family: var(--mono); font-size: 11.5px;
+    color: var(--ink-3); letter-spacing: 0.05em; line-height: 1.6;
+  }
+  .plate figcaption b { color: var(--ink-2); font-weight: 500; }
+  details .plate { margin: 16px 0; }
+
+  /* ============ Install steps ============ */
+  .install-steps { list-style: none; margin: 28px 0 !important; padding: 0; counter-reset: inst; }
+  .install-steps li {
+    counter-increment: inst; position: relative;
+    padding: 0 0 20px 46px; margin: 0 !important;
+  }
+  .install-steps li::marker { content: ""; }
+  .install-steps li::before {
+    content: counter(inst); position: absolute; left: 0; top: 0;
+    width: 28px; height: 28px; border-radius: 9px;
+    border: 1.5px solid var(--brass-deep); color: var(--brass);
+    font-family: var(--mono); font-size: 12.5px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .install-steps li::after {
+    content: ""; position: absolute; left: 14px; top: 32px; bottom: 4px;
+    width: 1px; background: var(--hairline);
+  }
+  .install-steps li:last-child::after { display: none; }
+  .install-steps b { color: var(--ink); font-weight: 600; }
+
+  /* ============ CTA band ============ */
+  .cta-band {
+    border-top: 1px solid var(--hairline-soft); margin-top: 20px;
+    padding: 76px 24px 70px; text-align: center;
+    background: radial-gradient(640px 320px at 50% 0%, rgba(227, 179, 106, 0.06), transparent 65%);
+  }
+  .cta-band h2 { margin-bottom: 16px; }
+  .cta-band p { max-width: 36em; margin: 0 auto; color: var(--ink-2); }
+
+  /* ============ Responsive: new components ============ */
+  @media (max-width: 1080px) {
+    .navlinks { display: none; }
+  }
+  @media (max-width: 860px) {
+    .story-inner { grid-template-columns: 1fr; gap: 6px; }
+    .sarrow { transform: rotate(90deg); width: 24px; justify-content: center; margin: 0 auto; }
+    .fail-grid { grid-template-columns: 1fr; }
+    .hero-art { max-width: 420px; }
+    .th-play { margin-left: 0; }
+  }
+  @media (max-width: 560px) {
+    .cta-row .btn { flex: 1 1 auto; justify-content: center; }
+    .prin li { padding-left: 22px; padding-top: 48px; }
+    .prin li::before { top: 20px; }
+  }
 </style>
 </head>
 <body>
 <div id="progress" aria-hidden="true"><div class="bar"></div></div>
 
-<header class="hero">
+<a class="skip" href="#main">Skip to content</a>
+
+<nav class="topnav" aria-label="Primary">
+  <a class="brand" href="#top">Haven</a>
+  <div class="navlinks">
+    <a href="#demo">Demo</a>
+    <a href="#how-it-works">Architecture</a>
+    <a href="#explainable">Explainability</a>
+    <a href="#benchmarks">Benchmarks</a>
+    <a href="#install">Install</a>
+  </div>
+  <a class="btn btn-ghost btn-sm" href="https://github.com/fazeprism25/haven">GitHub</a>
+</nav>
+
+<header class="hero" id="top">
   <div class="hero-inner">
     <div>
-      <span class="eyebrow">Haven · Engineering</span>
-      <h1>Memory for AI that can <em>show its work</em></h1>
+      <span class="eyebrow">Haven · Context Assembly Engine</span>
+      <h1>AI that resumes your work — <em>exactly where you left off</em></h1>
       <p class="sub">
-        Most AI memory systems can't tell you why they retrieved what they retrieved —
-        or what they quietly wrote down about you. Haven is built so that every memory
-        it surfaces comes with a receipt, and nothing enters the vault without your
-        sign-off. Here's how, and what we learned building it.
+        Haven is a deterministic context-assembly engine for LLMs. It distills your
+        conversations into knowledge you review, then — before the model generates a
+        single token — reconstructs your working context: the goal, the decisions,
+        the open questions. Every step explainable. Everything stored as plain
+        Markdown you own.
       </p>
-      <div class="byline">
-        <span class="avatar" aria-hidden="true">SK</span>
-        <span class="who">Siddhartha&nbsp;Khajuria</span>
-        <span class="dot">·</span>
-        <span>July 6, 2026 · updated July 7</span>
-        <span class="dot">·</span>
-        <span id="readtime">13 min read</span>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="#install">Get started <small>5 min · no API key</small></a>
+        <a class="btn btn-ghost" href="https://github.com/fazeprism25/haven">View on GitHub</a>
+        <a class="btn-text" href="#demo">Watch it resume →</a>
       </div>
+      <ul class="trust-row" aria-label="Key properties">
+        <li>Deterministic pipeline</li>
+        <li>Every retrieval explained</li>
+        <li>Review before write</li>
+        <li>Local-first Markdown</li>
+        <li>Demo runs offline</li>
+      </ul>
     </div>
-    <div class="hero-art" aria-hidden="true">
-      <svg viewBox="0 0 300 300" role="img" aria-label="Abstract concept graph converging into a vault">
-        <defs>
-          <radialGradient id="hg" cx="50%" cy="42%" r="60%">
-            <stop offset="0%" stop-color="#e3b36a" stop-opacity="0.14"/>
-            <stop offset="100%" stop-color="#e3b36a" stop-opacity="0"/>
-          </radialGradient>
-        </defs>
-        <rect width="300" height="300" fill="url(#hg)"/>
-        <g stroke="#2a3348" stroke-width="1">
-          <line x1="150" y1="126" x2="58" y2="60"/><line x1="150" y1="126" x2="236" y2="52"/>
-          <line x1="150" y1="126" x2="42" y2="168"/><line x1="150" y1="126" x2="252" y2="150"/>
-          <line x1="150" y1="126" x2="96" y2="248"/><line x1="150" y1="126" x2="212" y2="240"/>
-          <line x1="58" y1="60" x2="42" y2="168"/><line x1="236" y2="150" y1="52" x2="252"/>
-          <line x1="96" y1="248" x2="212" y2="240"/><line x1="58" y1="60" x2="236" y2="52"/>
-        </g>
-        <g fill="#0b0e14" stroke="#3a4560" stroke-width="1.4">
-          <circle cx="58" cy="60" r="7"/><circle cx="236" cy="52" r="5.5"/>
-          <circle cx="42" cy="168" r="6"/><circle cx="252" cy="150" r="7"/>
-          <circle cx="96" cy="248" r="5.5"/><circle cx="212" cy="240" r="6.5"/>
-        </g>
-        <g fill="#0b0e14" stroke="#e3b36a" stroke-width="1.6">
-          <rect x="122" y="98" width="56" height="56" rx="16"/>
-          <circle cx="150" cy="126" r="9" fill="#e3b36a" stroke="none" opacity="0.95"/>
-          <circle cx="150" cy="126" r="16" fill="none" stroke-opacity="0.4"/>
-        </g>
-        <g font-family="ui-monospace, Consolas, monospace" font-size="8.5" fill="#6f7890">
-          <text x="150" y="182" text-anchor="middle" letter-spacing="2">VAULT</text>
-        </g>
-      </svg>
+    <div class="hero-art">
+      <div class="mock hero-mock" role="img" aria-label="Preview: the Use Haven button assembling a working context — the project's key decision and open question — before a prompt is sent">
+        <div class="chrome"><i></i><i></i><i></i><span class="t">chatgpt.com · Haven</span></div>
+        <div class="body">
+          <div class="xbar">
+            <span class="compose">Managed RDS, or self-hosted?</span>
+            <span class="xbtn primary">Use Haven</span>
+          </div>
+          <div class="wc-card">
+            <div class="wc-head">
+              <span class="wc-title">billing-service</span>
+              <span class="wc-meta">project · active</span>
+            </div>
+            <div class="wc-focus"><b>Postgres over DynamoDB</b> · 250 ms p99 budget · 1 open question</div>
+          </div>
+          <div class="hero-pipe">retrieve → rank → accept → assemble → <b>prompt</b></div>
+        </div>
+      </div>
     </div>
   </div>
 </header>
 
-<div class="layout">
+<section class="story" aria-label="Why Haven exists">
+  <div class="story-inner">
+    <div class="sbeat">
+      <div class="stime">Last night</div>
+      <p>
+        Two hours deep in ChatGPT, you made real progress: <b>Postgres over
+        DynamoDB</b>, a 250&nbsp;ms p99 budget, one question still open —
+        managed RDS, or self-hosted?
+      </p>
+    </div>
+    <div class="sarrow" aria-hidden="true">→</div>
+    <div class="sbeat">
+      <div class="stime">This morning</div>
+      <p>
+        New chat. <b>The model has never heard of you</b>, your project, or last
+        night. You spend the first twenty minutes re-explaining decisions you
+        already made — and hoping you remember them right.
+      </p>
+    </div>
+    <div class="sarrow" aria-hidden="true">→</div>
+    <div class="sbeat haven">
+      <div class="stime">With Haven</div>
+      <p>
+        One click. Before the first token is generated, the model is holding your
+        decisions, your budget, your open question — each with a confidence score
+        and a receipt. <b>It doesn't meet you again. It resumes.</b>
+      </p>
+    </div>
+  </div>
+</section>
+
+<main class="layout" id="main" tabindex="-1" style="outline:none">
   <aside class="toc" aria-label="Table of contents">
     <div class="toc-label">Contents</div>
     <ol>
       <li><a href="#problem"><span class="n">01</span>The memory problem</a></li>
-      <li><a href="#falling-short"><span class="n">02</span>Why existing systems fall short</a></li>
-      <li><a href="#building"><span class="n">03</span>Building Haven</a></li>
-      <li><a href="#how-it-works"><span class="n">04</span>How Haven works</a></li>
-      <li><a href="#explainable"><span class="n">05</span>Explainable memory</a></li>
-      <li><a href="#product"><span class="n">06</span>Haven in use</a></li>
-      <li><a href="#benchmarks"><span class="n">07</span>Benchmarks</a></li>
-      <li><a href="#lessons"><span class="n">08</span>Lessons learned</a></li>
-      <li><a href="#next"><span class="n">09</span>What's next</a></li>
+      <li><a href="#demo"><span class="n">02</span>See it resume</a></li>
+      <li><a href="#falling-short"><span class="n">03</span>Why existing systems fall short</a></li>
+      <li><a href="#building"><span class="n">04</span>What Haven is</a></li>
+      <li><a href="#how-it-works"><span class="n">05</span>How Haven works</a></li>
+      <li><a href="#explainable"><span class="n">06</span>Explainable memory</a></li>
+      <li><a href="#product"><span class="n">07</span>Haven in use</a></li>
+      <li><a href="#benchmarks"><span class="n">08</span>Benchmarks</a></li>
+      <li><a href="#install"><span class="n">09</span>Installation</a></li>
+      <li><a href="#lessons"><span class="n">10</span>Engineering notes</a></li>
+      <li><a href="#next"><span class="n">11</span>Roadmap</a></li>
     </ol>
   </aside>
 
@@ -700,11 +986,107 @@
         fact. The half that decides whether you can trust the system is the other one:
         <strong>given a new query, which memories come back — and why?</strong>
       </p>
+
+      <p>Before the architecture, here's what getting that right feels like.</p>
     </section>
 
-    <!-- ============ 02 ============ -->
+    <!-- ============ 02 · Demo theater ============ -->
+    <section id="demo" class="rv">
+      <div class="kicker"><span class="num">02</span>See it resume</div>
+      <h2>The same question, with and without a working context</h2>
+
+      <p>
+        The scene below replays the demo vault's billing-service thread: a fresh
+        conversation, one click of <strong>Use Haven</strong>, and the difference
+        between a model that knows nothing and one that picks up mid-project.
+      </p>
+
+      <div class="theater wide" id="theater" role="group" aria-label="Animated demo: a conversation resuming with Haven">
+        <div class="mock">
+          <div class="chrome"><i></i><i></i><i></i><span class="t" id="thTitle">chatgpt.com · fresh conversation</span></div>
+          <div class="body">
+
+            <div class="th-scene on" data-title="chatgpt.com · fresh conversation">
+              <div class="scene-label">Scene 1 · A fresh chat, no context</div>
+              <div class="bub user">Should billing run managed RDS, or self-hosted?</div>
+              <div class="bub ai">
+                It depends on your requirements! Could you tell me more about your
+                database, expected workload, latency needs, and team's ops
+                experience? Managed services reduce operational burden, while
+                self-hosting offers more control…
+              </div>
+              <div class="th-note">The model meets you for the first time. Again.</div>
+            </div>
+
+            <div class="th-scene" data-title="chatgpt.com · Haven extension">
+              <div class="scene-label">Scene 2 · One click: Use Haven</div>
+              <div class="xbar">
+                <span class="compose">Should billing run managed RDS, or self-hosted?</span>
+                <span class="xbtn primary">Use Haven</span>
+              </div>
+              <div class="wc-card">
+                <div class="wc-head">
+                  <span class="wc-title">billing-service</span>
+                  <span class="wc-meta">project · active · 4 memories</span>
+                </div>
+                <div class="wc-focus">Current focus: <b>Chose PostgreSQL over DynamoDB</b> · 1 open question</div>
+              </div>
+              <div class="th-note">
+                Retrieved deterministically from your vault — 2 candidates accepted,
+                1 rejected with its reason recorded. Previewed before anything is inserted.
+              </div>
+            </div>
+
+            <div class="th-scene" data-title="Haven · working context assembled">
+              <div class="scene-label">Scene 3 · Working context, reconstructed</div>
+              <div class="th-ctx">&lt;HavenContext&gt;
+  &lt;WorkingContext title="billing-service" status="active"&gt;
+    &lt;RecentDecisions&gt;  [1] Chose PostgreSQL over DynamoDB   conf 0.84
+                       [2] Latency budget 250 ms p99        conf 0.72&lt;/…&gt;
+    &lt;OpenQuestions&gt;   [3] Managed RDS, or self-hosted?&lt;/…&gt;
+  &lt;/WorkingContext&gt;
+&lt;/HavenContext&gt;</div>
+              <div class="th-note">
+                Inserted into the prompt — goal, decisions, open questions, with
+                confidence scores — before the model generates a single token.
+              </div>
+            </div>
+
+            <div class="th-scene" data-title="chatgpt.com · resumed">
+              <div class="scene-label">Scene 4 · The AI resumes</div>
+              <div class="bub user">Should billing run managed RDS, or self-hosted?</div>
+              <div class="bub ai">
+                Since you chose <b>Postgres for relational consistency</b> and
+                you're holding a <b>250&nbsp;ms p99 budget</b>, managed RDS is the
+                safer call — it closes the exact open question you logged, and the
+                operational overhead you'd take on self-hosting buys you nothing
+                your decisions require…
+              </div>
+              <div class="th-note">No re-explaining. It picks up from your decisions — not from zero.</div>
+            </div>
+
+          </div>
+        </div>
+        <div class="th-controls" role="group" aria-label="Demo scene controls">
+          <button class="th-step" type="button" data-scene="0" aria-current="true">1 · Fresh chat</button>
+          <button class="th-step" type="button" data-scene="1">2 · Use Haven</button>
+          <button class="th-step" type="button" data-scene="2">3 · Context assembled</button>
+          <button class="th-step" type="button" data-scene="3">4 · It resumes</button>
+          <button class="th-play" type="button" id="thPlay" aria-pressed="true">Pause</button>
+        </div>
+        <div class="vh" aria-live="polite" id="thStatus"></div>
+      </div>
+
+      <p style="margin-top:26px">
+        Every other memory layer can do some version of scenes one and two. The rest
+        of this page is about scenes three and four — why the standard approach
+        can't deliver them reliably, and what it takes to build a system that can.
+      </p>
+    </section>
+
+    <!-- ============ 03 ============ -->
     <section id="falling-short" class="rv">
-      <div class="kicker"><span class="num">02</span>Why existing systems fall short</div>
+      <div class="kicker"><span class="num">03</span>Why existing systems fall short</div>
       <h2>"The embedding said so" is not an explanation</h2>
 
       <p>
@@ -714,44 +1096,50 @@
         show up once you depend on it.
       </p>
 
-      <h3>Black-box retrieval</h3>
-      <p>
-        When an embedding search injects three irrelevant memories and misses the one
-        that mattered, there is <strong>no way to find out why</strong>. Cosine
-        similarity between two 1,536-dimensional vectors is not a reason a human can
-        audit, and there's no trace to read, no factor to inspect, no knob that maps to
-        the failure you just watched. Retrieval quality stops being an engineering
-        problem — testable, bisectable, fixable — and becomes prompt-and-pray.
-      </p>
-
-      <h3>Top-k always returns k</h3>
-      <p>
-        Vector search has no concept of "nothing here is good enough." Ask it anything
-        and it returns its k nearest neighbors, however far away they are. Weak matches
-        get injected into your prompt as confidently as strong ones, silently steering
-        the conversation with plausible-looking noise. In our baseline measurements this
-        shows up directly: a <strong>false-positive rate of <span data-bench="fp-base">0.500</span></strong> — half of
-        everything injected was junk.
-      </p>
-
-      <h3>Duplicates instead of belief</h3>
-      <p>
-        Tell an embedding store "I use Python" five times across a month and you get
-        five near-identical rows, each competing to be retrieved. What you wanted was
-        one memory whose <em>confidence increased</em> — and which a later "I've moved
-        off Python" could supersede. Without an update model, a memory store isn't a
-        model of what the system believes about you; it's a pile of things you once said.
-      </p>
-
-      <h3>Writes you never see</h3>
-      <p>
-        The read side isn't the only black box. When you click "remember" in most
-        systems, an LLM decides what you meant, rephrases it, and writes it —
-        silently. You discover what it actually stored weeks later, when a mangled
-        version of something you said starts steering your conversations. A memory
-        system doesn't just need to explain what it retrieved; it needs to
-        <strong>show you what it's about to believe, before it believes it</strong>.
-      </p>
+      <div class="fail-grid wide">
+        <div class="fcard">
+          <h3>Black-box retrieval</h3>
+          <p>
+            When an embedding search injects three irrelevant memories and misses the one
+            that mattered, there is <strong>no way to find out why</strong>. Cosine
+            similarity between two 1,536-dimensional vectors is not a reason a human can
+            audit — no trace to read, no factor to inspect, no knob that maps to the
+            failure you just watched. Retrieval quality stops being an engineering
+            problem — testable, bisectable, fixable — and becomes prompt-and-pray.
+          </p>
+        </div>
+        <div class="fcard">
+          <h3>Top-k always returns k</h3>
+          <p>
+            Vector search has no concept of "nothing here is good enough." Ask it anything
+            and it returns its k nearest neighbors, however far away they are. Weak matches
+            get injected into your prompt as confidently as strong ones, silently steering
+            the conversation with plausible-looking noise, with no mechanism to say
+            <em>"nothing here clears the bar."</em>
+          </p>
+        </div>
+        <div class="fcard">
+          <h3>Duplicates instead of belief</h3>
+          <p>
+            Tell an embedding store "I use Python" five times across a month and you get
+            five near-identical rows, each competing to be retrieved. What you wanted was
+            one memory whose <em>confidence increased</em> — and which a later "I've moved
+            off Python" could supersede. Without an update model, a memory store isn't a
+            model of what the system believes about you; it's a pile of things you once said.
+          </p>
+        </div>
+        <div class="fcard">
+          <h3>Writes you never see</h3>
+          <p>
+            The read side isn't the only black box. When you click "remember" in most
+            systems, an LLM decides what you meant, rephrases it, and writes it —
+            silently. You discover what it actually stored weeks later, when a mangled
+            version of something you said starts steering your conversations. A memory
+            system doesn't just need to explain what it retrieved; it needs to
+            <strong>show you what it's about to believe, before it believes it</strong>.
+          </p>
+        </div>
+      </div>
 
       <blockquote class="pull">
         A black box is fine for a demo. It's disqualifying for a second brain — a system
@@ -765,15 +1153,15 @@
       </p>
     </section>
 
-    <!-- ============ 03 ============ -->
+    <!-- ============ 04 ============ -->
     <section id="building" class="rv">
-      <div class="kicker"><span class="num">03</span>Building Haven</div>
+      <div class="kicker"><span class="num">04</span>What Haven is</div>
       <h2>Deterministic context assembly, as a philosophy</h2>
 
       <p class="lede">
-        Haven is a local-first memory system built on a fork of mem0, organized around
-        one uncompromising idea: <strong>a memory system you can't interrogate is a
-        memory system you can't trust.</strong>
+        Haven is a local-first context-assembly engine, built on a fork of mem0 and
+        organized around one uncompromising idea: <strong>a memory system you can't
+        interrogate is a memory system you can't trust.</strong>
       </p>
 
       <p>
@@ -790,60 +1178,69 @@
         </p>
       </div>
 
-      <p>Three commitments fall out of taking that seriously:</p>
+      <p>Five commitments fall out of taking that seriously:</p>
 
-      <ul>
+      <ol class="prin wide">
         <li>
-          <strong>Deterministic retrieval.</strong> The read path is plain code:
-          IDF-weighted keyword matching, activation spreading across a concept graph,
-          and a ranker that scores every candidate on named factors. Same vault, same
-          query → same answer, every time. No temperature, no vibes. A retrieval bug
-          becomes something you can reproduce, bisect, and unit-test — which, as we'll
-          see in the lessons section, is exactly how the biggest quality wins were found.
+          <h3>Deterministic retrieval</h3>
+          <p>
+            The read path is plain code: IDF-weighted keyword matching, activation
+            spreading across a concept graph, and a ranker that scores every candidate
+            on named factors. Same vault, same query → same answer, every time. No
+            temperature, no vibes. A retrieval bug becomes something you can reproduce,
+            bisect, and unit-test — which, as the engineering notes show, is exactly
+            how the biggest quality wins were found.
+          </p>
         </li>
         <li>
-          <strong>Explainability by construction, not as a feature.</strong> Explanation
-          isn't a log bolted on afterward. The pipeline's own data structures carry a
-          per-factor score breakdown and an acceptance decision for every candidate —
-          the inspectors just render what the pipeline already computed. There is no
-          way for the explanation to drift out of sync with the behavior, because they
-          are the same object.
+          <h3>Explainability by construction, not as a feature</h3>
+          <p>
+            Explanation isn't a log bolted on afterward. The pipeline's own data
+            structures carry a per-factor score breakdown and an acceptance decision
+            for every candidate — the inspectors just render what the pipeline already
+            computed. There is no way for the explanation to drift out of sync with
+            the behavior, because they are the same object.
+          </p>
         </li>
         <li>
-          <strong>Files, not rows.</strong> Every memory is a Markdown file with YAML
-          frontmatter in a folder you choose — openable as an Obsidian vault, greppable,
-          diffable, syncable. Delete Haven tomorrow and your second brain is still
-          sitting there in plain text.
+          <h3>Files, not rows</h3>
+          <p>
+            Every memory is a Markdown file with YAML frontmatter in a folder you
+            choose — openable as an Obsidian vault, greppable, diffable, syncable.
+            Delete Haven tomorrow and your second brain is still sitting there in
+            plain text.
+          </p>
         </li>
-      </ul>
-
-      <p>
-        There's a fourth commitment, rarer than the others: <strong>the willingness to
-        say "I don't know."</strong> Haven's acceptance stage will return <em>nothing</em>
-        rather than pad your prompt with weak matches. An empty result is a legitimate,
-        first-class outcome — and it turns out to be where most of the false-positive
-        reduction comes from.
-      </p>
-
-      <p>
-        And a fifth, which arrived as the system grew a real write side: <strong>a gate
-        before every irreversible step.</strong> Haven never spends an LLM call, writes
-        a belief, or injects a memory without passing a checkpoint it can justify —
-        three gates in total, one per kind of trust. Section 04 walks through them.
-      </p>
+        <li>
+          <h3>The willingness to say "I don't know"</h3>
+          <p>
+            Haven's acceptance stage will return <em>nothing</em> rather than pad your
+            prompt with weak matches, recording a reason for every rejection. An empty
+            result is a legitimate, first-class outcome.
+          </p>
+        </li>
+        <li>
+          <h3>A gate before every irreversible step</h3>
+          <p>
+            Haven never spends an LLM call, writes a belief, or injects a memory
+            without passing a checkpoint it can justify — three gates in total, one
+            per kind of trust. The next section walks through them.
+          </p>
+        </li>
+      </ol>
     </section>
 
-    <!-- ============ 04 ============ -->
+    <!-- ============ 05 ============ -->
     <section id="how-it-works" class="rv">
-      <div class="kicker"><span class="num">04</span>How Haven works</div>
+      <div class="kicker"><span class="num">05</span>How Haven works</div>
       <h2>From conversation to context, one inspectable stage at a time</h2>
 
       <p>
         End to end, Haven is a write pipeline that turns conversations into canonical
         knowledge — with you reviewing every fact before it lands — an ontology that
         indexes it, and a read pipeline that assembles a structured context block for
-        the LLM. Every box below is a named, plain-Python stage (top row: the write
-        path; bottom row: the concept graph they share, then the read path).
+        the LLM. Every box below is a named, plain-Python stage (the first five: the
+        write path; then the concept graph they share, and the read path).
         <strong>Click any stage to see what it does.</strong>
       </p>
 
@@ -852,6 +1249,12 @@
         <div class="pipe-detail" id="pipeDetail" role="tabpanel" aria-live="polite"></div>
         <div class="pipe-hint">↳ 10 stages · one LLM call total (extraction) · one human gate (Memory Review) · everything else is deterministic</div>
       </div>
+
+      <figure class="plate wide">
+        <img src="architecture.svg" loading="lazy" width="1680" height="920"
+             alt="Haven architecture schematic: the write pipeline (Manager AI) and read pipeline (Memory Engine) meeting at a Markdown vault and concept graph, with the FastAPI server, dashboard, and browser extension on top">
+        <figcaption><b>Engineering plate 01</b> — the full system: both pipelines meeting at a plain-Markdown vault and one concept graph, with the server, dashboard, and extension on top.</figcaption>
+      </figure>
 
       <h3>Three gates, three kinds of trust</h3>
       <p>
@@ -889,18 +1292,29 @@
         That stop is <strong>Memory Review</strong>, the write path's human gate. The
         proposed facts come back to you as editable cards — reword one, change its
         type, delete it, add one the extractor missed — and only on
-        <strong>Save</strong> does anything touch disk. The mechanics matter: your
-        edits never re-run the LLM. Commit runs exactly one deterministic stage, the
-        <strong>CanonicalMatcher</strong>, which compares each kept fact against
-        existing knowledge and issues a decision — <code>NEW</code>,
-        <code>CONFIRM</code>, <code>UPDATE</code>, or <code>SUPERSEDE</code> — that the
-        <strong>KnowledgeUpdater</strong> applies. So a fact you edit into agreement
-        with something already known correctly <em>strengthens</em> that memory — its
-        confidence nudges up, its evidence chain grows — instead of spawning a
-        duplicate. That's the fix for the "five copies of I-use-Python" problem, at the
-        data-model level, and it survives human editing because the matching is code,
-        not vibes.
+        <strong>Save</strong> does anything touch disk. The mechanics matter:
       </p>
+
+      <ul>
+        <li>
+          <strong>Your edits never re-run the LLM.</strong> Commit runs exactly one
+          deterministic stage, the <strong>CanonicalMatcher</strong>, which compares
+          each kept fact against existing knowledge and issues a decision —
+          <code>NEW</code>, <code>CONFIRM</code>, <code>UPDATE</code>, or
+          <code>SUPERSEDE</code> — that the <strong>KnowledgeUpdater</strong> applies.
+        </li>
+        <li>
+          <strong>Agreement strengthens instead of duplicating.</strong> A fact you
+          edit into agreement with something already known correctly
+          <em>strengthens</em> that memory — its confidence nudges up, its evidence
+          chain grows — instead of spawning a duplicate.
+        </li>
+        <li>
+          <strong>Deduplication survives human editing</strong> because the matching is
+          code, not vibes. That's the answer to the "five copies of I-use-Python"
+          problem, at the data-model level.
+        </li>
+      </ul>
 
       <p>What lands on disk is just Markdown:</p>
 
@@ -933,7 +1347,15 @@ relational consistency mattered more than write throughput.
 
       <h3>The read path: retrieval with receipts</h3>
       <p>
-        A query takes the reverse trip. The <strong>HybridCandidateRetriever</strong>
+        Before retrieval, an optional <strong>QueryRewriter</strong> can expand one
+        query into several phrasings via an LLM call — off by default, toggleable
+        at runtime with no restart, and it fails open to the original query alone
+        if unset or unreachable. The Retrieval Inspector shows both the original
+        and any rewritten queries side by side, so a rewrite is never a silent
+        change to what got searched.
+      </p>
+      <p>
+        A query then takes the reverse trip. The <strong>HybridCandidateRetriever</strong>
         finds candidates two independent ways — IDF-weighted keyword overlap (with a
         phrase bonus), and activation spreading across the concept graph — and a memory
         found by both paths keeps evidence from both. The
@@ -995,17 +1417,50 @@ relational consistency mattered more than write throughput.
 <span class="tk-f">&lt;/HavenContext&gt;</span></code></pre>
       </div>
 
+      <p>The design choices in that block are deliberate:</p>
+
+      <ul>
+        <li>
+          <strong>Memory and the user's request live in disjoint subtrees</strong>, so
+          remembered text can never be read as an instruction.
+        </li>
+        <li>
+          <strong><code>&lt;Guidance&gt;</code> frames memory as information</strong> —
+          it tells the model to let confidence drive certainty and to surface
+          contradictions rather than guess.
+        </li>
+        <li>
+          <strong>Continuous <code>[N]</code> indices</strong> let the state summary
+          reference the same entries the buckets detail, without repeating them.
+        </li>
+      </ul>
+
       <p>
-        The design choices in that block are deliberate: memory and the user's request
-        live in disjoint subtrees so remembered text can never be read as an
-        instruction; <code>&lt;Guidance&gt;</code> frames memory as information, tells
-        the model to let confidence drive certainty, and to surface contradictions
-        rather than guess; and continuous <code>[N]</code> indices let the state
-        summary reference the same entries the buckets detail without repeating them.
         (The flat single-line renderer still exists — it backs
         <code>/retrieve_context</code> and the benchmark harness, and the extension
         falls back to it against an older server.)
       </p>
+
+      <details class="wide">
+        <summary>Engineering plates — the write path, read path, and working-context assembly in full</summary>
+        <div class="dbody">
+          <figure class="plate">
+            <img src="memory-write-pipeline.svg" loading="lazy" width="1700" height="1460"
+                 alt="Memory write pipeline schematic: save_memory() through Extractor, Classifier, ImportanceScorer, CanonicalMatcher, KnowledgeUpdater, VaultWriter, and OntologyPipeline, with checkpoint deduplication and write tracing">
+            <figcaption><b>Plate 02</b> — the write path, stage by stage, including checkpoint dedup and the write trace.</figcaption>
+          </figure>
+          <figure class="plate">
+            <img src="memory-retrieval-pipeline.svg" loading="lazy" width="1700" height="1520"
+                 alt="Memory retrieval pipeline schematic: query through HybridCandidateRetriever's dual ontology and keyword paths, DeterministicRanker, AcceptanceStage, and ContextBuilder, with diagnostics feeding the RetrievalTrace">
+            <figcaption><b>Plate 03</b> — the read path: two independent evidence paths, seven ranking factors, five acceptance checks, one trace.</figcaption>
+          </figure>
+          <figure class="plate">
+            <img src="working-context-assembly.svg" loading="lazy" width="1500" height="1180"
+                 alt="Working Context assembly schematic: WorkingContextBuilder grouping accepted candidates into per-concept topic buckets with a deterministic state summary, and its three consumers">
+            <figcaption><b>Plate 04</b> — accepted memories becoming resumable units of work, and the three consumers that render them.</figcaption>
+          </figure>
+        </div>
+      </details>
 
       <h3>Never pay for the same conversation twice</h3>
       <p>
@@ -1023,7 +1478,7 @@ relational consistency mattered more than write throughput.
       <p>
         The same deduplication extends beyond conversations: an imported Obsidian note
         is checkpointed under its vault-relative path, hashed with the <em>same</em>
-        hashing the save path uses — never a second scheme. Re-scan your vault
+        scheme the save path uses — never a second one. Re-scan your vault
         tomorrow and every unchanged note is skipped without a single LLM call; only
         notes you've edited come back up for review. And every memory born from an
         import carries <strong>provenance</strong> — source, source file, import
@@ -1032,9 +1487,9 @@ relational consistency mattered more than write throughput.
       </p>
     </section>
 
-    <!-- ============ 05 ============ -->
+    <!-- ============ 06 ============ -->
     <section id="explainable" class="rv">
-      <div class="kicker"><span class="num">05</span>Explainable memory</div>
+      <div class="kicker"><span class="num">06</span>Explainable memory</div>
       <h2>Three inspectors, one per question you'd ask a memory system</h2>
 
       <p>
@@ -1043,6 +1498,17 @@ relational consistency mattered more than write throughput.
         here are faithful recreations of the dashboard views, populated with the demo
         vault's data.
       </p>
+
+      <details class="wide">
+        <summary>Engineering plate — how every "why" button resolves to pipeline data</summary>
+        <div class="dbody">
+          <figure class="plate">
+            <img src="explainability-pipeline.svg" loading="lazy" width="1680" height="1180"
+                 alt="Explainability pipeline schematic: every dashboard why-button resolves to either engine.query_with_trace() re-exposed as an InspectorResponse, or a persisted WriteTrace read back unmodified">
+            <figcaption><b>Plate 05</b> — there is no separate "explain" algorithm: every inspector is the pipeline's own trace, re-exposed unmodified.</figcaption>
+          </figure>
+        </div>
+      </details>
 
       <h3>Retrieval Inspector — "why did I get these results?"</h3>
 
@@ -1167,8 +1633,11 @@ valid_from   2026-06-12</pre>
         </div>
       </div>
       <p class="mock-cap">
-        Confirmations strengthen; they never duplicate. A future "we're moving billing
-        off Postgres" would arrive here as a SUPERSEDE entry, not a competing row.
+        Confirmations strengthen; they never duplicate. A restatement that contradicts
+        the fact outright — "we're moving billing off Postgres" — is a case
+        <code>SUPERSEDE</code> exists to handle, but automatic detection of that case
+        is not wired into the production pipeline yet (see Roadmap) — today it would
+        arrive as a new, competing row instead.
       </p>
 
       <p>
@@ -1179,9 +1648,9 @@ valid_from   2026-06-12</pre>
       </p>
     </section>
 
-    <!-- ============ 06 ============ -->
+    <!-- ============ 07 ============ -->
     <section id="product" class="rv">
-      <div class="kicker"><span class="num">06</span>Haven in use</div>
+      <div class="kicker"><span class="num">07</span>Haven in use</div>
       <h2>The same pipeline, wherever your knowledge lives</h2>
 
       <p class="lede">
@@ -1196,13 +1665,15 @@ valid_from   2026-06-12</pre>
         Working Contexts for what you're about to ask and previews them card-by-card —
         topic, status, what's most salient — before inserting the structured prompt.
         <strong>Remember</strong> starts the write path. Neither ever acts silently.
+        The extension's popup also has its own vault search, for looking something
+        up without leaving the conversation to open the dashboard.
       </p>
 
       <div class="mock wide" role="img" aria-label="Browser extension mock: ChatGPT compose box with Use Haven and Remember buttons, and a Working Context preview card with Insert and Cancel actions">
         <div class="chrome"><i></i><i></i><i></i><span class="t">chatgpt.com · Haven extension</span></div>
         <div class="body">
           <div class="xbar">
-            <span class="compose">Should billing run managed RDS or self-hosted?</span>
+            <span class="compose">Should billing run managed RDS, or self-hosted?</span>
             <span class="xbtn primary">Use Haven</span>
             <span class="xbtn">Remember</span>
           </div>
@@ -1220,7 +1691,7 @@ valid_from   2026-06-12</pre>
         </div>
       </div>
       <p class="mock-cap">
-        What gets inserted is the &lt;HavenContext&gt; block from section 04 — the
+        What gets inserted is the &lt;HavenContext&gt; block from section 05 — the
         preview cards and the injected prompt are projections of the same
         WorkingContext objects.
       </p>
@@ -1270,9 +1741,11 @@ valid_from   2026-06-12</pre>
         is organized around what you'd actually do with a second brain: <strong>Quick
         capture</strong> a thought, <strong>Import</strong> an existing vault,
         <strong>Ask your memory</strong> a question, see your <strong>Current
-        focus</strong> (the same Working Contexts the extension previews), browse and
-        inspect memories, and open <strong>Under the hood</strong> when you want the
-        write traces and retrieval pipeline view.
+        focus</strong> (the same Working Contexts the extension previews), browse
+        memories grouped into three domains — <strong>Personal, Work,
+        Knowledge</strong> — each further tagged by topic, inspect any one of them,
+        and open <strong>Under the hood</strong> when you want the write traces and
+        retrieval pipeline view.
       </p>
 
       <div class="mock wide" role="img" aria-label="Quick Capture mock: a title field, Markdown editor, and Save note button">
@@ -1379,53 +1852,67 @@ valid_from   2026-06-12</pre>
       </p>
     </section>
 
-    <!-- ============ 07 ============ -->
+    <!-- ============ 08 ============ -->
     <section id="benchmarks" class="rv">
-      <div class="kicker"><span class="num">07</span>Benchmarks</div>
-      <h2>Measured against mem0, on the same cases</h2>
+      <div class="kicker"><span class="num">08</span>Benchmarks</div>
+      <h2>Two suites, driven through the real pipeline</h2>
 
       <p>
-        All numbers are reproducible from the repo:
-        <span data-bench="cases">159</span> cases across
-        <span data-bench="categories">11</span> categories (identity, preferences,
-        decisions, goals, contradictions, supersession, temporal, and more), driven
-        through the <em>real pipeline</em> — no stage reimplemented or bypassed — with
-        mem0's retrieval as the baseline. Every figure below comes from one
-        <code>BENCH</code> object in this page's source, populated from the recorded
-        run in <code>benchmarks/results/final_report.md</code>; the next full run only
-        has to replace those values.
+        Two independent harnesses live under <code>benchmarks/</code>, each driven
+        through the <em>real pipeline</em> — no stage reimplemented or bypassed — and
+        each measuring a different claim. Full methodology and raw results:
+        <code>benchmarks/README.md</code>.
       </p>
 
       <p style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-        <span class="prov">provisional · run 001 — expanded re-run pending</span>
-        <span style="font-family:var(--mono);font-size:12px;color:var(--ink-3)">baselines &amp; distractor sweeps land in the next report</span>
+        <span class="prov">write-path suite · deterministic, reproducible</span>
+        <span style="font-family:var(--mono);font-size:12px;color:var(--ink-3)">read-path suite also supports independent baselines &amp; ablation adapters — see below</span>
       </p>
 
       <div class="metrics wide">
-        <div class="metric"><div class="v" data-bench="precision-x">2.3×</div><div class="k">retrieval precision<br><span data-bench="precision-pair">0.301 → 0.679</span></div></div>
-        <div class="metric"><div class="v" data-bench="fp-x">5×</div><div class="k">fewer false positives<br><span data-bench="fp-pair">0.500 → 0.100</span></div></div>
-        <div class="metric"><div class="v" data-bench="noise-pct">−60<small>%</small></div><div class="k">noise volume<br><span data-bench="accepted-pair">278 → 110 accepted</span></div></div>
         <div class="metric"><div class="v">0</div><div class="k">LLM calls to re-save an<br>unchanged conversation or note</div></div>
+        <div class="metric"><div class="v" data-bench="prompt-haven">769</div><div class="k">constant extraction prompt tokens<br>at 500 turns (vs. linear growth)</div></div>
       </div>
 
       <div class="fig wide">
         <div class="fig-head">
-          <h5>Retrieval quality, baseline vs Haven</h5>
-          <div class="legend" id="barLegend"></div>
+          <h4>Read path: 288-case, LLM-judged retrieval suite</h4>
         </div>
-        <div class="fig-sub"><span data-bench="cases">159</span> cases, <span data-bench="categories">11</span> categories · higher precision is better, lower false-positive rate is better · <span class="prov">provisional</span></div>
-        <div class="chart-wrap" id="barWrap">
-          <svg id="barChart" viewBox="0 0 720 300" role="img" aria-label="Grouped bar chart. Retrieval precision: baseline 0.301, Haven 0.679. False-positive rate: baseline 0.500, Haven 0.100."></svg>
-          <div class="tip" id="barTip"></div>
-        </div>
+        <div class="fig-sub">Haven Full vs. four naive baselines and a retrieval-only ablation of itself · DeepSeek-judged run</div>
+        <p>
+          <code>benchmarks/runners/run_benchmarks.py</code> runs Haven's full pipeline
+          (<code>HavenAdapter</code> → <code>VaultWriter</code> + <code>OntologyPipeline</code>
+          + <code>MemoryEngine</code>, no stage bypassed) against a 288-case dataset
+          alongside four naive baselines — return-everything, most-recent, BM25 keyword
+          search, embedding similarity — and a retrieval-only ablation of Haven itself,
+          each graded by the same LLM judge. Full per-category breakdown:
+          <code>benchmarks/reports/archive/deepseek_validation_report.md</code>; raw data:
+          <code>benchmarks/results/results_*.json</code>.
+        </p>
+        <p>
+          <strong>The honest headline:</strong> Haven's full pipeline beats plain keyword
+          search (BM25) and its own retrieval-only ablation by a wide margin. It currently
+          loses on raw pass rate to two deliberately naive baselines — "return everything"
+          and "return the most recent memory" — specifically on the categories built to
+          test contradiction and supersession handling. The traced root cause is real and
+          scoped, not a benchmark artifact: <code>CanonicalMatcher</code> only recognizes
+          an <code>UPDATE</code> via a conservative prefix-extension rule, and doesn't yet
+          detect a restated or differently-phrased correction as a <code>SUPERSEDE</code> —
+          so the old and new facts both stay independently retrievable instead of the old
+          one being archived. Wiring that detection into the automatic pipeline is the
+          first item on the <a href="#next">roadmap</a>. A benchmark suite that only ever
+          finds wins is a marketing document; this one found the specific, named reason
+          Haven loses on four categories, which is why the win on the rest is worth
+          believing.
+        </p>
       </div>
 
       <div class="fig wide">
         <div class="fig-head">
-          <h5>Extractor prompt size vs conversation length</h5>
+          <h4>Extractor prompt size vs conversation length</h4>
           <div class="legend" id="lineLegend"></div>
         </div>
-        <div class="fig-sub">estimated tokens sent to the extractor per save · 25 → 500 turns · <span class="prov">provisional</span></div>
+        <div class="fig-sub">estimated tokens sent to the extractor per save · 25 → 500 turns · <span class="prov">run 001</span></div>
         <div class="chart-wrap" id="lineWrap">
           <svg id="lineChart" viewBox="0 0 720 340" role="img" aria-label="Line chart. Full reprocess grows linearly from about 340 tokens at 25 turns to about 6,800 at 500 turns. Haven incremental stays flat at about 769 tokens."></svg>
           <div class="tip" id="lineTip"></div>
@@ -1458,7 +1945,7 @@ valid_from   2026-06-12</pre>
           <ul>
             <li>Hybrid keyword + concept-graph activation, deterministic</li>
             <li>Acceptance gate abstains — returns nothing below the bar</li>
-            <li>CONFIRM / UPDATE / SUPERSEDE strengthen one belief</li>
+            <li>CONFIRM / UPDATE strengthen one belief instead of duplicating it</li>
             <li>Memory Review — every write passes your eyes first</li>
             <li>Checkpointed: 0 LLM calls if unchanged, 1 turn if incremental</li>
             <li>Storage: plain Markdown + YAML in Memory Spaces — real Obsidian vaults</li>
@@ -1466,7 +1953,7 @@ valid_from   2026-06-12</pre>
         </div>
       </div>
 
-      <details>
+      <details class="wide">
         <summary>Methodology fine print — it's load-bearing</summary>
         <div class="dbody">
           <p>
@@ -1481,30 +1968,132 @@ valid_from   2026-06-12</pre>
             (<code>chars / 4</code>) — directionally correct, not exact.
           </p>
           <p>
-            The gains come from named, individually testable changes — stop-word
-            filtering, IDF weighting with a phrase bonus, controlled normalization, a
-            tokenizer fix, and above all the acceptance stage — not from a bigger model
-            or a better embedding.
+            The read path's ranking and acceptance logic is built from named,
+            individually testable engineering changes — stop-word filtering, IDF
+            weighting with a phrase bonus, controlled normalization, a tokenizer fix,
+            and the acceptance stage — each traceable in the Retrieval Inspector, not
+            tuned to flatter any single benchmark number.
           </p>
           <p>
-            The harness itself has grown teeth since run 001, precisely so the next
-            numbers are harder to flatter. Four independent <strong>baselines</strong>
-            (return-everything, recency, BM25, dense embeddings) now bracket the
-            comparison — if "return the single most recent memory" matches Haven on the
-            supersession categories, those categories aren't measuring the ontology.
-            A <strong>distractor sweep</strong> prepends n guaranteed-irrelevant
-            memories and watches pass rates as n grows, because precision over a
-            two-document corpus is nearly meaningless. And <strong>ablation
-            adapters</strong> switch individual retrieval features off to attribute the
-            gains. Their results are what the "provisional" tags above are waiting on.
+            The harness is built so its own numbers are hard to flatter. Its adapter
+            registry supports four independent <strong>baselines</strong>
+            (return-everything, recency, BM25, dense embeddings) that bracket the
+            comparison — if "return the single most recent memory" matched Haven on
+            the supersession categories, those categories wouldn't be measuring the
+            ontology. A <strong>distractor sweep</strong> prepends n
+            guaranteed-irrelevant memories and watches pass rates as n grows, because
+            precision over a two-document corpus is nearly meaningless. And
+            <strong>ablation adapters</strong> switch individual retrieval features
+            off, so a gain can be attributed to the mechanism that produced it.
+          </p>
+          <figure class="plate">
+            <img src="benchmark-framework.svg" loading="lazy" width="1680" height="1360"
+                 alt="Benchmark framework schematic: dataset JSON through the adapter registry (real Haven pipeline, baselines, ablations, upstream mem0), ingestion, search, the LLM judge, results.json, and judge-independent failure classification">
+            <figcaption><b>Plate 06</b> — the benchmark framework: one dataset, one adapter registry, the real pipeline under test, and judge-independent failure classification.</figcaption>
+          </figure>
+        </div>
+      </details>
+
+      <div class="callout">
+        <span class="tag">Transparency, on purpose</span>
+        <p>
+          The benchmark report publishes its failures alongside its wins — including
+          a real accuracy gap the suite found in Haven's own incremental path
+          (engineering note 05, below). Showing the misses isn't a disclaimer; it's
+          the philosophy. Numbers you can audit are the only numbers worth publishing.
+        </p>
+      </div>
+    </section>
+
+    <!-- ============ 09 · Installation ============ -->
+    <section id="install" class="rv">
+      <div class="kicker"><span class="num">09</span>Installation</div>
+      <h2>Running in five minutes — no API key</h2>
+
+      <p>
+        Everything above is reproducible on your machine, offline. The demo replays
+        real conversations through Haven's real, unmodified pipeline using a scripted
+        fake LLM — so there is nothing to sign up for and no key to paste.
+      </p>
+
+      <div class="codeblock wide">
+        <div class="bar"><span>quickstart</span><span class="lang">shell</span></div>
+        <pre><code><span class="tk-c"># 1 · Clone and install the server's dependencies</span>
+git clone https://github.com/fazeprism25/haven.git
+cd haven
+pip install -r obsidian/server/requirements.txt
+
+<span class="tk-c"># 2 · Run the server from the repo root</span>
+uvicorn obsidian.server.main:app --reload --port 8765</code></pre>
+      </div>
+
+      <ol class="install-steps">
+        <li>
+          <b>Pick a vault.</b> Open <code>http://127.0.0.1:8765/dashboard</code> —
+          first run shows a <em>Select your vault</em> prompt. Any folder path works;
+          pointing at an existing Obsidian vault is safe (Haven only adds its own
+          subfolders, non-destructively).
+        </li>
+        <li>
+          <b>Click "Import Demo Data."</b> Two seconds later you have 47 memories,
+          47 concepts, and 57 relationships from three fictional people — every one
+          written through the production write path.
+        </li>
+        <li>
+          <b>Explore.</b> Query the Retrieval Inspector (<code>billing-service</code>,
+          <code>capstone</code>), click any memory card to open the Memory Inspector,
+          and open the Write Inspector's three <code>priya-standup</code> traces to
+          watch write cost collapse as checkpointing kicks in.
+        </li>
+      </ol>
+
+      <details>
+        <summary>Connect it to ChatGPT — the browser extension</summary>
+        <div class="dbody">
+          <p>Chromium browsers (Chrome, Edge, Brave — not Firefox/Safari):</p>
+          <p>
+            Go to <code>chrome://extensions</code>, enable <strong>Developer
+            mode</strong>, click <strong>Load unpacked</strong>, and select the repo's
+            <code>extension/</code> folder. The popup's status dot should read
+            <strong>Connected</strong> (it talks to <code>http://127.0.0.1:8765</code>
+            by default). On <code>chatgpt.com</code>, <strong>Use Haven</strong> and
+            <strong>Remember</strong> appear near the compose box.
+          </p>
+          <p>
+            <code>Ctrl+C</code> stops the server; your Markdown vault on disk is
+            untouched, and the extension shows "Offline" until it's back.
           </p>
         </div>
       </details>
+
+      <details>
+        <summary>Use it on your own conversations — needs a Qwen API key</summary>
+        <div class="dbody">
+          <p>
+            The quickstart replays a scripted demo. Real extraction from arbitrary
+            conversations (Quick Capture, <code>/memory/preview</code>) needs Manager
+            AI bound to a live LLM — Haven is standardized on Qwen Cloud for every AI
+            call site:
+          </p>
+          <p>
+            <code>cp config/manager_ai.env.example config/manager_ai.env</code> — then
+            set <code>MANAGER_AI_API_KEY</code> in that file. The server README
+            documents the full picture, including the benchmark judge's and Query
+            Rewriter's separate, independent configs.
+          </p>
+        </div>
+      </details>
+
+      <p>
+        What you've installed is small, legible Python — which is exactly what made
+        the next section possible: most of Haven's quality wins were found by reading
+        its own traces.
+      </p>
     </section>
 
-    <!-- ============ 08 ============ -->
+    <!-- ============ 10 ============ -->
     <section id="lessons" class="rv">
-      <div class="kicker"><span class="num">08</span>Lessons learned</div>
+      <div class="kicker"><span class="num">10</span>Engineering notes</div>
       <h2>What a fully inspectable pipeline teaches you</h2>
 
       <p class="lede">
@@ -1514,9 +2103,9 @@ valid_from   2026-06-12</pre>
       </p>
 
       <div class="lesson">
-        <div class="lh"><span class="ln">lesson 01</span><h3>The biggest wins are embarrassingly boring</h3></div>
+        <div class="lh"><span class="ln">note 01</span><h3>The biggest wins are embarrassingly boring</h3></div>
         <p>
-          The single largest false-positive reduction in the whole project was
+          One of the most consequential fixes in the whole project was
           <strong>stop-word filtering</strong>. Queries like "what's the plan" were
           matching vault-wide on the word "the." In an embedding pipeline this failure
           mode is smeared invisibly across a similarity score; in a keyword trace it's
@@ -1525,9 +2114,9 @@ valid_from   2026-06-12</pre>
       </div>
 
       <div class="lesson">
-        <div class="lh"><span class="ln">lesson 02</span><h3>One character can poison a vault</h3></div>
+        <div class="lh"><span class="ln">note 02</span><h3>One character can poison a vault</h3></div>
         <p>
-          A tokenizer bug worth telling on ourselves about: <code>What's</code> used to
+          A tokenizer bug worth confessing: <code>What's</code> used to
           tokenize into <code>what</code> + <code>s</code> — and the orphaned
           <code>s</code> matched every possessive in the vault. One-character token,
           vault-wide false positives. Finding it took minutes of reading a trace. In an
@@ -1537,7 +2126,7 @@ valid_from   2026-06-12</pre>
       </div>
 
       <div class="lesson">
-        <div class="lh"><span class="ln">lesson 03</span><h3>Don't stem a second brain</h3></div>
+        <div class="lh"><span class="ln">note 03</span><h3>Don't stem a second brain</h3></div>
         <p>
           A trade-off we'd make again: a <strong>controlled normalization table</strong>
           (<code>project ↔ projects</code>, <code>build ↔ building</code>) instead of a
@@ -1549,18 +2138,19 @@ valid_from   2026-06-12</pre>
       </div>
 
       <div class="lesson">
-        <div class="lh"><span class="ln">lesson 04</span><h3>Abstention did more than ranking</h3></div>
+        <div class="lh"><span class="ln">note 04</span><h3>Abstention did more than ranking</h3></div>
         <p>
-          We expected the ranker to be where quality lived. It wasn't. The acceptance
+          We expected the ranker to be where quality lived. It wasn't — ranking alone
+          still returns the full candidate list, weak matches included. The acceptance
           stage — five deterministic checks deciding <em>whether to return anything at
-          all</em> — is where most of the 5× false-positive reduction came from. The
-          design insight generalizes: a retrieval system's precision is bounded less by
-          how well it orders candidates than by whether it's allowed to say no.
+          all</em> — is what actually keeps weak matches out. The design insight
+          generalizes: a retrieval system's precision is bounded less by how well it
+          orders candidates than by whether it's allowed to say no.
         </p>
       </div>
 
       <div class="lesson">
-        <div class="lh"><span class="ln">lesson 05</span><h3>Our benchmark found a bug in the thing it validates</h3></div>
+        <div class="lh"><span class="ln">note 05</span><h3>Our benchmark found a bug in the thing it validates</h3></div>
         <p>
           The suite's most significant finding is a real accuracy gap in
           <strong>Haven's own incremental path</strong>. Working Context only surfaces
@@ -1582,7 +2172,7 @@ valid_from   2026-06-12</pre>
       </blockquote>
 
       <div class="lesson">
-        <div class="lh"><span class="ln">lesson 06</span><h3>Determinism has a perimeter, and time is outside it</h3></div>
+        <div class="lh"><span class="ln">note 06</span><h3>Determinism has a perimeter, and time is outside it</h3></div>
         <p>
           "Deterministic" needed a caveat we only discovered writing tests: the ranker's
           recency factor is a continuous function of wall-clock time, so two calls
@@ -1595,11 +2185,11 @@ valid_from   2026-06-12</pre>
       </div>
 
       <div class="lesson">
-        <div class="lh"><span class="ln">lesson 07</span><h3>Local-first has real costs — pay them openly</h3></div>
+        <div class="lh"><span class="ln">note 07</span><h3>Local-first has real costs — pay them openly</h3></div>
         <p>
           No embeddings means no fuzzy semantic recall: if you never used a word or a
           linked concept, keyword + graph activation won't find it. Working Context
-          retrieval time also grows with vault size (~2 ms at 25 turns → ~138 ms at
+          retrieval time also grows as the vault fills (~2 ms at 25 turns → ~138 ms at
           500) — a real overhead this architecture adds. These are stated limitations,
           not footnotes; the project optimizes for correctness and inspectability before
           coverage and autonomy, and that ordering is the product.
@@ -1607,7 +2197,7 @@ valid_from   2026-06-12</pre>
       </div>
 
       <div class="lesson">
-        <div class="lh"><span class="ln">lesson 08</span><h3>Trust is a write-side problem too</h3></div>
+        <div class="lh"><span class="ln">note 08</span><h3>Trust is a write-side problem too</h3></div>
         <p>
           We spent months making retrieval explainable before admitting the write side
           had the same disease: extraction is the system's one probabilistic step, and
@@ -1621,9 +2211,9 @@ valid_from   2026-06-12</pre>
       </div>
     </section>
 
-    <!-- ============ 09 ============ -->
+    <!-- ============ 11 ============ -->
     <section id="next" class="rv">
-      <div class="kicker"><span class="num">09</span>What's next</div>
+      <div class="kicker"><span class="num">11</span>Roadmap</div>
       <h2>The roadmap, in priority order</h2>
 
       <p>
@@ -1645,9 +2235,8 @@ valid_from   2026-06-12</pre>
               end-to-end, so conversations can't yet refine and contradict existing
               knowledge without review. Fix the Working Context memory-type gap the
               benchmarks surfaced (plain facts still don't reach the incremental
-              extractor's background). Run the expanded benchmark suite — baselines,
-              distractor sweep, ablations — and replace this page's provisional numbers.
-              Fill the six empty benchmark categories.
+              extractor's background). Extend the benchmark dataset into the
+              remaining planned categories.
             </p>
           </div>
         </div>
@@ -1679,17 +2268,33 @@ valid_from   2026-06-12</pre>
 
       <p>
         If the thesis resonates — that a second brain you can't question isn't a brain,
-        it's a liability — the code is open (Apache-2.0), the demo runs offline with no
-        API key, and the vault it builds is plain Markdown you already own.
+        it's a liability — <a href="https://github.com/fazeprism25/haven">the code is
+        open</a> (Apache-2.0), the demo runs offline with no API key, and the vault it
+        builds is plain Markdown you already own.
       </p>
     </section>
   </article>
-</div>
+</main>
+
+<section class="cta-band rv" aria-label="Get started">
+  <h2>Stop re-explaining. <em style="color:var(--brass)">Start resuming.</em></h2>
+  <p>
+    Haven is open source under Apache-2.0 and local-first by design. The demo runs
+    offline in five minutes with no API key — and the vault it builds is plain
+    Markdown that stays yours whether or not you keep Haven.
+  </p>
+  <div class="cta-row center">
+    <a class="btn btn-primary" href="#install">Get started</a>
+    <a class="btn btn-ghost" href="https://github.com/fazeprism25/haven">View on GitHub</a>
+  </div>
+</section>
 
 <footer class="foot">
   <div class="fm">
-    <b>Haven</b> — memory for AI that can show its work<br>
-    Built by Siddhartha Khajuria · Apache-2.0 · built on a fork of mem0
+    <b>Haven</b> — deterministic context assembly for AI that can show its work<br>
+    Designed, written &amp; built by Siddhartha&nbsp;Khajuria ·
+    <a href="https://github.com/fazeprism25/haven">github.com/fazeprism25/haven</a> ·
+    Apache-2.0 · built on a fork of mem0
   </div>
 </footer>
 
@@ -1755,7 +2360,7 @@ valid_from   2026-06-12</pre>
       chips: ["evidence chain", "confidence nudges up", "Markdown + YAML", "provenance"] },
     { key: "Ontology", icon: "M12 4a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM5 16a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm14 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM12 8v4m0 0-5 4m5-4 5 4",
       title: "Ontology — the concept graph",
-      body: "The OntologyPipeline — the only component allowed to mutate the graph — attaches each memory to concepts through an alias index, so “billing-service,” “the billing app,” and “billing” resolve to one node. At read time, activation spreads across this graph to find memories keywords alone would miss.",
+      body: "The OntologyPipeline — the only component allowed to mutate the graph — attaches each memory to concepts through an alias index, so \"billing-service,\" \"the billing app,\" and \"billing\" resolve to one node. At read time, activation spreads across this graph to find memories keywords alone would miss.",
       chips: ["ConceptGraph", "alias index", "activation spreading", "single writer"] },
     { key: "Retrieval", icon: "M10 4a6 6 0 1 0 0 12 6 6 0 0 0 0-12zm10 16-5.5-5.5",
       title: "Retrieval — hybrid, ranked, gated",
@@ -1771,7 +2376,7 @@ valid_from   2026-06-12</pre>
       chips: ["<HavenContext>", "Guidance framing", "confidence annotations", "preview before insert"] },
     { key: "LLM", icon: "M12 3a7 7 0 0 0-4 12.7V19h8v-3.3A7 7 0 0 0 12 3zM10 22h4",
       title: "LLM — the consumer",
-      body: "The model receives exactly what the Retrieval Inspector shows — the same pipeline output, no divergence possible. And because the acceptance stage can abstain, the honest answer to “nothing relevant is in the vault” is an empty injection, not three paragraphs of plausible-looking noise silently steering the conversation.",
+      body: "The model receives exactly what the Retrieval Inspector shows — the same pipeline output, no divergence possible. And because the acceptance stage can abstain, the honest answer to \"nothing relevant is in the vault\" is an empty injection, not three paragraphs of plausible-looking noise silently steering the conversation.",
       chips: ["what you inspect = what you inject", "empty is a first-class answer"] }
   ];
 
@@ -1781,10 +2386,13 @@ valid_from   2026-06-12</pre>
   STAGES.forEach(function (s, i) {
     var node = document.createElement("div");
     node.className = "pipe-node";
+    node.setAttribute("role", "presentation");
     var btn = document.createElement("button");
     btn.setAttribute("role", "tab");
     btn.setAttribute("aria-selected", "false");
+    btn.setAttribute("aria-controls", "pipeDetail");
     btn.setAttribute("id", "ptab-" + i);
+    btn.tabIndex = -1;
     var glyph = document.createElement("span");
     glyph.className = "glyph";
     glyph.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" stroke-linecap="round" stroke-linejoin="round"><path d="' + s.icon + '"/></svg>';
@@ -1797,11 +2405,16 @@ valid_from   2026-06-12</pre>
     track.appendChild(node);
   });
 
+  var pipeCurrent = 0;
   function select(i) {
+    pipeCurrent = i;
     Array.prototype.forEach.call(track.children, function (n, j) {
       n.classList.toggle("on", i === j);
-      n.querySelector("button").setAttribute("aria-selected", i === j ? "true" : "false");
+      var b = n.querySelector("button");
+      b.setAttribute("aria-selected", i === j ? "true" : "false");
+      b.tabIndex = i === j ? 0 : -1;
     });
+    detail.setAttribute("aria-labelledby", "ptab-" + i);
     var s = STAGES[i];
     detail.innerHTML = "";
     var step = document.createElement("div"); step.className = "step";
@@ -1818,19 +2431,28 @@ valid_from   2026-06-12</pre>
   }
   select(2); /* open on Memory Review — the write path's human gate */
 
+  track.addEventListener("keydown", function (e) {
+    var next = null;
+    if (e.key === "ArrowRight" || e.key === "ArrowDown") next = (pipeCurrent + 1) % STAGES.length;
+    else if (e.key === "ArrowLeft" || e.key === "ArrowUp") next = (pipeCurrent - 1 + STAGES.length) % STAGES.length;
+    else if (e.key === "Home") next = 0;
+    else if (e.key === "End") next = STAGES.length - 1;
+    if (next === null) return;
+    e.preventDefault();
+    select(next);
+    document.getElementById("ptab-" + next).focus();
+  });
+
   /* ---------- Benchmarks: single source of truth ----------
      Every displayed benchmark value on this page reads from BENCH.
-     After the next benchmark run, replace the values below and every
-     tile, chart, label, and prose figure updates together.
-     Source: benchmarks/results/final_report.md (run 001) and
-     benchmarks/incremental_ingestion/results/report.md. */
+     If a value ever changes, update it below and every tile, chart,
+     label, and prose figure updates together.
+     Source: benchmarks/incremental_ingestion/results/report.md (write-path,
+     the only benchmark numbers rendered as chart/tile data on this page —
+     see the Benchmarks section prose for the read-path suite's numbers,
+     which are reported qualitatively with a link to the full breakdown
+     rather than duplicated into this object). */
   var BENCH = {
-    provisional: true,
-    cases: 159,
-    categories: 11,
-    precision: { base: 0.301, haven: 0.679 },
-    fpRate: { base: 0.500, haven: 0.100 },
-    accepted: { base: 278, haven: 110 },
     prompt: {
       turns: [25, 50, 100, 200, 300, 400, 500],
       fullPerTurn: 13.6,                                   /* → ~6,800 tokens @ 500 */
@@ -1842,19 +2464,9 @@ valid_from   2026-06-12</pre>
 
   /* Fill every [data-bench] span from BENCH */
   (function () {
-    var f3 = function (v) { return v.toFixed(3); };
     var fills = {
-      "cases": String(BENCH.cases),
-      "categories": String(BENCH.categories),
-      "precision-x": (BENCH.precision.haven / BENCH.precision.base).toFixed(1) + "×",
-      "precision-pair": f3(BENCH.precision.base) + " → " + f3(BENCH.precision.haven),
-      "fp-x": Math.round(BENCH.fpRate.base / BENCH.fpRate.haven) + "×",
-      "fp-pair": f3(BENCH.fpRate.base) + " → " + f3(BENCH.fpRate.haven),
-      "noise-pct": "−" + Math.round((1 - BENCH.accepted.haven / BENCH.accepted.base) * 100) + "<small>%</small>",
-      "accepted-pair": BENCH.accepted.base + " → " + BENCH.accepted.haven + " accepted",
       "prompt-haven": String(BENCH.prompt.havenLabel),
-      "prompt-full-end": BENCH.prompt.full[BENCH.prompt.full.length - 1].toLocaleString(),
-      "fp-base": BENCH.fpRate.base.toFixed(3)
+      "prompt-full-end": BENCH.prompt.full[BENCH.prompt.full.length - 1].toLocaleString()
     };
     document.querySelectorAll("[data-bench]").forEach(function (el) {
       var v = fills[el.getAttribute("data-bench")];
@@ -1873,14 +2485,14 @@ valid_from   2026-06-12</pre>
   }
   function legend(id) {
     var box = document.getElementById(id);
-    [["Baseline (mem0)", C_BASE], ["Haven", C_HAVEN]].forEach(function (d) {
+    [["Full reprocess", C_BASE], ["Haven incremental", C_HAVEN]].forEach(function (d) {
       var li = document.createElement("span"); li.className = "li";
       var sw = document.createElement("span"); sw.className = "sw"; sw.style.background = d[1];
       li.appendChild(sw); li.appendChild(document.createTextNode(d[0]));
       box.appendChild(li);
     });
   }
-  legend("barLegend"); legend("lineLegend");
+  legend("lineLegend");
 
   function showTip(tip, wrap, html, x, y) {
     tip.innerHTML = html;
@@ -1890,55 +2502,6 @@ valid_from   2026-06-12</pre>
     var top = Math.max(8, y - tr.height - 12);
     tip.style.left = left + "px"; tip.style.top = top + "px";
   }
-
-  /* --- Grouped bars: precision & FP rate --- */
-  (function () {
-    var svg = document.getElementById("barChart");
-    var wrap = document.getElementById("barWrap");
-    var tip = document.getElementById("barTip");
-    var W = 720, H = 300, mL = 46, mR = 16, mT = 16, mB = 44;
-    var plotW = W - mL - mR, plotH = H - mT - mB;
-    var groups = [
-      { label: "Retrieval precision", base: BENCH.precision.base, haven: BENCH.precision.haven },
-      { label: "False-positive rate", base: BENCH.fpRate.base, haven: BENCH.fpRate.haven }
-    ];
-    svg.setAttribute("aria-label",
-      "Grouped bar chart. Retrieval precision: baseline " + BENCH.precision.base +
-      ", Haven " + BENCH.precision.haven + ". False-positive rate: baseline " +
-      BENCH.fpRate.base + ", Haven " + BENCH.fpRate.haven + ".");
-    var yMax = 0.8;
-    function y(v) { return mT + (1 - v / yMax) * plotH; }
-    [0, 0.2, 0.4, 0.6, 0.8].forEach(function (t) {
-      el("line", { x1: mL, x2: W - mR, y1: y(t), y2: y(t), "class": "grid-l" }, svg);
-      el("text", { x: mL - 8, y: y(t) + 4, "text-anchor": "end", "class": "axis-t" }, svg).textContent = t.toFixed(1);
-    });
-    var bw = 74, gap = 2;
-    groups.forEach(function (g, gi) {
-      var cx = mL + plotW * (gi === 0 ? 0.27 : 0.73);
-      [{ v: g.base, c: C_BASE, name: "Baseline (mem0)" }, { v: g.haven, c: C_HAVEN, name: "Haven" }].forEach(function (s, si) {
-        var x = cx - bw - gap / 2 + si * (bw + gap);
-        var by = y(s.v), bh = y(0) - by;
-        var r = el("path", {
-          d: "M" + x + " " + (by + 4) + " a4 4 0 0 1 4 -4 h" + (bw - 8) + " a4 4 0 0 1 4 4 v" + (bh - 4) + " h-" + bw + " Z",
-          fill: s.c
-        }, svg);
-        el("text", { x: x + bw / 2, y: by - 8, "text-anchor": "middle", "class": "dlab" }, svg).textContent = s.v.toFixed(3);
-        var hit = el("rect", { x: x - 2, y: mT, width: bw + 4, height: plotH, fill: "transparent" }, svg);
-        function over(ev) {
-          var pt = wrap.getBoundingClientRect();
-          showTip(tip, wrap,
-            "<span class='sw' style='background:" + s.c + "'></span><b>" + s.name + "</b><br>" +
-            g.label + ": <b>" + s.v.toFixed(3) + "</b>",
-            ev.clientX - pt.left, ev.clientY - pt.top);
-          r.setAttribute("opacity", "0.85");
-        }
-        function out() { tip.style.display = "none"; r.setAttribute("opacity", "1"); }
-        hit.addEventListener("mousemove", over);
-        hit.addEventListener("mouseleave", out);
-      });
-      el("text", { x: cx, y: H - 14, "text-anchor": "middle", "class": "axis-t" }, svg).textContent = g.label;
-    });
-  })();
 
   /* --- Line chart: prompt growth --- */
   (function () {
@@ -2014,9 +2577,68 @@ valid_from   2026-06-12</pre>
     });
   })();
 
-  /* ---------- Reading time from actual word count ---------- */
-  var words = document.querySelector("article").textContent.trim().split(/\s+/).length;
-  document.getElementById("readtime").textContent = Math.round(words / 225) + " min read";
+  /* ---------- Demo theater ---------- */
+  (function () {
+    var theater = document.getElementById("theater");
+    if (!theater) return;
+    theater.classList.add("js");
+    var scenes = theater.querySelectorAll(".th-scene");
+    var steps = theater.querySelectorAll(".th-step");
+    var playBtn = document.getElementById("thPlay");
+    var title = document.getElementById("thTitle");
+    var status = document.getElementById("thStatus");
+    var idx = 0, timer = null;
+
+    function show(i) {
+      idx = i;
+      scenes.forEach(function (s, j) { s.classList.toggle("on", i === j); });
+      steps.forEach(function (b, j) {
+        if (i === j) b.setAttribute("aria-current", "true");
+        else b.removeAttribute("aria-current");
+      });
+      title.textContent = scenes[i].getAttribute("data-title");
+      status.textContent = "Demo scene " + (i + 1) + " of " + scenes.length;
+    }
+    function tick() { show((idx + 1) % scenes.length); }
+    function start() {
+      if (timer || reduced) return;
+      timer = setInterval(tick, 5200);
+      playBtn.textContent = "Pause";
+      playBtn.setAttribute("aria-pressed", "true");
+    }
+    function stop() {
+      clearInterval(timer);
+      timer = null;
+      playBtn.textContent = "Play";
+      playBtn.setAttribute("aria-pressed", "false");
+    }
+
+    steps.forEach(function (b) {
+      b.addEventListener("click", function () {
+        stop();
+        show(parseInt(b.getAttribute("data-scene"), 10));
+      });
+    });
+    playBtn.addEventListener("click", function () {
+      if (reduced) { tick(); return; }
+      if (timer) { stop(); } else { start(); tick(); }
+    });
+
+    show(0);
+    if (reduced) {
+      /* reduced motion: no autoplay — the button steps scenes manually */
+      playBtn.textContent = "Next scene";
+      playBtn.removeAttribute("aria-pressed");
+    } else {
+      stop();
+      var seen = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          if (e.isIntersecting) { start(); seen.disconnect(); }
+        });
+      }, { threshold: 0.35 });
+      seen.observe(theater);
+    }
+  })();
 })();
 </script>
 
