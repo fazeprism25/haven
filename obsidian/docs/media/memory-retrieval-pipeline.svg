@@ -1,0 +1,165 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1700 1520" font-family="'Segoe UI', Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="arrowB" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1a1a1a"/></marker>
+    <marker id="arrowG" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#8a8a8a"/></marker>
+    <marker id="arrowV" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#7c3aed"/></marker>
+  </defs>
+  <style>
+    .bg { fill:#ffffff; }
+    .box { fill:#fafafa; stroke:#1a1a1a; stroke-width:1.5; rx:6; }
+    .boxAccent { fill:#f5f0fe; stroke:#7c3aed; stroke-width:1.5; stroke-dasharray:5,4; rx:6; }
+    .gate { fill:#fafafa; stroke:#1a1a1a; stroke-width:2; }
+    .container { fill:#ffffff; stroke:#b5b5b5; stroke-width:1.3; stroke-dasharray:4,3; rx:10; }
+    .diagContainer { fill:#fbfbfb; stroke:#c9c9c9; stroke-width:1.3; stroke-dasharray:2,3; rx:10; }
+    .callout { fill:#ffffff; stroke:#8a8a8a; stroke-width:1.3; stroke-dasharray:4,3; rx:6; }
+    .lbl { font-size:14px; font-weight:600; fill:#141414; text-anchor:middle; }
+    .lblSm { font-size:11.5px; font-weight:600; fill:#141414; text-anchor:middle; }
+    .path { font-family:'Consolas','SF Mono',Menlo,monospace; font-size:10px; fill:#6b6b6b; text-anchor:middle; }
+    .note { font-family:'Consolas','SF Mono',Menlo,monospace; font-size:10px; fill:#7c3aed; text-anchor:middle; }
+    .noteG { font-family:'Consolas','SF Mono',Menlo,monospace; font-size:9.8px; fill:#5a5a5a; text-anchor:middle; }
+    .noteGL { font-family:'Consolas','SF Mono',Menlo,monospace; font-size:9.8px; fill:#5a5a5a; text-anchor:start; }
+    .arrow { stroke:#1a1a1a; stroke-width:1.6; fill:none; marker-end:url(#arrowB); }
+    .arrowDashed { stroke:#8a8a8a; stroke-width:1.5; fill:none; stroke-dasharray:6,4; marker-end:url(#arrowG); }
+    .arrowDotted { stroke:#b5b5b5; stroke-width:1.4; fill:none; stroke-dasharray:1.5,3.5; marker-end:url(#arrowG); }
+    .edgeLbl { font-size:10px; fill:#5a5a5a; text-anchor:middle; }
+    .title { font-size:23px; font-weight:700; fill:#111111; text-anchor:middle; }
+    .subtitle { font-size:12.5px; fill:#5a5a5a; text-anchor:middle; }
+    .containerLbl { font-size:11.5px; font-weight:700; fill:#8a8a8a; letter-spacing:0.5px; }
+    .legendTxt { font-size:10.5px; fill:#333333; }
+    .legendTitle { font-size:11px; font-weight:700; fill:#333333; }
+  </style>
+
+  <rect class="bg" x="0" y="0" width="1700" height="1520"/>
+  <text class="title" x="850" y="34">Memory Retrieval Pipeline</text>
+  <text class="subtitle" x="850" y="53">MemoryEngine.query() / query_with_trace() — obsidian/memory_engine/engine.py:718 (_run_retrieval shared prefix)</text>
+
+  <!-- entry -->
+  <rect class="box" x="360" y="80" width="500" height="56"/>
+  <text class="lbl" x="610" y="105">raw query</text>
+  <text class="path" x="610" y="122">query() · query_with_trace() · query_working_context() · query_structured()</text>
+
+  <!-- ContextPlanner -->
+  <rect class="box" x="360" y="166" width="500" height="60"/>
+  <text class="lbl" x="610" y="190">ContextPlanner.plan(raw_query)</text>
+  <text class="path" x="610" y="206">context_planner.py → ContextPlan: POINTED_QA vs CONTINUATION</text>
+  <line class="arrow" x1="610" y1="136" x2="610" y2="164"/>
+
+  <!-- QueryRewriter -->
+  <rect class="boxAccent" x="360" y="256" width="500" height="60"/>
+  <text class="lbl" x="610" y="280">QueryRewriter.rewrite() — optional</text>
+  <text class="path" x="610" y="296">query_rewriter.py — LLM call, off by default, fail-open → 0–2 rewrites</text>
+  <line class="arrow" x1="610" y1="226" x2="610" y2="254"/>
+
+  <!-- HybridCandidateRetriever container -->
+  <rect class="container" x="220" y="342" width="780" height="230"/>
+  <text class="containerLbl" x="240" y="334">per query (original + rewrites) — HybridCandidateRetriever.retrieve_with_diagnostics()</text>
+  <line class="arrow" x1="610" y1="316" x2="610" y2="340"/>
+
+  <rect class="box" x="250" y="366" width="330" height="120"/>
+  <text class="lblSm" x="415" y="388">Ontology path</text>
+  <text class="path" x="415" y="403">QueryResolver.resolve() → AliasIndex</text>
+  <text class="noteG" x="415" y="418">→ Concept seeds</text>
+  <text class="noteG" x="415" y="433">→ ActivationSpreader.spread(ConceptGraph)</text>
+  <text class="noteG" x="415" y="448">decays over Relationship edges by hop</text>
+  <text class="noteG" x="415" y="463">→ CandidateAssembler.assemble()</text>
+
+  <rect class="box" x="600" y="366" width="330" height="120"/>
+  <text class="lblSm" x="765" y="395">Keyword path</text>
+  <text class="path" x="765" y="412">KeywordCandidateRetriever</text>
+  <text class="path" x="765" y="427">.retrieve_with_scores()</text>
+  <text class="noteG" x="765" y="445">token-overlap over MemoryStore.all(),</text>
+  <text class="noteG" x="765" y="460">independent of the concept graph</text>
+
+  <text class="noteG" x="610" y="548">merge by KnowledgeObject id — a hit found by both paths keeps ontology evidence; keyword-only hits are zero-evidence candidates</text>
+
+  <!-- merge across queries -->
+  <rect class="box" x="360" y="602" width="500" height="66"/>
+  <text class="lbl" x="610" y="626">Merge candidates across queries</text>
+  <text class="path" x="610" y="642">engine.py: _merge_candidates() (ontology evidence wins) → _active_candidates()</text>
+  <text class="noteG" x="610" y="656">drops archived/superseded objects (valid_until ≤ now)</text>
+  <line class="arrow" x1="610" y1="572" x2="610" y2="600"/>
+
+  <!-- Ranker -->
+  <rect class="box" x="360" y="700" width="500" height="80"/>
+  <text class="lbl" x="610" y="724">DeterministicRanker.score_all()</text>
+  <text class="path" x="610" y="740">deterministic_ranker.py → RankedCandidate[]</text>
+  <text class="noteG" x="610" y="754">7 weighted, normalized components:</text>
+  <text class="noteG" x="610" y="768">activation · attachment_relevance · keyword_overlap · importance · confidence · recency · confirmation_count</text>
+  <line class="arrow" x1="610" y1="668" x2="610" y2="698"/>
+
+  <!-- CategoryPreferenceScorer -->
+  <rect class="box" x="360" y="812" width="500" height="56"/>
+  <text class="lbl" x="610" y="834">CategoryPreferenceScorer.score()</text>
+  <text class="path" x="610" y="850">category_preference.py — bounded bonus for ContextPlan-preferred categories, never a hard filter</text>
+  <line class="arrow" x1="610" y1="780" x2="610" y2="810"/>
+
+  <!-- AcceptanceStage gate -->
+  <polygon class="gate" points="330,890 890,890 870,1004 350,1004"/>
+  <text class="lbl" x="610" y="914">AcceptanceStage.accept()</text>
+  <text class="path" x="610" y="930">acceptance_stage.py — 5 ordered, only-shrinking filters:</text>
+  <text class="noteG" x="610" y="946">1 absolute floor · 2 abstention (query-wide) · 3 score-gap cut</text>
+  <text class="noteG" x="610" y="960">4 relative floor · 5 hard cap (acceptance_max_k)</text>
+  <text class="noteG" x="610" y="976">→ AcceptanceDecision[] — every rejection carries a reason</text>
+  <line class="arrow" x1="610" y1="868" x2="610" y2="888"/>
+
+  <!-- Slot allocator -->
+  <rect class="box" x="360" y="1040" width="500" height="60"/>
+  <text class="lbl" x="610" y="1064">DeterministicSlotAllocator.allocate()</text>
+  <text class="path" x="610" y="1080">deterministic_slot_allocator.py — re-sorts, takes top RetrievalConfig.max_results</text>
+  <line class="arrow" x1="610" y1="1004" x2="610" y2="1038"/>
+
+  <!-- ContextBuilder -->
+  <rect class="box" x="360" y="1128" width="500" height="66"/>
+  <text class="lbl" x="610" y="1152">ContextBuilder.build()</text>
+  <text class="path" x="610" y="1168">context_builder.py — renders the final LLM-ready context string</text>
+  <text class="noteG" x="610" y="1182">query()'s return value — query_working_context()/query_structured() branch here instead (see Working Context diagram)</text>
+  <line class="arrow" x1="610" y1="1100" x2="610" y2="1126"/>
+
+  <!-- output -->
+  <rect class="box" x="360" y="1226" width="500" height="56"/>
+  <text class="lbl" x="610" y="1248">context string</text>
+  <text class="path" x="610" y="1265">injected into the LLM's conversation</text>
+  <line class="arrow" x1="610" y1="1194" x2="610" y2="1224"/>
+
+  <!-- diagnostics side branch -->
+  <rect class="diagContainer" x="1010" y="812" width="500" height="392"/>
+  <text class="containerLbl" x="1030" y="804">diagnostics only — attached to RetrievalTrace, never fed back into ranking / acceptance / allocation / context</text>
+
+  <rect class="box" x="1040" y="840" width="440" height="60"/>
+  <text class="lblSm" x="1260" y="862">CoverageAnalyzer.analyze_coverage()</text>
+  <text class="path" x="1260" y="878">coverage_analyzer.py (Phase 2)</text>
+
+  <rect class="box" x="1040" y="920" width="440" height="60"/>
+  <text class="lblSm" x="1260" y="942">GapRecovery.decide_gap_recovery()</text>
+  <text class="path" x="1260" y="958">gap_recovery.py (Phase 4)</text>
+
+  <rect class="box" x="1040" y="1000" width="440" height="60"/>
+  <text class="lblSm" x="1260" y="1022">ProjectStateBuilder.build()</text>
+  <text class="path" x="1260" y="1038">project_state.py (Phase A)</text>
+
+  <rect class="callout" x="1040" y="1090" width="440" height="90"/>
+  <text class="lblSm" x="1260" y="1112">RetrievalTrace</text>
+  <text class="noteG" x="1260" y="1128">every candidate seen, accepted or rejected,</text>
+  <text class="noteG" x="1260" y="1141">with score_breakdown + rejection_reason —</text>
+  <text class="noteG" x="1260" y="1154">read by the Explainability pipeline, never</text>
+  <text class="noteG" x="1260" y="1167">serialized into an LLM prompt</text>
+
+  <line class="arrowDotted" x1="890" y1="930" x2="1038" y2="870"/>
+  <line class="arrowDotted" x1="870" y1="960" x2="1038" y2="950"/>
+  <line class="arrowDotted" x1="890" y1="990" x2="1038" y2="1030"/>
+  <line class="arrowDotted" x1="1260" y1="1060" x2="1260" y2="1088"/>
+  <line class="arrowDotted" x1="1260" y1="900" x2="1260" y2="918"/>
+  <line class="arrowDotted" x1="1260" y1="980" x2="1260" y2="998"/>
+
+  <!-- legend -->
+  <rect class="callout" x="1210" y="80" width="300" height="110"/>
+  <text class="legendTitle" x="1225" y="100">Legend</text>
+  <line x1="1225" y1="114" x2="1255" y2="114" class="arrow"/>
+  <text class="legendTxt" x="1262" y="118">deterministic call / required sequence</text>
+  <line x1="1225" y1="131" x2="1255" y2="131" class="arrowDashed"/>
+  <text class="legendTxt" x="1262" y="135">optional / fail-open</text>
+  <line x1="1225" y1="148" x2="1255" y2="148" class="arrowDotted"/>
+  <text class="legendTxt" x="1262" y="152">diagnostic only, not fed back</text>
+  <rect x="1225" y="160" width="30" height="12" class="boxAccent"/>
+  <text class="legendTxt" x="1262" y="170">LLM call (non-deterministic)</text>
+</svg>

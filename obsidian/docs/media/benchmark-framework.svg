@@ -1,0 +1,139 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1680 1360" font-family="'Segoe UI', Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="arrowB" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1a1a1a"/></marker>
+    <marker id="arrowG" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#8a8a8a"/></marker>
+  </defs>
+  <style>
+    .bg { fill:#ffffff; }
+    .box { fill:#fafafa; stroke:#1a1a1a; stroke-width:1.5; rx:6; }
+    .boxAccent { fill:#f5f0fe; stroke:#7c3aed; stroke-width:1.5; rx:6; }
+    .container { fill:#ffffff; stroke:#b5b5b5; stroke-width:1.3; stroke-dasharray:4,3; rx:10; }
+    .callout { fill:#ffffff; stroke:#8a8a8a; stroke-width:1.3; stroke-dasharray:4,3; rx:6; }
+    .lbl { font-size:14px; font-weight:600; fill:#141414; text-anchor:middle; }
+    .lblSm { font-size:11.5px; font-weight:600; fill:#141414; text-anchor:middle; }
+    .path { font-family:'Consolas','SF Mono',Menlo,monospace; font-size:10px; fill:#6b6b6b; text-anchor:middle; }
+    .noteG { font-family:'Consolas','SF Mono',Menlo,monospace; font-size:9.8px; fill:#5a5a5a; text-anchor:middle; }
+    .arrow { stroke:#1a1a1a; stroke-width:1.6; fill:none; marker-end:url(#arrowB); }
+    .arrowDashed { stroke:#8a8a8a; stroke-width:1.5; fill:none; stroke-dasharray:6,4; marker-end:url(#arrowG); }
+    .title { font-size:23px; font-weight:700; fill:#111111; text-anchor:middle; }
+    .subtitle { font-size:12.5px; fill:#5a5a5a; text-anchor:middle; }
+    .containerLbl { font-size:11.5px; font-weight:700; fill:#8a8a8a; letter-spacing:0.5px; }
+    .legendTxt { font-size:10.5px; fill:#333333; }
+    .legendTitle { font-size:11px; font-weight:700; fill:#333333; }
+  </style>
+
+  <rect class="bg" x="0" y="0" width="1680" height="1360"/>
+  <text class="title" x="840" y="34">Benchmark Framework Architecture</text>
+  <text class="subtitle" x="840" y="53">dataset JSON → adapter → system under test → judge → results.json → analysis — benchmarks/runners/run_benchmarks.py</text>
+
+  <!-- datasets -->
+  <rect class="box" x="440" y="80" width="800" height="66"/>
+  <text class="lbl" x="840" y="105">benchmarks/datasets/**/*.json</text>
+  <text class="path" x="840" y="122">19 categories: decisions, goals, identity, temporal, supersession, contradictions, people, projects, …</text>
+  <text class="noteG" x="840" y="136">plus benchmarks/datasets_continuation/, benchmarks/incremental_ingestion/</text>
+
+  <!-- load -->
+  <rect class="box" x="440" y="180" width="800" height="60"/>
+  <text class="lbl" x="840" y="204">load_benchmarks(dataset_dir)</text>
+  <text class="path" x="840" y="220">run_benchmarks.py:73 — skips files missing benchmark_id/category/conversation/query/expected</text>
+  <line class="arrow" x1="840" y1="146" x2="840" y2="178"/>
+
+  <!-- adapter registry -->
+  <rect class="box" x="440" y="272" width="800" height="56"/>
+  <text class="lbl" x="840" y="294">get_adapter_cls(name)</text>
+  <text class="path" x="840" y="310">run_benchmarks.py:13 — string → adapter class registry</text>
+  <line class="arrow" x1="840" y1="240" x2="840" y2="270"/>
+
+  <!-- adapter family container -->
+  <rect class="container" x="150" y="360" width="1380" height="200"/>
+  <text class="containerLbl" x="170" y="352">adapters/base.py — BaseAdapter ABC: from_config() · delete_all() · add()/add_conversation() · search()</text>
+  <line class="arrow" x1="840" y1="328" x2="840" y2="358"/>
+
+  <rect class="boxAccent" x="180" y="388" width="380" height="140"/>
+  <text class="lblSm" x="370" y="410">Haven (real pipeline)</text>
+  <text class="path" x="370" y="428">haven_adapter.py — HavenAdapter</text>
+  <text class="noteG" x="370" y="442">retrieval only: real MemoryEngine</text>
+  <text class="path" x="370" y="460">haven_full_adapter.py — HavenFullAdapter</text>
+  <text class="noteG" x="370" y="474">full write+read: Extractor → Classifier →</text>
+  <text class="noteG" x="370" y="487">ImportanceScorer → CanonicalMatcher →</text>
+  <text class="noteG" x="370" y="500">KnowledgeUpdater → VaultWriter →</text>
+  <text class="noteG" x="370" y="513">OntologyPipeline → MemoryEngine (in-process)</text>
+
+  <rect class="box" x="590" y="388" width="330" height="140"/>
+  <text class="lblSm" x="755" y="412">Baselines</text>
+  <text class="path" x="755" y="430">baselines.py</text>
+  <text class="noteG" x="755" y="450">ReturnAllAdapter · RecencyAdapter</text>
+  <text class="noteG" x="755" y="464">BM25Adapter · EmbeddingAdapter</text>
+  <text class="noteG" x="755" y="484" fill="#8a8a8a">no Haven code</text>
+
+  <rect class="box" x="950" y="388" width="330" height="140"/>
+  <text class="lblSm" x="1115" y="412">Ablations</text>
+  <text class="path" x="1115" y="430">ablations.py</text>
+  <text class="noteG" x="1115" y="450">HavenNoOntologyAdapter</text>
+  <text class="noteG" x="1115" y="464">HavenNoKeywordAdapter</text>
+  <text class="noteG" x="1115" y="478">HavenNoRecencyAdapter</text>
+  <text class="noteG" x="1115" y="498" fill="#8a8a8a">scoring-contribution ablations</text>
+  <text class="noteG" x="1115" y="511" fill="#8a8a8a">of the real Haven pipeline</text>
+
+  <rect class="callout" x="1300" y="388" width="200" height="140"/>
+  <text class="lblSm" x="1400" y="412">mem0 (upstream)</text>
+  <text class="noteG" x="1400" y="432">"mem0" resolves directly</text>
+  <text class="noteG" x="1400" y="445">to mem0.Memory (run_bench-</text>
+  <text class="noteG" x="1400" y="458">marks.py:35) — the forked</text>
+  <text class="noteG" x="1400" y="471">mem0/ SDK, no adapter file</text>
+
+  <!-- run_benchmark sequence -->
+  <rect class="container" x="150" y="592" width="1380" height="330"/>
+  <text class="containerLbl" x="170" y="584">run_benchmark(benchmark, adapter_cls, query_rewriter) — run_benchmarks.py:147, per dataset case</text>
+  <line class="arrow" x1="840" y1="560" x2="840" y2="590"/>
+
+  <rect class="box" x="440" y="616" width="800" height="52"/>
+  <text class="lblSm" x="840" y="637">adapter = adapter_cls.from_config(config)</text>
+  <text class="noteG" x="840" y="652">(or adapter_cls(query_rewriter=...) when rewriting is enabled)</text>
+
+  <rect class="box" x="440" y="686" width="800" height="46"/>
+  <text class="lblSm" x="840" y="714">delete_all(filters) — best-effort clean slate</text>
+  <line class="arrow" x1="840" y1="668" x2="840" y2="684"/>
+
+  <rect class="box" x="440" y="750" width="800" height="60"/>
+  <text class="lblSm" x="840" y="772">add_conversation(...) if supported, else per-turn add(messages, infer=False)</text>
+  <text class="noteG" x="840" y="788">ingests the benchmark's synthetic conversation into the adapter under test</text>
+  <line class="arrow" x1="840" y1="732" x2="840" y2="748"/>
+
+  <rect class="box" x="440" y="828" width="800" height="66"/>
+  <text class="lblSm" x="840" y="852">search(query=benchmark["query"], filters=...) → results</text>
+  <text class="noteG" x="840" y="868">answer = join(result["results"][*]["memory"]) — Haven's answer is its accepted RetrievalTrace candidates</text>
+  <line class="arrow" x1="840" y1="810" x2="840" y2="826"/>
+
+  <!-- judge -->
+  <rect class="boxAccent" x="440" y="936" width="800" height="80"/>
+  <text class="lbl" x="840" y="960">judge_answer(query, expected, answer)</text>
+  <text class="path" x="840" y="977">judges/llm_judge.py:96 — LLM call (Qwen judge model, DashScope)</text>
+  <text class="noteG" x="840" y="993">semantic pass/fail + failure_type ∈ {NONE, RETRIEVAL, SUPERSESSION, TEMPORAL, REASONING, INCOMPLETE, INCORRECT, JUDGE_ERROR}</text>
+  <line class="arrow" x1="840" y1="922" x2="840" y2="934"/>
+
+  <!-- results -->
+  <rect class="box" x="440" y="1052" width="800" height="80"/>
+  <text class="lbl" x="840" y="1076">result dict → benchmarks/results/results_*.json</text>
+  <text class="noteG" x="840" y="1092">benchmark_id, category, passed, answer_score, retrieved_memories,</text>
+  <text class="noteG" x="840" y="1106">judge_reason, failure_type, per-stage timings</text>
+  <line class="arrow" x1="840" y1="1016" x2="840" y2="1050"/>
+
+  <!-- analysis -->
+  <rect class="box" x="440" y="1168" width="800" height="90"/>
+  <text class="lbl" x="840" y="1192">benchmarks/analysis/classify_failure.py</text>
+  <text class="path" x="840" y="1208">classify_failure(result) — line 41, judge-independent cross-check</text>
+  <text class="noteG" x="840" y="1224">→ PASS · NO_RETRIEVAL (zero retrieved_memories) · INCORRECT_ANSWER</text>
+  <text class="noteG" x="840" y="1240">generate_report() aggregates results_*.json into a markdown report</text>
+  <line class="arrow" x1="840" y1="1132" x2="840" y2="1166"/>
+
+  <!-- legend -->
+  <rect class="callout" x="1310" y="80" width="270" height="86"/>
+  <text class="legendTitle" x="1325" y="100">Legend</text>
+  <line x1="1325" y1="114" x2="1355" y2="114" class="arrow"/>
+  <text class="legendTxt" x="1362" y="118">sequential call</text>
+  <rect x="1325" y="126" width="30" height="12" class="boxAccent"/>
+  <text class="legendTxt" x="1362" y="136">real Haven pipeline / LLM call</text>
+  <rect x="1325" y="146" width="30" height="12" class="callout"/>
+  <text class="legendTxt" x="1362" y="156">external / upstream baseline</text>
+</svg>

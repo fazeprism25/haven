@@ -1,0 +1,151 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1680 1180" font-family="'Segoe UI', Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="arrowB" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1a1a1a"/></marker>
+    <marker id="arrowG" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#8a8a8a"/></marker>
+  </defs>
+  <style>
+    .bg { fill:#ffffff; }
+    .box { fill:#fafafa; stroke:#1a1a1a; stroke-width:1.5; rx:6; }
+    .boxCore { fill:#f3edfe; stroke:#7c3aed; stroke-width:1.7; rx:6; }
+    .container { fill:#ffffff; stroke:#b5b5b5; stroke-width:1.3; stroke-dasharray:4,3; rx:10; }
+    .callout { fill:#ffffff; stroke:#8a8a8a; stroke-width:1.3; stroke-dasharray:4,3; rx:6; }
+    .lbl { font-size:14px; font-weight:600; fill:#141414; text-anchor:middle; }
+    .lblSm { font-size:11.5px; font-weight:600; fill:#141414; text-anchor:middle; }
+    .path { font-family:'Consolas','SF Mono',Menlo,monospace; font-size:10px; fill:#6b6b6b; text-anchor:middle; }
+    .noteG { font-family:'Consolas','SF Mono',Menlo,monospace; font-size:9.8px; fill:#5a5a5a; text-anchor:middle; }
+    .arrow { stroke:#1a1a1a; stroke-width:1.6; fill:none; marker-end:url(#arrowB); }
+    .arrowDashed { stroke:#8a8a8a; stroke-width:1.5; fill:none; stroke-dasharray:6,4; marker-end:url(#arrowG); }
+    .title { font-size:23px; font-weight:700; fill:#111111; text-anchor:middle; }
+    .subtitle { font-size:12.5px; fill:#5a5a5a; text-anchor:middle; }
+    .containerLbl { font-size:11.5px; font-weight:700; fill:#8a8a8a; letter-spacing:0.5px; }
+    .legendTxt { font-size:10.5px; fill:#333333; }
+    .legendTitle { font-size:11px; font-weight:700; fill:#333333; }
+  </style>
+
+  <rect class="bg" x="0" y="0" width="1680" height="1180"/>
+  <text class="title" x="840" y="34">Explainability Pipeline ("Universal Why")</text>
+  <text class="subtitle" x="840" y="53">No separate explain algorithm — every "why" view is the Retrieval Inspector's RetrievalTrace, or a persisted WriteTrace, re-exposed as-is</text>
+
+  <!-- triggers -->
+  <rect class="box" x="60" y="86" width="420" height="70"/>
+  <text class="lblSm" x="270" y="110">Search / query box</text>
+  <text class="path" x="270" y="126">popup.js search · dashboard query field</text>
+  <text class="noteG" x="270" y="142">HAVEN_SEARCH_MEMORIES → GET /dashboard/inspect?query=</text>
+
+  <rect class="box" x="510" y="86" width="420" height="70"/>
+  <text class="lblSm" x="720" y="108">dashboard.html .why-btn</text>
+  <text class="noteG" x="720" y="124">memory card · activity item · Working Context</text>
+  <text class="noteG" x="720" y="138">bucket member · Project Overview field</text>
+  <text class="path" x="720" y="152">openMemoryDetail()</text>
+
+  <rect class="box" x="960" y="86" width="330" height="70"/>
+  <text class="lblSm" x="1125" y="110">dashboard.html .why-btn</text>
+  <text class="path" x="1125" y="126">benchmark row</text>
+  <text class="noteG" x="1125" y="142">renderBenchmarkDetail()</text>
+
+  <!-- routes -->
+  <rect class="box" x="60" y="216" width="420" height="60"/>
+  <text class="lblSm" x="270" y="240">GET /api/v1/dashboard/inspect?query=</text>
+  <text class="path" x="270" y="256">dashboard.py:590</text>
+  <line class="arrow" x1="270" y1="156" x2="270" y2="214"/>
+
+  <rect class="box" x="510" y="216" width="420" height="60"/>
+  <text class="lblSm" x="720" y="240">GET /dashboard/inspect/memory/{memory_id}</text>
+  <text class="path" x="720" y="256">dashboard.py:615</text>
+  <line class="arrow" x1="720" y1="156" x2="720" y2="214"/>
+
+  <rect class="box" x="960" y="216" width="330" height="60"/>
+  <text class="lblSm" x="1125" y="240">GET /dashboard/benchmarks/{benchmark_id}</text>
+  <text class="path" x="1125" y="256">benchmark_explorer.py:448</text>
+  <line class="arrow" x1="1125" y1="156" x2="1125" y2="214"/>
+
+  <text class="noteG" x="720" y="292">memory route: query text = that memory's own canonical_fact</text>
+
+  <!-- shared core -->
+  <rect class="boxCore" x="200" y="320" width="700" height="66"/>
+  <text class="lbl" x="550" y="345">engine.query_with_trace(query)</text>
+  <text class="path" x="550" y="362">obsidian/memory_engine/engine.py — the exact same retrieval pipeline as retrieve_context</text>
+  <line class="arrow" x1="270" y1="276" x2="420" y2="318"/>
+  <line class="arrow" x1="720" y1="276" x2="650" y2="318"/>
+
+  <!-- ontology + provenance for memory route -->
+  <rect class="callout" x="960" y="320" width="330" height="90"/>
+  <text class="lblSm" x="1125" y="342">memory route only</text>
+  <text class="noteG" x="1125" y="358">_ontology_for_memory() — dashboard.py:213</text>
+  <text class="noteG" x="1125" y="371">Concepts/Relationships reachable via</text>
+  <text class="noteG" x="1125" y="384">ConceptGraph, plus import provenance</text>
+  <line class="arrowDashed" x1="900" y1="358" x2="958" y2="358"/>
+
+  <!-- RetrievalTrace -->
+  <rect class="box" x="200" y="426" width="700" height="132"/>
+  <text class="lbl" x="550" y="450">RetrievalTrace</text>
+  <text class="path" x="550" y="466">retrieval_models.py:1341 — immutable, JSON-serializable "why" record</text>
+  <text class="noteG" x="550" y="484">every candidate seen, accepted or rejected — rejection_reason, threshold_used,</text>
+  <text class="noteG" x="550" y="497">score_gap, relative_score, abstained, full score_breakdown, base_score,</text>
+  <text class="noteG" x="550" y="510">category_preference_bonus, plus context_plan / coverage / gap_recovery /</text>
+  <text class="noteG" x="550" y="523">project_state diagnostic projections</text>
+  <text class="noteG" x="550" y="546" fill="#b8860b">must NEVER be passed to, or serialized into, an LLM prompt</text>
+  <line class="arrow" x1="550" y1="386" x2="550" y2="424"/>
+
+  <!-- InspectorResponse -->
+  <rect class="box" x="200" y="596" width="700" height="80"/>
+  <text class="lbl" x="550" y="621">InspectorResponse</text>
+  <text class="path" x="550" y="637">{ context, trace, working_contexts, structured_prompt }</text>
+  <text class="noteG" x="550" y="654">query route: from _working_contexts_and_prompt() (best-effort query_working_context/query_structured)</text>
+  <text class="noteG" x="550" y="667">memory route: merges in ontology attachments + provenance</text>
+  <line class="arrow" x1="550" y1="558" x2="550" y2="594"/>
+  <line class="arrowDashed" x1="1000" y1="410" x2="750" y2="600"/>
+
+  <!-- benchmark disk read -->
+  <rect class="box" x="960" y="426" width="330" height="120"/>
+  <text class="lblSm" x="1125" y="450">Explain a benchmark row</text>
+  <text class="path" x="1125" y="468">reads committed files on disk:</text>
+  <text class="noteG" x="1125" y="484">benchmarks/datasets/**/*.json</text>
+  <text class="noteG" x="1125" y="497">benchmarks/results/results_*.json</text>
+  <text class="noteG" x="1125" y="513">(conversation + judge evidence)</text>
+  <text class="noteG" x="1125" y="530">separate from RetrievalTrace entirely</text>
+  <line class="arrow" x1="1125" y1="276" x2="1125" y2="424"/>
+
+  <!-- test confirmation -->
+  <rect class="callout" x="960" y="596" width="330" height="80"/>
+  <text class="noteG" x="1125" y="620">confirmed by</text>
+  <text class="path" x="1125" y="636">test_e2e_universal_why.py</text>
+  <text class="noteG" x="1125" y="654">every .why-btn resolves to exactly</text>
+  <text class="noteG" x="1125" y="667">one of these two GET calls</text>
+  <line class="arrow" x1="1125" y1="546" x2="1125" y2="594"/>
+
+  <!-- write-side trail (separate section) -->
+  <rect class="container" x="200" y="760" width="1090" height="200"/>
+  <text class="containerLbl" x="220" y="752">write-side trail — persisted once, NOT recomputed on demand (unlike the read-side Inspector above)</text>
+
+  <rect class="box" x="230" y="790" width="330" height="70"/>
+  <text class="lblSm" x="395" y="814">save_memory() time</text>
+  <text class="path" x="395" y="830">WriteTraceWriter</text>
+  <text class="noteG" x="395" y="846">ontology/write_trace_store.py</text>
+
+  <rect class="box" x="620" y="790" width="330" height="70"/>
+  <text class="lblSm" x="785" y="814">WriteTrace persisted to disk</text>
+  <text class="path" x="785" y="830">ontology/write_trace_models.py</text>
+
+  <rect class="box" x="1010" y="790" width="250" height="70"/>
+  <text class="lblSm" x="1135" y="812">GET /dashboard/</text>
+  <text class="lblSm" x="1135" y="826">write-traces/{id}</text>
+  <text class="path" x="1135" y="842">dashboard.py:658</text>
+
+  <line class="arrow" x1="560" y1="825" x2="618" y2="825"/>
+  <line class="arrow" x1="950" y1="825" x2="1008" y2="825"/>
+
+  <rect class="callout" x="230" y="880" width="1030" height="60"/>
+  <text class="noteG" x="745" y="905">Consumer: Write Inspector — "what did that save actually cost?" — reads facts_extracted, pipeline stages run,</text>
+  <text class="noteG" x="745" y="920">and duration per trace (e.g. the checkpoint "duplicate" short-circuit collapsing duration to ~0)</text>
+
+  <!-- legend -->
+  <rect class="callout" x="1330" y="86" width="290" height="88"/>
+  <text class="legendTitle" x="1345" y="106">Legend</text>
+  <line x1="1345" y1="120" x2="1375" y2="120" class="arrow"/>
+  <text class="legendTxt" x="1382" y="124">required call</text>
+  <line x1="1345" y1="137" x2="1375" y2="137" class="arrowDashed"/>
+  <text class="legendTxt" x="1382" y="141">best-effort / merged-in data</text>
+  <rect x="1345" y="149" width="30" height="12" class="boxCore"/>
+  <text class="legendTxt" x="1382" y="159">shared retrieval core</text>
+</svg>

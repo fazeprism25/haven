@@ -1,0 +1,178 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1700 1620" font-family="'Segoe UI', Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="arrowB" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1a1a1a"/></marker>
+    <marker id="arrowG" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#8a8a8a"/></marker>
+  </defs>
+  <style>
+    .bg { fill:#ffffff; }
+    .box { fill:#fafafa; stroke:#1a1a1a; stroke-width:1.5; rx:6; }
+    .container { fill:#ffffff; stroke:#b5b5b5; stroke-width:1.3; stroke-dasharray:4,3; rx:10; }
+    .callout { fill:#ffffff; stroke:#8a8a8a; stroke-width:1.3; stroke-dasharray:4,3; rx:6; }
+    .lbl { font-size:13.5px; font-weight:600; fill:#141414; text-anchor:middle; }
+    .lblSm { font-size:11.5px; font-weight:600; fill:#141414; text-anchor:middle; }
+    .path { font-family:'Consolas','SF Mono',Menlo,monospace; font-size:9.8px; fill:#6b6b6b; text-anchor:middle; }
+    .noteG { font-family:'Consolas','SF Mono',Menlo,monospace; font-size:9.6px; fill:#5a5a5a; text-anchor:middle; }
+    .arrow { stroke:#1a1a1a; stroke-width:1.6; fill:none; marker-end:url(#arrowB); }
+    .arrowDashed { stroke:#8a8a8a; stroke-width:1.5; fill:none; stroke-dasharray:6,4; marker-end:url(#arrowG); }
+    .title { font-size:23px; font-weight:700; fill:#111111; text-anchor:middle; }
+    .subtitle { font-size:12.5px; fill:#5a5a5a; text-anchor:middle; }
+    .containerLbl { font-size:11.5px; font-weight:700; fill:#8a8a8a; letter-spacing:0.5px; }
+    .colHead { font-size:13px; font-weight:700; fill:#1a1a1a; text-anchor:middle; }
+    .legendTxt { font-size:10.5px; fill:#333333; }
+    .legendTitle { font-size:11px; font-weight:700; fill:#333333; }
+  </style>
+
+  <rect class="bg" x="0" y="0" width="1700" height="1620"/>
+  <text class="title" x="850" y="34">Browser Extension → Haven → Obsidian</text>
+  <text class="subtitle" x="850" y="53">extension/ message-passing chain: content script → background.js → obsidian/server/main.py, plus the separate Obsidian vault import path</text>
+
+  <!-- endpoint registry -->
+  <rect class="callout" x="480" y="70" width="740" height="56"/>
+  <text class="lblSm" x="850" y="90">Endpoint registry — extension/config.js:10 ENDPOINTS</text>
+  <text class="noteG" x="850" y="106">maps each HAVEN_* message type to one {method, path} under /api/v1 — the only place URLs are hardcoded</text>
+
+  <!-- column headers -->
+  <text class="colHead" x="290" y="158">"Use Haven"</text>
+  <text class="colHead" x="860" y="158">"Remember"</text>
+  <text class="colHead" x="1410" y="158">Popup search</text>
+
+  <!-- ===== column 1: Use Haven ===== -->
+  <rect class="box" x="50" y="176" width="480" height="56"/>
+  <text class="lblSm" x="290" y="196">onButtonClick() — controller.js:820</text>
+  <text class="path" x="290" y="212">"Use Haven" button in the ChatGPT compose area</text>
+
+  <rect class="box" x="50" y="256" width="480" height="56"/>
+  <text class="lblSm" x="290" y="276">HavenClient.send(HAVEN_RETRIEVE_WORKING_CONTEXT)</text>
+  <text class="path" x="290" y="292">controller.js:59 → chrome.runtime.sendMessage</text>
+  <line class="arrow" x1="290" y1="232" x2="290" y2="254"/>
+
+  <rect class="box" x="50" y="336" width="480" height="56"/>
+  <text class="lblSm" x="290" y="356">background.js resolves endpoint, fetch()</text>
+  <text class="path" x="290" y="372">→ POST /api/v1/retrieve_working_context</text>
+  <line class="arrow" x1="290" y1="312" x2="290" y2="334"/>
+
+  <rect class="callout" x="50" y="416" width="480" height="60"/>
+  <text class="lblSm" x="290" y="436">if unavailable → fallback</text>
+  <text class="noteG" x="290" y="452">HAVEN_RETRIEVE_CONTEXT → POST /retrieve_context</text>
+  <text class="noteG" x="290" y="465">(same background.js round trip)</text>
+  <line class="arrowDashed" x1="290" y1="392" x2="290" y2="414"/>
+
+  <rect class="box" x="50" y="500" width="480" height="70"/>
+  <text class="lblSm" x="290" y="522">showWorkingContextDialog() / showPreviewDialog()</text>
+  <text class="noteG" x="290" y="538">gated by autoPreview setting</text>
+  <text class="noteG" x="290" y="554">→ adapter.insertContextAbove(composeBox, content)</text>
+  <line class="arrow" x1="290" y1="392" x2="290" y2="498"/>
+  <line class="arrowDashed" x1="290" y1="476" x2="290" y2="498"/>
+
+  <!-- ===== column 2: Remember ===== -->
+  <rect class="box" x="600" y="176" width="520" height="56"/>
+  <text class="lblSm" x="860" y="196">onRememberClick() — controller.js:935</text>
+  <text class="path" x="860" y="212">"Remember" button — scrapes adapter.getConversationTurns()</text>
+
+  <rect class="box" x="600" y="256" width="520" height="56"/>
+  <text class="lblSm" x="860" y="276">send HAVEN_MEMORY_PREVIEW {conversation: [...]}</text>
+  <line class="arrow" x1="860" y1="232" x2="860" y2="254"/>
+
+  <rect class="box" x="600" y="336" width="520" height="66"/>
+  <text class="lblSm" x="860" y="358">background.js fetch → POST /memory/preview</text>
+  <text class="path" x="860" y="374">main.py:2033 — ManagerPipeline.extract_classify_score() only</text>
+  <text class="noteG" x="860" y="388">LLM stages run; nothing is written yet</text>
+  <line class="arrow" x1="860" y1="312" x2="860" y2="334"/>
+
+  <rect class="box" x="600" y="426" width="520" height="66"/>
+  <text class="lblSm" x="860" y="448">review_id + editable items → showReviewDialog()</text>
+  <text class="noteG" x="860" y="464">user edits, removes, or adds memories before committing</text>
+  <line class="arrow" x1="860" y1="402" x2="860" y2="424"/>
+
+  <rect class="box" x="600" y="516" width="520" height="66"/>
+  <text class="lblSm" x="860" y="538">send HAVEN_MEMORY_COMMIT → POST /memory/commit</text>
+  <text class="path" x="860" y="554">main.py:2169 — CanonicalMatcher/KnowledgeUpdater only</text>
+  <text class="noteG" x="860" y="568">deterministic re-run on edited items — never re-calls the LLM</text>
+  <line class="arrow" x1="860" y1="492" x2="860" y2="514"/>
+
+  <rect class="box" x="600" y="606" width="520" height="56"/>
+  <text class="lblSm" x="860" y="628">vault_writer.write() + ontology_pipeline.process()</text>
+  <text class="noteG" x="860" y="644">persisted exactly like save_memory() — see write-pipeline diagram</text>
+  <line class="arrow" x1="860" y1="582" x2="860" y2="604"/>
+
+  <rect class="callout" x="1140" y="516" width="200" height="66"/>
+  <text class="lblSm" x="1240" y="538">Dismiss / Escape</text>
+  <text class="noteG" x="1240" y="554">HAVEN_MEMORY_CANCEL</text>
+  <text class="noteG" x="1240" y="567">→ POST /memory/cancel</text>
+  <line class="arrowDashed" x1="1120" y1="459" x2="1240" y2="514"/>
+
+  <!-- ===== column 3: popup search ===== -->
+  <rect class="box" x="1180" y="176" width="460" height="56"/>
+  <text class="lblSm" x="1410" y="196">popup/popup.js — search box</text>
+  <text class="path" x="1410" y="212">type a query in the extension popup</text>
+
+  <rect class="box" x="1180" y="256" width="460" height="56"/>
+  <text class="lblSm" x="1410" y="276">send HAVEN_SEARCH_MEMORIES</text>
+  <line class="arrow" x1="1410" y1="232" x2="1410" y2="254"/>
+
+  <rect class="box" x="1180" y="336" width="460" height="66"/>
+  <text class="lblSm" x="1410" y="358">background.js fetch → GET /dashboard/inspect?query=</text>
+  <text class="noteG" x="1410" y="374">reuses the Retrieval Inspector route as search</text>
+  <line class="arrow" x1="1410" y1="312" x2="1410" y2="334"/>
+
+  <rect class="box" x="1180" y="426" width="460" height="66"/>
+  <text class="lblSm" x="1410" y="448">render trace.candidates.filter(c =&gt; c.accepted)</text>
+  <text class="noteG" x="1410" y="464">only accepted candidates are shown as results</text>
+  <line class="arrow" x1="1410" y1="402" x2="1410" y2="424"/>
+
+  <rect class="callout" x="1180" y="516" width="460" height="66"/>
+  <text class="lblSm" x="1410" y="538">Settings panel</text>
+  <text class="noteG" x="1410" y="554">server URL, autoPreview, autoRemember →</text>
+  <text class="noteG" x="1410" y="567">chrome.storage.local[SETTINGS_STORAGE_KEY]</text>
+
+  <!-- shared background.js infra -->
+  <rect class="callout" x="50" y="720" width="1590" height="70"/>
+  <text class="lblSm" x="845" y="742">extension/background.js — the single place that talks HTTP to the Haven server</text>
+  <text class="noteG" x="845" y="758">chrome.runtime.onMessage.addListener() resolves ENDPOINTS[type], reads server URL from chrome.storage.local, fetch()es with a 15000ms abort timeout, returns { ok, data } or { ok:false, error, status }</text>
+
+  <!-- Obsidian import section -->
+  <rect class="container" x="50" y="830" width="1590" height="260"/>
+  <text class="containerLbl" x="70" y="822">separate path — obsidian/integrations/obsidian/importer.py — no browser extension involved</text>
+
+  <rect class="box" x="80" y="862" width="360" height="90"/>
+  <text class="lblSm" x="260" y="884">Obsidian vault (external *.md notes)</text>
+  <text class="path" x="260" y="900">iter_notes(root, exclude_dirs)</text>
+  <text class="noteG" x="260" y="916">skips .obsidian, dot-dirs, and Haven's own</text>
+  <text class="noteG" x="260" y="929">vault/concepts/notes/.haven dirs</text>
+  <text class="noteG" x="260" y="942">→ note_to_turns() → (external_key, turns)</text>
+
+  <rect class="box" x="480" y="862" width="360" height="70"/>
+  <text class="lblSm" x="660" y="886">POST /import/obsidian/scan</text>
+  <text class="path" x="660" y="902">main.py:2619 — filesystem + checkpoint-hash diff, no LLM</text>
+  <text class="noteG" x="660" y="918">classifies notes: skipped vs needs_review</text>
+  <line class="arrow" x1="440" y1="907" x2="478" y2="898"/>
+
+  <rect class="box" x="880" y="862" width="360" height="70"/>
+  <text class="lblSm" x="1060" y="886">POST /import/obsidian/preview</text>
+  <text class="path" x="1060" y="902">main.py:2706 — calls the same preview_memory()</text>
+  <text class="noteG" x="1060" y="918">function the "Remember" flow uses, in-process</text>
+  <line class="arrow" x1="840" y1="897" x2="878" y2="897"/>
+
+  <rect class="box" x="1280" y="862" width="320" height="70"/>
+  <text class="lblSm" x="1440" y="886">POST /memory/commit</text>
+  <text class="noteG" x="1440" y="902">same route as the "Remember" flow —</text>
+  <text class="noteG" x="1440" y="915">not a second ingestion path</text>
+  <line class="arrow" x1="1240" y1="897" x2="1278" y2="897"/>
+
+  <rect class="callout" x="480" y="962" width="1120" height="98"/>
+  <text class="noteG" x="1040" y="988">An imported Obsidian note goes through the identical Manager AI pipeline as a ChatGPT conversation —</text>
+  <text class="noteG" x="1040" y="1002">Extractor → Classifier → ImportanceScorer → CanonicalMatcher → KnowledgeUpdater → VaultWriter → OntologyPipeline —</text>
+  <text class="noteG" x="1040" y="1016">the only difference is the source of the (Role, str) turns fed into it. See the write-pipeline diagram for what happens next.</text>
+  <line class="arrow" x1="1440" y1="932" x2="1440" y2="960"/>
+  <path d="M1440,960 C1440,975 1040,975 1040,960" class="arrow" fill="none"/>
+  <line class="arrowDashed" x1="1240" y1="606" x2="1080" y2="960"/>
+  <text class="noteG" x="1150" y="700" fill="#8a8a8a">converges on the same /memory/commit route</text>
+
+  <!-- legend -->
+  <rect class="callout" x="60" y="70" width="400" height="56"/>
+  <text class="legendTitle" x="75" y="90">Legend</text>
+  <line x1="75" y1="105" x2="105" y2="105" class="arrow"/>
+  <text class="legendTxt" x="112" y="109">required call</text>
+  <line x1="220" y1="105" x2="250" y2="105" class="arrowDashed"/>
+  <text class="legendTxt" x="257" y="109">optional branch / cross-flow link</text>
+</svg>
