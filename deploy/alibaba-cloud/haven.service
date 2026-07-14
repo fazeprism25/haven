@@ -1,0 +1,32 @@
+[Unit]
+Description=Haven FastAPI server (obsidian.server.main:app)
+After=network.target
+
+[Service]
+# Haven's own concept_graph / pending_reviews / write-lock live in one
+# process's memory (see obsidian/server/main.py's _write_lock docstring) --
+# do not add --workers > 1 here, and do not run a second instance of this
+# unit. Multiple workers would each hold their own copy of that state, so
+# concurrent writes could silently double-write or corrupt the vault.
+Type=simple
+User=haven
+Group=haven
+WorkingDirectory=/opt/haven
+# Manager AI / Query Rewriter load config/manager_ai.env and
+# config/query_rewriter.env themselves (obsidian/manager_ai/llm.py,
+# obsidian/memory_engine/query_rewriter.py both call config.load_env at
+# import time) -- no EnvironmentFile= needed here, this just has to exist
+# on disk before the service starts.
+ExecStart=/opt/haven/.venv/bin/uvicorn obsidian.server.main:app --host 127.0.0.1 --port 8765
+Restart=on-failure
+RestartSec=5
+
+# Light sandboxing -- Haven only needs to read/write its own repo directory
+# (vault, concepts, config, logs), nothing else on the filesystem.
+NoNewPrivileges=true
+ProtectSystem=strict
+ReadWritePaths=/opt/haven
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
