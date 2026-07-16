@@ -1004,6 +1004,37 @@ def _spaces_env_managed() -> bool:
     return any(os.environ.get(var) for var in _ENV_VAULT_VARS)
 
 
+#: Hostnames the dashboard itself treats as "running locally" -- see the
+#: matching ``['localhost', '127.0.0.1'].includes(location.hostname)`` check
+#: in dashboard.html, which hides the folder-selector UI on any other host.
+_LOCAL_HOSTNAMES = {"localhost", "127.0.0.1"}
+
+
+def _is_local_request(http_request: Request) -> bool:
+    """Whether *http_request* reached Haven via localhost/127.0.0.1.
+
+    A pasted-in absolute filesystem path (a Memory Space root, an Obsidian
+    import folder) only resolves to something real when the browser and the
+    Haven process share a filesystem -- true for the Quick Start's local
+    ``uvicorn`` but not for a remote deployment (e.g. the Alibaba Cloud
+    backend), where "C:\\Users\\you\\Vault" or "/home/you/Vault" refers to
+    the *browser's* machine, not the server's. The dashboard already hides
+    its folder-selector UI once ``location.hostname`` isn't local; this is
+    the server-side half of that contract, so a request that reaches a route
+    directly (bypassing the hidden UI) is rejected the same way rather than
+    silently touching the wrong filesystem.
+    """
+    return http_request.url.hostname in _LOCAL_HOSTNAMES
+
+
+_LOCAL_PATH_REMOTE_ERROR = (
+    "Local filesystem paths cannot be used on remote deployments -- "
+    "'root' refers to a path on your browser's machine, not the server's. "
+    "Run Haven locally (accessed via localhost/127.0.0.1) to select a "
+    "folder on this machine."
+)
+
+
 #: Fixed id for the single synthetic space an env-managed deployment always
 #: gets. Deterministic (not ``uuid4()``) because that space is never
 #: persisted (see ``_load_spaces_registry``/``_save_spaces_registry`` below)
@@ -1147,6 +1178,112 @@ def _activate_space(registry: dict, space_id: str) -> None:
 
 
 # ---------------------------------------------------------------------------
+# Hosted demo initialization (Alibaba Cloud deployment)
+#
+# A judge visiting the public hosted demo should see a fully populated
+# dashboard on the very first request -- no folder to choose, no "Import
+# Demo Data" click required (see deploy/alibaba-cloud/README.md and this
+# module's ``_LOCAL_HOSTNAMES``/``IS_LOCAL_DEPLOYMENT`` local-vs-remote
+# contract, which this reuses unchanged on the dashboard side).
+#
+# Gated on HAVEN_HOSTED_DEMO (set only in that deployment's haven.service,
+# never in local dev, CI, or the test suite), so every other tier's startup
+# behavior is completely unchanged -- this is one centralized bootstrap path,
+# not a scattering of `if hosted` checks through the rest of the module.
+#
+# Runs at most once per deployment lifetime, from lifespan() below, exactly
+# like _synthesize_spaces_registry's own migration path: the very first
+# startup with no config/spaces.json yet builds and seeds the two bundled
+# demo Memory Spaces once, persists the registry, and every later startup
+# (or process restart) finds it already on disk and skips straight past this
+# section entirely -- idempotent, no reseeding, no duplicate demo memories.
+# ---------------------------------------------------------------------------
+
+_HOSTED_DEMO_ENV_VAR = "HAVEN_HOSTED_DEMO"
+
+#: (display name, directory slug) for each bundled demo Memory Space, in
+#: activation order -- the first is always the one active by default after
+#: bootstrap. Slugs (not names) name the on-disk folders under
+#: haven_data/demo_spaces/, so renaming a space later (dashboard "Rename")
+#: never orphans its own directory.
+_HOSTED_DEMO_SPACES: Tuple[Tuple[str, str], ...] = (
+    ("Haven Development", "haven_development"),
+    ("Personal AI Research", "personal_ai_research"),
+)
+
+
+def _is_hosted_demo_deployment() -> bool:
+    """Whether this process should bootstrap the bundled demo Memory Spaces.
+
+    True only when HAVEN_HOSTED_DEMO is set truthy (the Alibaba Cloud
+    ``haven.service`` unit) *and* this deployment isn't already env-managed
+    via HAVEN_VAULT_DIR-style vars -- the two tiers are mutually exclusive,
+    and an env-managed deployment never registers spaces at all (see
+    ``_spaces_env_managed``).
+    """
+    return (
+        os.environ.get(_HOSTED_DEMO_ENV_VAR, "").strip().lower() in ("1", "true", "yes")
+        and not _spaces_env_managed()
+    )
+
+
+def _seed_hosted_demo_space(space: dict) -> None:
+    """(Re)build ``app.state`` for *space* and write its bundled demo dataset
+    into it in place -- the same bulk-facts-then-scripted-conversations
+    sequence ``POST /api/v1/dev/seed_demo`` already uses (see
+    ``demo_seed.dataset_for_space``), just called directly during startup
+    instead of from a dashboard button click.
+    """
+    _configure_vault_state(
+        Path(space["vault_dir"]),
+        Path(space["concept_dir"]),
+        Path(space["checkpoint_dir"]),
+        Path(space["write_trace_dir"]),
+    )
+    app.state.active_space_name = space["name"]
+    memories_file, _ = demo_seed.dataset_for_space(space["name"])
+    demo_seed.seed_bulk_facts(
+        app.state.vault_writer, app.state.ontology_pipeline, memories_file
+    )
+    _replay_demo_conversations()
+
+
+def _bootstrap_hosted_demo_registry() -> dict:
+    """Build and seed the bundled demo Memory Spaces (see
+    ``_HOSTED_DEMO_SPACES``), persist the registry, and return it.
+
+    Only ever called once per deployment, from ``lifespan()``, when
+    ``_is_hosted_demo_deployment()`` is true and no ``config/spaces.json``
+    exists yet -- see this section's module docstring for the idempotency
+    contract that guarantees it never runs again afterward.
+    """
+    demo_root = Path("haven_data/demo_spaces")
+    spaces = []
+    for name, slug in _HOSTED_DEMO_SPACES:
+        vault_dir, concept_dir, checkpoint_dir, write_trace_dir = _paths_for_root(
+            demo_root / slug
+        )
+        spaces.append(
+            {
+                "id": str(uuid4()),
+                "name": name,
+                "root": str(demo_root / slug),
+                "vault_dir": str(vault_dir),
+                "concept_dir": str(concept_dir),
+                "checkpoint_dir": str(checkpoint_dir),
+                "write_trace_dir": str(write_trace_dir),
+                "env_managed": False,
+            }
+        )
+
+    registry = {"active_space_id": spaces[0]["id"], "spaces": spaces}
+    for space in spaces:
+        _seed_hosted_demo_space(space)
+    _save_spaces_registry(registry)
+    return registry
+
+
+# ---------------------------------------------------------------------------
 # Query Rewriting (optional, experimental multi-query expansion)
 #
 # A dashboard-facing on/off switch for the already-implemented
@@ -1239,13 +1376,13 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     app.state.query_rewriter = QueryRewriter()
     app.state.query_rewriting_enabled = _load_query_rewriting_enabled()
 
-    registry = _load_spaces_registry() or _synthesize_spaces_registry()
-    _activate_space(registry, registry["active_space_id"])
-
     # Single shared LLM instance for every Manager AI stage (see
     # obsidian/manager_ai/llm.py's module docstring) -- Extractor,
     # Classifier, and ImportanceScorer only ever call llm.generate(prompt),
-    # so one client/model/timeout configuration serves all three.
+    # so one client/model/timeout configuration serves all three. Built
+    # before the spaces registry below: a hosted-demo bootstrap's scripted
+    # conversation replay (_replay_demo_conversations) swaps this out and
+    # back in, so it must already exist on app.state by that point.
     manager_llm = ManagerAILLM()
     app.state.manager_pipeline = ManagerPipeline(
         extractor=Extractor(llm=manager_llm),
@@ -1254,6 +1391,15 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         canonical_matcher=CanonicalMatcher(),
         knowledge_updater=KnowledgeUpdater(),
     )
+
+    registry = _load_spaces_registry()
+    if registry is None:
+        registry = (
+            _bootstrap_hosted_demo_registry()
+            if _is_hosted_demo_deployment()
+            else _synthesize_spaces_registry()
+        )
+    _activate_space(registry, registry["active_space_id"])
 
     yield
 
@@ -1355,7 +1501,9 @@ def get_vault() -> VaultInfo:
 
 
 @router.post("/vault", response_model=SelectVaultResponse)
-def select_vault(request: SelectVaultRequest) -> SelectVaultResponse:
+def select_vault(
+    request: SelectVaultRequest, http_request: Request
+) -> SelectVaultResponse:
     """Select (and initialize, if necessary) an Obsidian vault root.
 
     *request.root* becomes the enclosing folder for Haven's four
@@ -1375,9 +1523,12 @@ def select_vault(request: SelectVaultRequest) -> SelectVaultResponse:
     Raises
     ------
     HTTPException
-        400 if *root* is not an absolute path, or exists but is not a
-        directory (e.g. it's a file).
+        400 if this deployment isn't being accessed locally (see
+        :func:`_is_local_request`), *root* is not an absolute path, or it
+        exists but is not a directory (e.g. it's a file).
     """
+    if not _is_local_request(http_request):
+        raise HTTPException(status_code=400, detail=_LOCAL_PATH_REMOTE_ERROR)
     root = Path(request.root)
     if not root.is_absolute():
         raise HTTPException(
@@ -1430,7 +1581,7 @@ def list_spaces() -> SpacesListResponse:
 
 
 @router.post("/spaces", response_model=SpaceInfo, status_code=201)
-def create_space(request: CreateSpaceRequest) -> SpaceInfo:
+def create_space(request: CreateSpaceRequest, http_request: Request) -> SpaceInfo:
     """Register a new Memory Space. Does not activate it -- creating and
     switching are separate dashboard actions."""
     if _spaces_env_managed():
@@ -1439,6 +1590,8 @@ def create_space(request: CreateSpaceRequest) -> SpaceInfo:
             detail="Cannot create a Memory Space while HAVEN_VAULT_DIR-style "
             "env vars are set for this deployment.",
         )
+    if not _is_local_request(http_request):
+        raise HTTPException(status_code=400, detail=_LOCAL_PATH_REMOTE_ERROR)
     root = Path(request.root)
     if not root.is_absolute():
         raise HTTPException(status_code=400, detail="root must be an absolute path.")
@@ -1477,7 +1630,9 @@ def create_space(request: CreateSpaceRequest) -> SpaceInfo:
 
 
 @router.patch("/spaces/{space_id}", response_model=SpaceInfo)
-def update_space(space_id: str, request: UpdateSpaceRequest) -> SpaceInfo:
+def update_space(
+    space_id: str, request: UpdateSpaceRequest, http_request: Request
+) -> SpaceInfo:
     """Rename a Memory Space and/or re-point its root -- the only way to
     "move" a space, since ``root`` is otherwise fixed at creation.
 
@@ -1505,6 +1660,8 @@ def update_space(space_id: str, request: UpdateSpaceRequest) -> SpaceInfo:
         space["name"] = request.name
 
     if request.root is not None:
+        if not _is_local_request(http_request):
+            raise HTTPException(status_code=400, detail=_LOCAL_PATH_REMOTE_ERROR)
         root = Path(request.root)
         if not root.is_absolute():
             raise HTTPException(
@@ -2772,18 +2929,26 @@ def capture_note(request: CaptureNoteRequest) -> CaptureNoteResponse:
     )
 
 
-def _resolve_import_root(root_arg: Optional[str]) -> Path:
+def _resolve_import_root(root_arg: Optional[str], http_request: Request) -> Path:
     """Resolve the vault folder an import scan/preview should read.
 
     Uses *root_arg* when given, otherwise the active Memory Space's root.
+    An explicit *root_arg* is a path on the browser's machine, so it's only
+    honored for requests reaching Haven locally (see :func:`_is_local_request`)
+    -- falling back to the active space's already-configured root is always
+    fine, since that path was validated (and belongs to the server) when the
+    space was created or last re-pointed.
 
     Raises
     ------
     HTTPException
-        400 if there is no root to fall back to, or the resolved path is not
-        a directory.
+        400 if *root_arg* is given but this deployment isn't being accessed
+        locally, if there is no root to fall back to, or the resolved path is
+        not a directory.
     """
     if root_arg:
+        if not _is_local_request(http_request):
+            raise HTTPException(status_code=400, detail=_LOCAL_PATH_REMOTE_ERROR)
         root = Path(root_arg)
     elif app.state.vault_root is not None:
         root = Path(app.state.vault_root)
@@ -2799,7 +2964,9 @@ def _resolve_import_root(root_arg: Optional[str]) -> Path:
 
 
 @router.post("/import/obsidian/scan", response_model=ImportScanResponse)
-def scan_obsidian_vault(request: ImportScanRequest) -> ImportScanResponse:
+def scan_obsidian_vault(
+    request: ImportScanRequest, http_request: Request
+) -> ImportScanResponse:
     """Obsidian import, phase 1: classify each note as skipped or needs_review.
 
     Pure filesystem walk + checkpoint hashing -- **no LLM, no pipeline, and
@@ -2826,10 +2993,12 @@ def scan_obsidian_vault(request: ImportScanRequest) -> ImportScanResponse:
     Raises
     ------
     HTTPException
-        400 if no root is given and the active deployment has no single vault
-        root to default to, or if the resolved root is not a directory.
+        400 if an explicit ``root`` is given but this deployment isn't being
+        accessed locally, if no root is given and the active deployment has
+        no single vault root to default to, or if the resolved root is not a
+        directory.
     """
-    root = _resolve_import_root(request.root)
+    root = _resolve_import_root(request.root, http_request)
 
     exclude_dirs = [
         app.state.vault_dir,
@@ -2886,7 +3055,9 @@ def scan_obsidian_vault(request: ImportScanRequest) -> ImportScanResponse:
 
 
 @router.post("/import/obsidian/preview", response_model=PreviewMemoryResponse)
-def preview_obsidian_note(request: ImportPreviewRequest) -> PreviewMemoryResponse:
+def preview_obsidian_note(
+    request: ImportPreviewRequest, http_request: Request
+) -> PreviewMemoryResponse:
     """Obsidian import, phase 3: preview one changed note for review.
 
     Reads *request.source_file* (a vault-relative path from a prior scan)
@@ -2913,7 +3084,7 @@ def preview_obsidian_note(request: ImportPreviewRequest) -> PreviewMemoryRespons
         already surfaces unreadable notes for review rather than crashing,
         so this mirrors that with a clean error instead of a raw 500.
     """
-    root = _resolve_import_root(request.root)
+    root = _resolve_import_root(request.root, http_request)
     absolute = (root / request.source_file).resolve()
     try:
         absolute.relative_to(root.resolve())

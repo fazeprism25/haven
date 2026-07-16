@@ -44,7 +44,7 @@ def client(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> TestClient:
 
     from obsidian.server.main import app
 
-    with TestClient(app) as test_client:
+    with TestClient(app, base_url="http://localhost") as test_client:
         yield test_client
 
 
@@ -141,7 +141,7 @@ class TestMemorySpaceSwitchReloadsTheDashboard:
 
         from obsidian.server.main import app
 
-        with TestClient(app) as client:
+        with TestClient(app, base_url="http://localhost") as client:
             default_id = client.get("/api/v1/spaces").json()["active_space_id"]
             work = client.post(
                 "/api/v1/spaces", json={"name": "Work", "root": str(tmp_path / "Work")}
@@ -193,7 +193,7 @@ class TestSelectingANewVaultRootReloadsTheDashboard:
 
         from obsidian.server.main import app
 
-        with TestClient(app) as client:
+        with TestClient(app, base_url="http://localhost") as client:
             _seed(client, canonical_fact="In the original, unconfigured vault.")
             assert client.get("/api/v1/dashboard").json()["vault_stats"]["total_memories"] == 1
 
@@ -227,7 +227,7 @@ class TestSelectingANewVaultRootReloadsTheDashboard:
 
         from obsidian.server.main import app
 
-        with TestClient(app) as client:
+        with TestClient(app, base_url="http://localhost") as client:
             root = tmp_path / "MyVault"
             first = client.post("/api/v1/vault", json={"root": str(root)})
             assert first.json()["created"] is True

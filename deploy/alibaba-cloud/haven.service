@@ -17,6 +17,15 @@ WorkingDirectory=/opt/haven
 # obsidian/memory_engine/query_rewriter.py both call config.load_env at
 # import time) -- no EnvironmentFile= needed here, this just has to exist
 # on disk before the service starts.
+#
+# HAVEN_HOSTED_DEMO=true marks this specifically as the public judge-facing
+# instance: on first startup (no config/spaces.json on disk yet), Haven
+# bootstraps and seeds the bundled "Haven Development"/"Personal AI Research"
+# demo Memory Spaces instead of an empty "Default" one (see
+# _bootstrap_hosted_demo_registry in obsidian/server/main.py). Idempotent --
+# every later restart finds the registry already there and skips this
+# entirely, so it's safe to leave set permanently.
+Environment=HAVEN_HOSTED_DEMO=true
 ExecStart=/opt/haven/.venv/bin/uvicorn obsidian.server.main:app --host 127.0.0.1 --port 8765
 Restart=on-failure
 RestartSec=5

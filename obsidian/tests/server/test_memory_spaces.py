@@ -30,7 +30,7 @@ def _env_client(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> TestClient:
 
     from obsidian.server.main import app
 
-    return TestClient(app)
+    return TestClient(app, base_url="http://localhost")
 
 
 def _unconfigured_client(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> TestClient:
@@ -47,7 +47,17 @@ def _unconfigured_client(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Tes
 
     from obsidian.server.main import app
 
-    return TestClient(app)
+    return TestClient(app, base_url="http://localhost")
+
+
+def _hosted_demo_client(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> TestClient:
+    """Same as ``_unconfigured_client`` but with ``HAVEN_HOSTED_DEMO`` set --
+    the Alibaba Cloud deployment's tier, which bootstraps and seeds the
+    bundled demo Memory Spaces on first startup instead of synthesizing an
+    empty "Default" space."""
+    client = _unconfigured_client(tmp_path, monkeypatch)
+    monkeypatch.setenv("HAVEN_HOSTED_DEMO", "true")
+    return client
 
 
 # ---------------------------------------------------------------------------
@@ -108,7 +118,7 @@ def test_tier2_persisted_root_synthesizes_space_named_after_root_folder(
 
     from obsidian.server.main import app
 
-    with TestClient(app) as client:
+    with TestClient(app, base_url="http://localhost") as client:
         res = client.get("/api/v1/spaces")
         assert res.status_code == 200
         data = res.json()
@@ -144,6 +154,80 @@ def test_tier3_flat_layout_is_not_recomputed_through_paths_for_root(
     assert space["write_trace_dir"] == str(Path("haven_data") / "write_traces")
     # NOT the _paths_for_root nested convention:
     assert ".haven" not in space["checkpoint_dir"]
+
+
+# ---------------------------------------------------------------------------
+# Hosted demo bootstrap (Alibaba Cloud deployment, HAVEN_HOSTED_DEMO=true)
+# ---------------------------------------------------------------------------
+
+
+def test_hosted_demo_bootstraps_two_pre_seeded_spaces(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    with _hosted_demo_client(tmp_path, monkeypatch) as client:
+        data = client.get("/api/v1/spaces").json()
+        names = sorted(s["name"] for s in data["spaces"])
+        assert names == ["Haven Development", "Personal AI Research"]
+        assert data["env_managed"] is False
+
+        active = next(s for s in data["spaces"] if s["id"] == data["active_space_id"])
+        assert active["name"] == "Haven Development"
+
+        vault = client.get("/api/v1/vault").json()
+        assert vault["configured"] is True
+        assert vault["memory_count"] > 0
+
+
+def test_hosted_demo_switching_spaces_shows_different_pre_seeded_data(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    with _hosted_demo_client(tmp_path, monkeypatch) as client:
+        data = client.get("/api/v1/spaces").json()
+        dev_count = client.get("/api/v1/vault").json()["memory_count"]
+
+        personal = next(s for s in data["spaces"] if s["name"] == "Personal AI Research")
+        res = client.post(f"/api/v1/spaces/{personal['id']}/activate", json={})
+        assert res.status_code == 200
+
+        personal_count = client.get("/api/v1/vault").json()["memory_count"]
+        assert personal_count > 0
+        # The two bundled datasets are genuinely different stories, not the
+        # same demo data duplicated into both spaces.
+        assert personal_count != dev_count
+
+
+def test_hosted_demo_bootstrap_is_idempotent_across_restarts(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    with _hosted_demo_client(tmp_path, monkeypatch) as client:
+        first = client.get("/api/v1/spaces").json()
+        first_count = client.get("/api/v1/vault").json()["memory_count"]
+
+    # A second "process restart" against the same on-disk state must find
+    # config/spaces.json already there and skip straight past the bootstrap
+    # path entirely -- no re-seeding, no duplicate demo memories.
+    from obsidian.server.main import app
+
+    with TestClient(app, base_url="http://localhost") as client2:
+        second = client2.get("/api/v1/spaces").json()
+        second_count = client2.get("/api/v1/vault").json()["memory_count"]
+
+    assert len(second["spaces"]) == len(first["spaces"]) == 2
+    assert second["active_space_id"] == first["active_space_id"]
+    assert second_count == first_count
+
+
+def test_non_hosted_deployment_unaffected_by_hosted_demo_env_var_absent(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Sanity check: with HAVEN_HOSTED_DEMO unset, behavior is exactly the
+    existing tier-3 "Default" synthesis -- unchanged by this feature."""
+    monkeypatch.delenv("HAVEN_HOSTED_DEMO", raising=False)
+    with _unconfigured_client(tmp_path, monkeypatch) as client:
+        data = client.get("/api/v1/spaces").json()
+        assert len(data["spaces"]) == 1
+        assert data["spaces"][0]["name"] == "Default"
+        assert client.get("/api/v1/vault").json()["memory_count"] == 0
 
 
 # ---------------------------------------------------------------------------

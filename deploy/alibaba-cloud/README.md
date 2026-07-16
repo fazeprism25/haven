@@ -227,3 +227,34 @@ Once §6 passes, for the hackathon submission capture:
 
 This is added to the root `README.md`'s new "Deployment" section — see
 that section for where it links back here.
+
+## 11. Hosted demo Memory Spaces
+
+`haven.service` sets `HAVEN_HOSTED_DEMO=true` (see that file), which changes
+first-startup behavior specifically for this deployment: instead of
+synthesizing one empty "Default" Memory Space, Haven bootstraps two
+pre-populated ones — **Haven Development** (active by default) and
+**Personal AI Research** — each already seeded with its own bundled demo
+dataset (`obsidian/server/main.py`'s `_bootstrap_hosted_demo_registry`, the
+same deterministic no-API-key seeding `POST /api/v1/dev/seed_demo` already
+uses). A judge opening `/dashboard` after Basic Auth sees a fully populated
+instance immediately — no folder to choose, no Import Demo Data click
+needed — and can switch between the two spaces from the Settings section.
+
+This only runs once: the very first startup with no `config/spaces.json` on
+disk yet. Every later restart (including `systemctl restart haven` after a
+`git pull`) finds that file already there and skips straight past it, so
+demo data is never re-seeded or duplicated. Local dev (`uvicorn` on
+`127.0.0.1`/`localhost`, no `HAVEN_HOSTED_DEMO` set) is completely
+unaffected — it keeps the existing "pick a folder / import a vault"
+workflow exactly as it was.
+
+If you ever need to wipe this instance back to a truly fresh state (e.g.
+testing the bootstrap itself again), stop the service, delete both
+`config/spaces.json` and `haven_data/demo_spaces/`, and restart:
+
+```bash
+sudo systemctl stop haven
+sudo -u haven rm -rf /opt/haven/config/spaces.json /opt/haven/haven_data/demo_spaces
+sudo systemctl start haven
+```

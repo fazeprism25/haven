@@ -1328,6 +1328,30 @@
   }
   #vault-copy-path-btn { margin-left: 6px; }
 
+  /* Informational card shown in place of any local-folder-path input
+     (Memory Space root, Obsidian import folder) once the dashboard detects
+     it isn't being accessed via localhost/127.0.0.1 -- see
+     IS_LOCAL_DEPLOYMENT. */
+  .remote-notice {
+    margin-top: 12px;
+    padding: 12px 14px;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-md, 10px);
+    background: rgba(255, 255, 255, 0.03);
+    font-size: 12.5px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+  .remote-notice p { margin: 0; }
+  .remote-notice p + p { margin-top: 6px; }
+  .remote-notice code {
+    background: rgba(255, 255, 255, 0.07);
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  .remote-notice .btn { margin-top: 10px; }
+
   /* ---- Modal ---------------------------------------------------------------------------------------------- */
   .modal-overlay {
     position: fixed;
@@ -1849,6 +1873,11 @@
           <button type="button" class="btn btn-primary" id="import-scan-btn">Scan</button>
           <button type="button" class="btn" id="import-scan-cancel-btn" hidden>Cancel</button>
         </div>
+        <p class="vault-hint hidden" id="import-root-remote-note">
+          A custom vault folder can't be entered on a remote deployment — it
+          would point at your browser's machine, not the server's. Scan
+          always uses the active Memory Space's root here.
+        </p>
         <div id="import-scan-status" class="capture-status"></div>
       </div>
 
@@ -2072,11 +2101,23 @@
           <span class="vault-summary-label">Active Memory Space</span>
           <span class="vault-path" id="vault-path-text">Checking…</span>
           <span class="badge hidden" id="vault-memory-count-badge"></span>
+          <span class="badge hidden" id="vault-hosted-badge">☁️ Hosted on Alibaba Cloud</span>
         </div>
-        <p class="vault-hint" style="margin-top: -2px;">
+        <p class="vault-hint" style="margin-top: -2px;" id="vault-local-hint">
           The one Memory Space every other section on this dashboard currently reads and writes.
           <a href="#import-vault">Import Obsidian vault</a> above adds notes into this space — it doesn't switch it.
         </p>
+        <div class="remote-notice hidden" id="vault-hosted-notice">
+          <p>
+            <strong>Hosted Demo Instance</strong>
+          </p>
+          <p>
+            This deployment contains preloaded demo Memory Spaces demonstrating
+            Haven's capabilities. Local filesystem folders are intentionally
+            unavailable on hosted deployments — use the Memory Spaces list
+            below to switch between them.
+          </p>
+        </div>
 
         <div class="vault-actions" id="vault-actions" hidden>
           <button class="btn btn-primary" id="vault-open-obsidian-btn">Open in Obsidian</button>
@@ -2108,6 +2149,22 @@
           <code>vault/</code>/<code>concepts/</code>/<code>.haven/</code>
           subfolders) if it doesn't exist yet, and never touches anything
           else already there.
+        </div>
+
+        <div class="remote-notice hidden" id="vault-remote-notice">
+          <p>
+            <strong>Local folder selection isn't available here.</strong>
+            Haven is running on a remote server, so a path typed into this
+            browser (e.g. <code>C:\Users\you\MyVault</code> or
+            <code>/home/you/MyVault</code>) points at your machine, not the
+            server's, and can't be used as a Memory Space root.
+          </p>
+          <p>
+            Local filesystem paths only work when Haven is accessed via
+            <code>localhost</code> or <code>127.0.0.1</code>. This deployment
+            manages its Memory Space directory via environment variables instead.
+          </p>
+          <button class="btn hidden" id="vault-remote-notice-cancel-btn">Cancel</button>
         </div>
 
         <div class="vault-hint hidden" id="vault-obsidian-fallback">
@@ -2212,6 +2269,16 @@
     import { formatUtcTimestamp, toUtcDate } from '/format-utc.js';
 
     const API_BASE = '/api/v1/dashboard';
+
+    // A pasted-in absolute filesystem path (Memory Space root, Obsidian
+    // import folder) only resolves to something real when this page and the
+    // Haven process share a filesystem -- true for the Quick Start's local
+    // `uvicorn` on 127.0.0.1/localhost, not for a remote deployment (e.g. the
+    // Alibaba Cloud backend). Every folder-selector UI on this page checks
+    // this before showing its path input; the backend enforces the same
+    // rule independently (see `_is_local_request` in obsidian/server/main.py)
+    // in case a request reaches a route directly.
+    const IS_LOCAL_DEPLOYMENT = ['localhost', '127.0.0.1'].includes(location.hostname);
     // Domain tab labels (obsidian/core/enums.py MemoryDomain) -- Browse
     // Memories groups all 18 memory types into these 3 tabs instead of one
     // tab per type (see obsidian/core/memory_domain.py for the fixed
@@ -2506,12 +2573,20 @@
     }
 
     function setVaultSelectRowVisible(visible) {
-      document.getElementById('vault-select-row').hidden = !visible;
-      document.getElementById('vault-select-hint').hidden = !visible;
-      document.getElementById('vault-select-cancel-btn').classList.toggle(
-        'hidden', !visible || !(currentVaultInfo && currentVaultInfo.configured)
-      );
-      if (visible) {
+      // Never show the paste-a-path input on a remote deployment -- a
+      // filesystem path typed into this browser refers to the browser's
+      // machine, not the server's, so it's replaced with an explanatory
+      // card instead (also enforced server-side, see _is_local_request).
+      const showInput = visible && IS_LOCAL_DEPLOYMENT;
+      const showNotice = visible && !IS_LOCAL_DEPLOYMENT;
+      const cancelable = visible && !!(currentVaultInfo && currentVaultInfo.configured);
+
+      document.getElementById('vault-select-row').hidden = !showInput;
+      document.getElementById('vault-select-hint').hidden = !showInput;
+      document.getElementById('vault-select-cancel-btn').classList.toggle('hidden', !cancelable);
+      document.getElementById('vault-remote-notice').classList.toggle('hidden', !showNotice);
+      document.getElementById('vault-remote-notice-cancel-btn').classList.toggle('hidden', !cancelable);
+      if (showInput) {
         document.getElementById('vault-root-input').value =
           (currentVaultInfo && currentVaultInfo.root) || '';
         document.getElementById('vault-root-input').focus();
@@ -2547,12 +2622,27 @@
       const badge = document.getElementById('vault-memory-count-badge');
       const actions = document.getElementById('vault-actions');
 
-      panel.classList.toggle('first-run', !info.configured);
+      panel.classList.toggle('first-run', IS_LOCAL_DEPLOYMENT && !info.configured);
       actions.hidden = !info.configured;
-      document.getElementById('first-run-banner').classList.toggle('hidden', info.configured && info.memory_count > 0);
-      updateFirstRunSteps(info);
 
-      if (!info.configured) {
+      if (IS_LOCAL_DEPLOYMENT) {
+        document.getElementById('first-run-banner').classList.toggle(
+          'hidden', info.configured && info.memory_count > 0
+        );
+        updateFirstRunSteps(info);
+      } else {
+        // Hosted deployments are always pre-seeded at startup (see
+        // _bootstrap_hosted_demo_registry in main.py) -- a judge should
+        // never see a "set up your Memory Space" nudge.
+        document.getElementById('first-run-banner').classList.add('hidden');
+      }
+
+      if (!IS_LOCAL_DEPLOYMENT) {
+        pathText.textContent = 'Hosted Demo Instance';
+        badge.textContent = `${info.memory_count} memor${info.memory_count === 1 ? 'y' : 'ies'}`;
+        badge.classList.toggle('hidden', !info.configured);
+        setVaultSelectRowVisible(false);
+      } else if (!info.configured) {
         pathText.textContent = 'Not selected yet — choose a folder below';
         badge.classList.add('hidden');
         setVaultSelectRowVisible(true);
@@ -2867,11 +2957,13 @@
           renameBtn.addEventListener('click', () => beginRenameSpace(tr, space));
           actionsTd.appendChild(renameBtn);
 
-          const editRootBtn = document.createElement('button');
-          editRootBtn.className = 'btn btn-ghost';
-          editRootBtn.textContent = 'Edit root…';
-          editRootBtn.addEventListener('click', () => beginEditSpaceRoot(space));
-          actionsTd.appendChild(editRootBtn);
+          if (IS_LOCAL_DEPLOYMENT) {
+            const editRootBtn = document.createElement('button');
+            editRootBtn.className = 'btn btn-ghost';
+            editRootBtn.textContent = 'Edit root…';
+            editRootBtn.addEventListener('click', () => beginEditSpaceRoot(space));
+            actionsTd.appendChild(editRootBtn);
+          }
         }
 
         if (!isActive && !info.env_managed && info.spaces.length > 1) {
@@ -2986,6 +3078,12 @@
     });
 
     document.getElementById('vault-select-cancel-btn').addEventListener('click', () => {
+      rootRowMode = { action: 'edit-active' };
+      document.getElementById('space-name-input').classList.add('hidden');
+      setVaultSelectRowVisible(false);
+    });
+
+    document.getElementById('vault-remote-notice-cancel-btn').addEventListener('click', () => {
       rootRowMode = { action: 'edit-active' };
       document.getElementById('space-name-input').classList.add('hidden');
       setVaultSelectRowVisible(false);
@@ -6171,9 +6269,29 @@
     // Local dev (Quick Start's `uvicorn` on 127.0.0.1/localhost) is the common
     // case, so default the footer to "local" and only claim the Alibaba Cloud
     // backend when the dashboard is actually being served from somewhere else.
-    if (!['localhost', '127.0.0.1'].includes(location.hostname)) {
+    if (!IS_LOCAL_DEPLOYMENT) {
       document.getElementById('deployment-footer-text').textContent =
         'Backend: Alibaba Cloud ECS · LLM: Qwen Cloud (DashScope)';
+      // The import-scan folder override is a path on *this browser's*
+      // machine -- meaningless on a remote deployment, so it's hidden in
+      // favor of the always-available "use the active Memory Space" default
+      // (also enforced server-side, see _resolve_import_root).
+      document.getElementById('import-root').hidden = true;
+      document.getElementById('import-root-remote-note').classList.remove('hidden');
+
+      // Hosted demo instance (see _bootstrap_hosted_demo_registry in
+      // main.py): a judge should never see filesystem-path affordances --
+      // "Open in Obsidian" and "Change root…" have no meaning without a
+      // local Obsidian install/filesystem, and "+ New Memory Space"/"Edit
+      // root…" would just 400 (see _is_local_request). Switching between
+      // the pre-seeded spaces, renaming them, and Import/Reset demo all
+      // stay available.
+      document.getElementById('vault-local-hint').classList.add('hidden');
+      document.getElementById('vault-hosted-notice').classList.remove('hidden');
+      document.getElementById('vault-hosted-badge').classList.remove('hidden');
+      document.getElementById('vault-open-obsidian-btn').hidden = true;
+      document.getElementById('vault-change-btn').hidden = true;
+      document.getElementById('space-create-btn').hidden = true;
     }
 
     // Deep link support: the extension's "Write Inspector" button (see
