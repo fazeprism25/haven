@@ -28,8 +28,14 @@
     return;
   }
 
-  const { HAVEN_BASE_URL, SETTINGS_STORAGE_KEY, DEFAULT_SETTINGS, REQUEST_TIMEOUT_MS } =
-    await import(chrome.runtime.getURL("config.js"));
+  const {
+    HAVEN_BASE_URL,
+    SETTINGS_STORAGE_KEY,
+    DEFAULT_SETTINGS,
+    REQUEST_TIMEOUT_MS,
+    loadSettings,
+    MEMORY_TYPE_LABELS,
+  } = await import(chrome.runtime.getURL("config.js"));
   const { resolveQuery } = await import(
     chrome.runtime.getURL("content/resolve-query.js")
   );
@@ -94,13 +100,9 @@
   };
 
   // Auto-preview/auto-remember, set from popup/popup.js via
-  // chrome.storage.local — see loadSettings()/the onChanged listener below.
+  // chrome.storage.local — see loadSettings() (config.js)/the onChanged
+  // listener below.
   let settings = { ...DEFAULT_SETTINGS };
-
-  async function loadSettings() {
-    const stored = await chrome.storage.local.get(SETTINGS_STORAGE_KEY);
-    settings = { ...DEFAULT_SETTINGS, ...(stored[SETTINGS_STORAGE_KEY] || {}) };
-  }
 
   chrome.storage.onChanged.addListener((changes, area) => {
     if (area === "local" && changes[SETTINGS_STORAGE_KEY]) {
@@ -492,17 +494,10 @@
   // read back out of card._havenReview by the Save button.
   const MEMORY_TYPES = ["fact", "preference", "decision", "goal", "project"];
 
-  // Presentation-only labels for the save summary's type/decision breakdown
-  // (see showSaveSummary) -- singular form; pluralized with a trailing "s"
-  // by pluralizeType() below since every value here pluralizes regularly.
-  const MEMORY_TYPE_LABELS = {
-    fact: "Fact",
-    preference: "Preference",
-    decision: "Decision",
-    goal: "Goal",
-    project: "Project",
-  };
-
+  // MEMORY_TYPE_LABELS (config.js) supplies the save summary's type/decision
+  // breakdown (see showSaveSummary) -- singular form; pluralized with a
+  // trailing "s" by pluralizeType() below since every value pluralizes
+  // regularly.
   function pluralizeType(type, count) {
     const label = MEMORY_TYPE_LABELS[type] ?? type;
     return count === 1 ? label : `${label}s`;
@@ -1124,7 +1119,7 @@
   window.addEventListener("resize", positionContainer);
   window.addEventListener("scroll", positionContainer, true);
 
-  await loadSettings();
+  settings = await loadSettings();
   sync();
   updateRememberVisibility();
 })();

@@ -7,7 +7,12 @@
 // scripts), so this reads the shared settings shape straight from config.js
 // rather than duplicating it.
 
-import { SETTINGS_STORAGE_KEY, DEFAULT_SETTINGS } from "../config.js";
+import {
+  SETTINGS_STORAGE_KEY,
+  DEFAULT_SETTINGS,
+  loadSettings,
+  MEMORY_TYPE_LABELS,
+} from "../config.js";
 
 function send(type, payload) {
   return new Promise((resolve) => {
@@ -43,11 +48,6 @@ const els = {
   searchError: document.getElementById("search-error"),
   searchResults: document.getElementById("search-results"),
 };
-
-async function loadSettings() {
-  const stored = await chrome.storage.local.get(SETTINGS_STORAGE_KEY);
-  return { ...DEFAULT_SETTINGS, ...(stored[SETTINGS_STORAGE_KEY] || {}) };
-}
 
 async function refreshStatus() {
   els.statusDot.className = "status-dot";
@@ -131,18 +131,6 @@ els.searchForm.addEventListener("submit", async (event) => {
     if (requestId === searchRequestId) submitBtn.disabled = false;
   }
 });
-
-// Mirrors content/controller.js's MEMORY_TYPE_LABELS -- popup and content
-// scripts run in separate contexts with no shared module to import this
-// from, so the map is kept in sync by hand rather than duplicated verbatim
-// with a different name.
-const MEMORY_TYPE_LABELS = {
-  fact: "Fact",
-  preference: "Preference",
-  decision: "Decision",
-  goal: "Goal",
-  project: "Project",
-};
 
 function renderResults(candidates) {
   if (!candidates.length) {

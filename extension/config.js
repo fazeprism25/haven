@@ -43,3 +43,24 @@ export const DEFAULT_SETTINGS = {
   autoPreview: true,
   autoRemember: false,
 };
+
+// Shared by content/controller.js (dynamic import -- classic content scripts
+// can't use a top-level `import`) and popup/popup.js (static import) so
+// both read the same merged-with-defaults settings shape from
+// chrome.storage.local.
+export async function loadSettings() {
+  const stored = await chrome.storage.local.get(SETTINGS_STORAGE_KEY);
+  return { ...DEFAULT_SETTINGS, ...(stored[SETTINGS_STORAGE_KEY] || {}) };
+}
+
+// Presentation-only labels for MemoryType values, used by content/controller.js's
+// Memory Review dialog (save summary + type <select>) and popup/popup.js's
+// search results. Singular form; pluralized with a trailing "s" by
+// controller.js's pluralizeType() since every value here pluralizes regularly.
+export const MEMORY_TYPE_LABELS = {
+  fact: "Fact",
+  preference: "Preference",
+  decision: "Decision",
+  goal: "Goal",
+  project: "Project",
+};
