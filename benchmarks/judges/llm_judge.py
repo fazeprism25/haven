@@ -1,6 +1,5 @@
 import json
 import os
-import time
 from typing import Any, Dict, Optional
 
 from openai import OpenAI
@@ -113,7 +112,6 @@ def judge_answer(
 
     Return only JSON.
     """
-    start = time.perf_counter()
     client = _get_client()
     response = client.chat.completions.create(
         model=_resolve_model(model),
@@ -129,7 +127,6 @@ def judge_answer(
             }
         ]
     )
-    print("Judge took",round(time.perf_counter()-start,2),"seconds")
     text = response.choices[0].message.content
 
     try:

@@ -313,6 +313,21 @@ def save_results(data: Any, output_path: str):
         json.dump(data, f, indent=2)
 
 
+def _checkpoint_path(adapter_name: str) -> str:
+    """Where an in-progress run's per-case results are saved incrementally.
+
+    A full run (mem0 baseline plus every ablation/baseline) can take hours
+    of real Qwen-judge API calls, and this process has no control over the
+    machine staying awake or this shell surviving that long — a kill
+    partway through must not lose already-computed, already-judged results.
+    Kept separate from the adapter's real ``results*.json`` output so a
+    stale checkpoint from an old attempt is never mistaken for a finished
+    run, and separate per adapter so runs for different adapters never
+    collide.
+    """
+    return f"benchmarks/results/.checkpoint_{adapter_name}.json"
+
+
 def main(adapter_name: str = "mem0", enable_query_rewriter: bool = False):
 
     adapter_cls = get_adapter_cls(adapter_name)
@@ -353,9 +368,19 @@ def main(adapter_name: str = "mem0", enable_query_rewriter: bool = False):
     if skipped_files:
         print("Skipped", len(skipped_files), "invalid/incomplete dataset files")
 
-    results = []
+    checkpoint_path = _checkpoint_path(adapter_name)
+    completed: Dict[str, Any] = {}
+    if os.path.exists(checkpoint_path):
+        with open(checkpoint_path, "r") as f:
+            checkpoint = json.load(f)
+        completed = {r["benchmark_id"]: r for r in checkpoint.get("results", [])}
+        print(f"Resuming from checkpoint: {len(completed)} case(s) already done")
 
     for benchmark in all_benchmarks:
+
+        if benchmark["benchmark_id"] in completed:
+            print(f"Skipping {benchmark['benchmark_id']} (already in checkpoint)")
+            continue
 
         print(
             f"Running {benchmark['benchmark_id']}...",
@@ -372,7 +397,20 @@ def main(adapter_name: str = "mem0", enable_query_rewriter: bool = False):
             else "FAIL"
         )
 
-        results.append(result)
+        completed[benchmark["benchmark_id"]] = result
+        save_results(
+            {"metadata": {"adapter": adapter_name, "in_progress": True}, "results": list(completed.values())},
+            checkpoint_path,
+        )
+
+    # Preserve dataset order in the final output rather than checkpoint
+    # insertion order (resumed runs would otherwise interleave differently
+    # than a from-scratch run).
+    results = [
+        completed[b["benchmark_id"]]
+        for b in all_benchmarks
+        if b["benchmark_id"] in completed
+    ]
 
     print("\nSaving results")
 
@@ -393,6 +431,9 @@ def main(adapter_name: str = "mem0", enable_query_rewriter: bool = False):
     }
 
     save_results({"metadata": metadata, "results": results}, output_path)
+
+    if os.path.exists(checkpoint_path):
+        os.remove(checkpoint_path)
 
     passed = sum(
         1 for r in results

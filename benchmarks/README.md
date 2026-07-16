@@ -47,7 +47,26 @@ python -m benchmarks.runners.run_benchmarks --adapter haven    # Haven
 Results are written to `results/results.json` (mem0) or
 `results/results_<adapter>.json`. Add `--query-rewriter` to enable
 `QueryRewriter` multi-query expansion on the Haven adapter (requires
-`QUERY_REWRITER_API_KEY`; fails open to no rewrites otherwise).
+`QUERY_REWRITER_API_KEY`, e.g. via `cp config/query_rewriter.env.example
+config/query_rewriter.env`; fails open to no rewrites otherwise).
+
+The judge itself needs its own key: `cp config/benchmark_judge.env.example
+config/benchmark_judge.env`, then set `QWEN_API_KEY` in that file (or
+export it directly — see `obsidian/server/README.md`'s "Configure Manager
+AI" section for how the three independent AI-call-site configs relate).
+The `QWEN_*` names are just the config's variable names, not a guarantee
+of which provider judged any given result file: the canonical
+`results_<adapter>.json` files on disk were judged by `deepseek-chat`
+(that run pointed `QWEN_API_KEY`/`QWEN_BASE_URL`/`QWEN_JUDGE_MODEL` at
+DeepSeek's endpoint) — see `benchmarks/results/archive/README.md` and
+`benchmarks/reports/archive/deepseek_validation_report.md` for the full
+picture, including the incomplete Qwen-judged rerun kept archived for
+engineering reference only. **There is currently no canonical mem0
+baseline** (`results.json`): the DeepSeek pass never ran the plain `mem0`
+adapter, and the only 288-case mem0 baseline that exists was judged by
+Qwen, not DeepSeek — kept archived rather than mixed into the canonical,
+single-judge set. The Benchmark Explorer reflects this honestly (no
+`mem0` rows) until a real DeepSeek-judged mem0 run exists.
 
 ### Continuation benchmark (pilot)
 

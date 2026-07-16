@@ -333,8 +333,9 @@ No hidden scoring.
 # Current Limitations
 
 - Single-user design
-- Local-only deployment
-- No authentication
+- No authentication built into the app itself (the
+  [Alibaba Cloud deployment](../../deploy/alibaba-cloud/README.md) adds Basic
+  Auth at the nginx layer in front of it)
 - No live synchronization
 - Dashboard polling instead of push updates
 - Canonical supersession pipeline not yet integrated into production writes
