@@ -7,6 +7,14 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='4' fill='%235E6AD2'/%3E%3Ctext x='8' y='12' font-family='-apple-system,Segoe UI,sans-serif' font-size='11' font-weight='600' fill='white' text-anchor='middle'%3EH%3C/text%3E%3C/svg%3E" />
 <style>
   :root {
+    /* Haven ships one fixed dark theme (no light-mode toggle) -- without
+       this, native form controls (the <select> option list, checkboxes,
+       scrollbars) still render using the OS's own light theme, since the
+       browser has no way to know the page around them is dark. This is
+       what makes every <select> dropdown (Kind filter, Memory Space
+       switcher, import type picker, ...) pop up near-white and
+       low-contrast against Haven's dark chrome. */
+    color-scheme: dark;
     --accent: #7b87ff;
     --accent-2: #a78bfa;
     --accent-dark: #5E6AD2;
@@ -1025,6 +1033,7 @@
     transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, box-shadow 0.2s ease;
   }
   .tab:hover { border-color: var(--border-strong); color: var(--text); }
+  .tab:disabled { cursor: default; opacity: 0.45; }
   .tab.active {
     background: linear-gradient(135deg, #6c78e8, #7c62e0);
     border-color: transparent;
@@ -1035,6 +1044,21 @@
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 14px;
+  }
+  .memory-type-group { margin-bottom: 22px; }
+  .memory-type-group:last-child { margin-bottom: 0; }
+  .memory-type-heading {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--faint);
+    margin: 0 0 10px;
+  }
+  .memory-topics {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 8px;
   }
   .memory-card {
     background: var(--card);
@@ -1590,6 +1614,13 @@
     box-shadow: 0 0 0 9999px rgba(4, 4, 8, 0.82);
     transition: outline-color 0.2s ease;
   }
+  .tour-scrim {
+    position: fixed;
+    inset: 0;
+    z-index: 150;
+    background: transparent;
+  }
+  .tour-scrim.hidden { display: none; }
   .tour-bar {
     position: fixed;
     left: 50%;
@@ -1598,6 +1629,13 @@
     z-index: 200;
     width: 420px;
     max-width: calc(100vw - 32px);
+    /* Bounded to the viewport (minus top/bottom breathing room) so a long
+       step's body can never grow the bar past the screen -- .tour-bar-body
+       below is the part that scrolls; the head and foot (with Previous/
+       Next/Skip) are outside that scroll area and always stay visible. */
+    max-height: calc(100vh - 48px);
+    display: flex;
+    flex-direction: column;
     background: var(--card-solid);
     border: 1px solid var(--border-strong);
     border-radius: var(--radius-lg);
@@ -1606,7 +1644,11 @@
     animation: rise-in 0.22s cubic-bezier(0.21, 0.7, 0.35, 1) both;
   }
   .tour-bar.hidden { display: none; }
-  .tour-bar-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 8px; }
+  .tour-bar-head {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    margin-bottom: 8px;
+    flex-shrink: 0;
+  }
   .tour-step-label {
     font-size: 11px;
     font-weight: 600;
@@ -1625,13 +1667,26 @@
     border-radius: 6px;
   }
   .tour-close:hover { background: rgba(255, 255, 255, 0.08); color: var(--text); }
-  .tour-bar h3 { margin: 0 0 6px; font-size: 15px; font-weight: 650; letter-spacing: -0.01em; }
-  .tour-bar p { margin: 0 0 14px; font-size: 13px; color: var(--muted); line-height: 1.5; }
+  .tour-bar-body {
+    overflow-y: auto;
+    min-height: 0;
+    /* Room for the outline+box-shadow the highlighted target draws (see
+       .tour-highlight) so this scroll container's own edge doesn't clip it. */
+    margin: 0 -4px;
+    padding: 0 4px;
+  }
+  .tour-bar h3 { margin: 0 0 6px; font-size: 15px; font-weight: 650; letter-spacing: -0.01em; overflow-wrap: break-word; }
+  .tour-bar p { margin: 0 0 14px; font-size: 13px; color: var(--muted); line-height: 1.5; overflow-wrap: break-word; }
   .tour-dots { display: flex; gap: 5px; }
   .tour-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--border-strong); transition: background 0.15s ease, transform 0.15s ease; }
   .tour-dot.active { background: var(--accent); transform: scale(1.3); }
-  .tour-bar-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-  .tour-bar-actions { display: flex; gap: 8px; }
+  .tour-bar-foot {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    flex-shrink: 0;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+  }
+  .tour-bar-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
   #tour-skip-btn { color: var(--faint); font-size: 12.5px; }
 
   /* ---- Responsiveness ------------------------------------------------------------------------------------------------------ */
@@ -1646,7 +1701,7 @@
     #stale-banner { padding: 10px 18px; }
     #inspector-form { flex-direction: column; }
     #inspector-form button[type="submit"] { height: 44px; }
-    .tour-bar { width: calc(100vw - 24px); left: 12px; right: 12px; bottom: 12px; transform: none; }
+    .tour-bar { width: calc(100vw - 24px); left: 12px; right: 12px; bottom: 12px; transform: none; max-height: calc(100vh - 24px); }
   }
   @media (min-width: 1440px) {
     main, .hero-inner, .first-run-banner { max-width: 1200px; }
@@ -1690,11 +1745,11 @@
   </div>
 
   <header class="hero">
-    <div class="hero-inner">
+    <div class="hero-inner" id="dashboard-home">
       <h1>Your AI's long-term memory</h1>
       <p class="tagline">Haven turns conversations into structured, searchable knowledge.</p>
       <p class="hero-desc">Every conversation becomes memory. Every memory is explainable — from extraction to retrieval, end to end.</p>
-      <div class="hero-stats">
+      <div class="hero-stats" id="hero-stats">
         <div class="stat-card"><div class="stat-icon">🧠</div><div class="stat-value skeleton" id="stat-total">—</div><div class="stat-label">Memories</div></div>
         <div class="stat-card"><div class="stat-icon">✨</div><div class="stat-value skeleton" id="stat-active">—</div><div class="stat-label">Active</div></div>
         <div class="stat-card"><div class="stat-icon">📦</div><div class="stat-value skeleton" id="stat-archived">—</div><div class="stat-label">Archived</div></div>
@@ -1785,7 +1840,7 @@
 
     <section id="import-vault">
       <h2>📥 Import Obsidian vault</h2>
-      <p class="section-sub">Scan a folder of Markdown notes and import them through the same memory pipeline as your conversations. Scanning never calls the LLM, and your original notes are never modified.</p>
+      <p class="section-sub">Scan a folder of Markdown notes and import them into your <strong>active Memory Space</strong> (below in Settings), through the same memory pipeline as your conversations. This adds notes to the space you're already using — it does not create a new one. Want them kept separate instead? Create a new Memory Space in Settings first, then import here. Scanning never calls the LLM, and your original notes are never modified.</p>
 
       <!-- Phase 1: Scan -->
       <div id="import-scan-phase" class="import-phase">
@@ -1847,9 +1902,13 @@
       </form>
       <div class="ask-suggestions">
         <span class="ask-suggestions-label">Try:</span>
-        <button type="button" class="suggestion-chip" data-suggestion="What am I working on right now?">What am I working on?</button>
-        <button type="button" class="suggestion-chip" data-suggestion="What did I decide about the database?">What did I decide?</button>
-        <button type="button" class="suggestion-chip" data-suggestion="What are my preferences?">What are my preferences?</button>
+        <button type="button" class="suggestion-chip" data-suggestion="What am I working on?">What am I working on?</button>
+        <button type="button" class="suggestion-chip" data-suggestion="What's blocking the deployment?">What's blocking the deployment?</button>
+        <button type="button" class="suggestion-chip" data-suggestion="What decisions have I made recently?">What decisions have I made recently?</button>
+        <button type="button" class="suggestion-chip" data-suggestion="What code areas am I modifying?">What code areas am I modifying?</button>
+        <button type="button" class="suggestion-chip" data-suggestion="What rules am I following?">What rules am I following?</button>
+        <button type="button" class="suggestion-chip" data-suggestion="What questions are still unresolved?">What questions are still unresolved?</button>
+        <button type="button" class="suggestion-chip" data-suggestion="Summarize everything I'm working on.">Summarize everything I'm working on.</button>
       </div>
       <div id="inspector-error" class="error hidden"></div>
       <div id="ask-results"></div>
@@ -1913,12 +1972,10 @@
     <section id="memories">
       <h2>🗂️ Browse memories</h2>
       <p class="section-sub">Everything Haven knows, organized by category.</p>
-      <div class="tab-bar">
-        <button class="tab active" data-category="projects">📁 Projects</button>
-        <button class="tab" data-category="decisions">⚖️ Decisions</button>
-        <button class="tab" data-category="beliefs">💭 Beliefs</button>
-        <button class="tab" data-category="preferences">❤️ Preferences</button>
-        <button class="tab" data-category="tasks">✅ Tasks</button>
+      <div class="tab-bar" id="memory-domain-tabs">
+        <button class="tab active" data-category="personal">🧑 Personal</button>
+        <button class="tab" data-category="work">🛠️ Work</button>
+        <button class="tab" data-category="knowledge">📚 Knowledge</button>
       </div>
       <div id="category-list" class="memory-list">
         <div class="skeleton-card"></div>
@@ -2016,6 +2073,10 @@
           <span class="vault-path" id="vault-path-text">Checking…</span>
           <span class="badge hidden" id="vault-memory-count-badge"></span>
         </div>
+        <p class="vault-hint" style="margin-top: -2px;">
+          The one Memory Space every other section on this dashboard currently reads and writes.
+          <a href="#import-vault">Import Obsidian vault</a> above adds notes into this space — it doesn't switch it.
+        </p>
 
         <div class="vault-actions" id="vault-actions" hidden>
           <button class="btn btn-primary" id="vault-open-obsidian-btn">Open in Obsidian</button>
@@ -2066,6 +2127,12 @@
             environment variables, not the dashboard.
           </span>
         </div>
+        <p class="vault-hint" style="margin-top: -2px;">
+          Each Memory Space is a fully independent Haven database — activating one changes
+          everything on this dashboard at once. Creating a space here only registers it; to
+          add notes to it, activate it and then use <a href="#import-vault">Import Obsidian vault</a>
+          or Quick Capture above.
+        </p>
         <table class="spaces-table" id="spaces-table">
           <tbody id="spaces-table-body"></tbody>
         </table>
@@ -2074,8 +2141,32 @@
         </div>
         <div class="inline-message hidden" id="spaces-message"></div>
       </div>
+
+      <div id="query-rewriting-panel" class="vault-panel">
+        <div class="vault-summary">
+          <span class="vault-summary-label">Query Rewriting</span>
+        </div>
+        <p class="vault-hint" style="margin-top: 0;">
+          Uses an LLM to rewrite vague or underspecified queries before retrieval, searching
+          every rewritten phrasing alongside the original for better recall. Retrieval,
+          ranking, and acceptance logic are unchanged either way; this only changes how many
+          queries are searched. The Retrieval Inspector shows both the original and rewritten
+          queries when enabled. Off by default; switching back to <b>Off</b> at any time
+          reproduces Haven's original, LLM-free behavior exactly, with no restart required.
+        </p>
+        <div class="tab-bar" id="query-rewriting-toggle" role="radiogroup" aria-label="Query Rewriting">
+          <button class="tab" id="query-rewriting-off-btn" data-mode="off" type="button">Off</button>
+          <button class="tab" id="query-rewriting-on-btn" data-mode="on" type="button">On</button>
+        </div>
+        <div class="inline-message hidden" id="query-rewriting-message"></div>
+      </div>
     </section>
   </main>
+
+  <footer id="deployment-footer" style="border-top: 1px solid var(--border); padding: 14px 24px; text-align: center; font-size: 12px; color: var(--muted);">
+    <span id="deployment-footer-text">Backend: local &nbsp;·&nbsp; LLM: Qwen Cloud (DashScope), when configured</span>
+    &nbsp;·&nbsp; <a href="/api/v1/health" style="color: inherit;">health</a>
+  </footer>
 
   <div id="detail-modal" class="modal-overlay hidden">
     <div class="modal">
@@ -2097,18 +2188,21 @@
     </div>
   </div>
 
+  <div id="tour-scrim" class="tour-scrim hidden" aria-hidden="true"></div>
   <div id="tour-bar" class="tour-bar hidden" role="dialog" aria-label="Guided demo">
     <div class="tour-bar-head">
-      <span class="tour-step-label" id="tour-step-label">Step 1 of 6</span>
+      <span class="tour-step-label" id="tour-step-label">Step 1 of 1</span>
       <button class="tour-close" id="tour-close-btn" aria-label="Close guided demo">&times;</button>
     </div>
-    <h3 id="tour-title"></h3>
-    <p id="tour-body"></p>
+    <div class="tour-bar-body">
+      <h3 id="tour-title"></h3>
+      <p id="tour-body"></p>
+    </div>
     <div class="tour-bar-foot">
       <div class="tour-dots" id="tour-dots"></div>
       <div class="tour-bar-actions">
         <button class="btn btn-ghost" id="tour-skip-btn">Skip tour</button>
-        <button class="btn btn-ghost" id="tour-back-btn">Back</button>
+        <button class="btn btn-ghost" id="tour-back-btn">Previous</button>
         <button class="btn btn-primary" id="tour-next-btn">Next</button>
       </div>
     </div>
@@ -2118,12 +2212,24 @@
     import { formatUtcTimestamp, toUtcDate } from '/format-utc.js';
 
     const API_BASE = '/api/v1/dashboard';
+    // Domain tab labels (obsidian/core/enums.py MemoryDomain) -- Browse
+    // Memories groups all 18 memory types into these 3 tabs instead of one
+    // tab per type (see obsidian/core/memory_domain.py for the fixed
+    // MemoryType -> MemoryDomain mapping this UI mirrors).
     const CATEGORY_LABELS = {
-      projects: 'projects',
-      decisions: 'decisions',
-      beliefs: 'beliefs',
-      preferences: 'preferences',
-      tasks: 'tasks',
+      personal: 'Personal',
+      work: 'Work',
+      knowledge: 'Knowledge',
+    };
+
+    // Display order of memory types within each domain tab -- matches
+    // obsidian/core/memory_domain.py's MEMORY_TYPE_DOMAIN grouping. A type
+    // absent from the current vault's data is simply skipped, never shown
+    // empty (see renderCategory).
+    const TYPE_ORDER = {
+      personal: ['preference', 'interest', 'trait', 'habit', 'skill', 'goal'],
+      work: ['project', 'task', 'decision', 'open_question', 'blocker', 'implementation_state', 'code_area'],
+      knowledge: ['fact', 'belief', 'person', 'event', 'rule'],
     };
 
     // Icon + badge class per MemoryType (obsidian/core/enums.py). Unknown
@@ -2131,6 +2237,9 @@
     const TYPE_META = {
       fact:       { icon: '📌', label: 'Fact' },
       preference: { icon: '❤️', label: 'Preference' },
+      interest:   { icon: '🔭', label: 'Interest' },
+      trait:      { icon: '🧬', label: 'Trait' },
+      habit:      { icon: '🔁', label: 'Habit' },
       belief:     { icon: '💭', label: 'Belief' },
       decision:   { icon: '⚖️', label: 'Decision' },
       goal:       { icon: '🎯', label: 'Goal' },
@@ -2141,9 +2250,17 @@
       skill:      { icon: '🛠️', label: 'Skill' },
       rule:       { icon: '📏', label: 'Rule' },
       blocker:    { icon: '🚧', label: 'Blocker' },
-      open_question: { icon: '❓', label: 'Open Question' },
+      open_question: { icon: '❓', label: 'Question' },
       implementation_state: { icon: '🧩', label: 'Implementation State' },
-      code_area:  { icon: '🗂️', label: 'Code Area' },
+      code_area:  { icon: '🗂️', label: 'Code Areas' },
+    };
+
+    // Domain display labels for the Why? inspector's classification section
+    // (obsidian/core/enums.py MemoryDomain).
+    const DOMAIN_LABELS = {
+      personal: 'Personal',
+      work: 'Work',
+      knowledge: 'Knowledge',
     };
 
     function typeMeta(type) {
@@ -2247,7 +2364,7 @@
     }
 
     let dashboardData = null;
-    let activeCategory = 'projects';
+    let activeCategory = 'personal';
     let lastLatencyMs = null;
     // Bumped on every inspector query / memory-detail open so a slow,
     // superseded response can recognise it's stale and skip rendering
@@ -2319,11 +2436,23 @@
 
     // Re-arms the hero stat cards' skeleton shimmer + count-up-from-zero
     // animation (see setText) so a demo import/reset visibly "lands" on
-    // the numbers instead of them silently jumping to a new value.
+    // the numbers instead of them silently jumping to a new value. Also
+    // resets Project Overview's hero cards (Current Objective/Milestone/
+    // Focus) and the Current Focus / Working Context grid to their
+    // initial-load skeleton markup -- both are only otherwise repainted
+    // once loadDashboard()'s fetch resolves, so without this a slow
+    // Memory Space switch left the *previous* space's Current Focus
+    // visibly on screen for the entire duration of the switch instead of
+    // reading as "loading," easily mistaken for stale data that never
+    // refreshed.
     function bumpStatsToSkeleton() {
       ['stat-total', 'stat-active', 'stat-archived', 'stat-concepts', 'stat-relationships'].forEach((id) => {
         document.getElementById(id).classList.add('skeleton');
       });
+      document.getElementById('overview-hero-grid').innerHTML =
+        '<div class="skeleton-card"></div><div class="skeleton-card"></div><div class="skeleton-card"></div>';
+      document.getElementById('resume-grid').innerHTML =
+        '<div class="skeleton-card"></div><div class="skeleton-card"></div><div class="skeleton-card"></div>';
     }
 
     // Promise-based replacement for window.confirm() so destructive actions
@@ -2495,7 +2624,45 @@
         mode.action === 'create' ? 'Create Memory Space' : 'Use this folder';
     }
 
+    // Ask Your Memory is scoped to whichever Memory Space is active. A
+    // switch (or a root repoint of the active space) changes the entire
+    // corpus underneath any in-progress query, so every piece of UI/state
+    // the feature owns — input, results, retrieval trace, Explainability
+    // Pipeline, structured prompt, cached latency stat, button busy state —
+    // must be torn down rather than left showing answers from the old space.
+    function resetAskMemoryState() {
+      // Bumping this discards any in-flight /inspect response from the
+      // space we just left; runInspection() checks it before repainting.
+      inspectorRequestId++;
+
+      const submitBtn = document.querySelector('#inspector-form button[type="submit"]');
+      if (submitBtn) clearButtonBusy(submitBtn);
+
+      document.getElementById('inspector-query').value = '';
+
+      const errorEl = document.getElementById('inspector-error');
+      errorEl.textContent = '';
+      errorEl.classList.add('hidden');
+
+      document.getElementById('ask-results').innerHTML = '';
+
+      const traceDetails = document.getElementById('inspector-trace');
+      traceDetails.open = false;
+      traceDetails.classList.add('hidden');
+      document.getElementById('inspector-table').classList.add('hidden');
+      document.getElementById('inspector-tbody').innerHTML = '';
+      document.getElementById('inspector-stages').innerHTML = '';
+
+      document.getElementById('pipeline-flow').innerHTML = '';
+      document.getElementById('pipeline-flow').classList.add('hidden');
+      document.getElementById('pipeline-empty').classList.remove('hidden');
+
+      lastLatencyMs = null;
+      renderOverview();
+    }
+
     async function refreshAfterSpaceChange() {
+      resetAskMemoryState();
       await loadVaultInfo();
       await loadSpacesInfo();
       await loadDashboard();
@@ -2733,6 +2900,69 @@
         console.error('Failed to load Memory Spaces', err);
       }
     }
+
+    // ---------------------------------------------------------------------
+    // Query Rewriting -- optional multi-query expansion. A two-state
+    // selector (never a checkbox: "Off"/"On" communicates that this is a
+    // mode switch, not a single boolean flag) over GET/PUT
+    // /api/v1/settings/query-rewriting. Off is the default and reproduces
+    // Haven's original, LLM-free retrieval behavior exactly; toggling
+    // either way takes effect on the very next query, with no server
+    // restart.
+    // ---------------------------------------------------------------------
+
+    function renderQueryRewritingToggle(enabled) {
+      document.getElementById('query-rewriting-off-btn').classList.toggle('active', !enabled);
+      document.getElementById('query-rewriting-on-btn').classList.toggle('active', enabled);
+    }
+
+    async function loadQueryRewritingSetting() {
+      try {
+        const res = await fetch('/api/v1/settings/query-rewriting', { cache: 'no-store' });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        renderQueryRewritingToggle(data.enabled);
+      } catch (err) {
+        console.error('Failed to load Query Rewriting setting', err);
+      }
+    }
+
+    function showQueryRewritingMessage(text, isError) {
+      const el = document.getElementById('query-rewriting-message');
+      el.textContent = text;
+      el.classList.remove('hidden');
+      el.classList.toggle('error', isError);
+      el.classList.toggle('success', !isError);
+    }
+
+    document.getElementById('query-rewriting-toggle').addEventListener('click', async (e) => {
+      const btn = e.target.closest('.tab');
+      if (!btn || btn.classList.contains('active')) return;
+      const enabled = btn.dataset.mode === 'on';
+      const toggleEl = document.getElementById('query-rewriting-toggle');
+      toggleEl.querySelectorAll('.tab').forEach((b) => { b.disabled = true; });
+      try {
+        const res = await fetch('/api/v1/settings/query-rewriting', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ enabled }),
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        renderQueryRewritingToggle(data.enabled);
+        showQueryRewritingMessage(
+          data.enabled
+            ? 'Query Rewriting is on — future queries may search alternate phrasings.'
+            : "Query Rewriting is off — retrieval is back to Haven's deterministic default.",
+          false
+        );
+      } catch (err) {
+        console.error('Failed to update Query Rewriting setting', err);
+        showQueryRewritingMessage("Couldn't update Query Rewriting — try again.", true);
+      } finally {
+        toggleEl.querySelectorAll('.tab').forEach((b) => { b.disabled = false; });
+      }
+    });
 
     document.getElementById('space-switcher-select').addEventListener('change', async (e) => {
       const spaceId = e.target.value;
@@ -3060,7 +3290,7 @@
           </div>
           <div class="context-count">
             <span>${ctx.memory_count} memor${ctx.memory_count === 1 ? 'y' : 'ies'}</span>
-            <button type="button" class="why-btn context-bucket-why" data-ctx-key="${escapeHtml(ctx.key)}">Why this bucket?</button>
+            <button type="button" class="why-btn context-bucket-why" data-ctx-key="${escapeHtml(ctx.key)}" title="This shows why Haven grouped this memory into this section.">Why is this here?</button>
           </div>
           ${fields}
           ${empty ? '<p class="empty">Nothing to resume here yet.</p>' : ''}
@@ -3243,13 +3473,25 @@
     // cards show (including decision detail), not just ProjectState's own
     // narrower projection. Blockers/open questions have no dedicated
     // category list server-side, so this legitimately returns null for them.
+    // Flattens the domain-grouped DashboardResponse (obsidian/server/schemas.py
+    // DomainSection.by_type) into the same "every loaded memory pool" list
+    // findLoadedMemoryById/ByFact used to build from the old fixed 5 fields
+    // (projects/decisions/beliefs/preferences/tasks) -- now covers all 18
+    // memory types, not just those 5.
+    function allLoadedMemoryPools() {
+      if (!dashboardData) return [];
+      const pools = [dashboardData.recent_memories];
+      for (const section of dashboardData.domains || []) {
+        for (const type of Object.keys(section.by_type || {})) {
+          pools.push(section.by_type[type]);
+        }
+      }
+      return pools;
+    }
+
     function findLoadedMemoryById(id) {
       if (!dashboardData || !id) return null;
-      const pools = [
-        dashboardData.projects, dashboardData.decisions, dashboardData.beliefs,
-        dashboardData.preferences, dashboardData.tasks, dashboardData.recent_memories,
-      ];
-      for (const pool of pools) {
+      for (const pool of allLoadedMemoryPools()) {
         const hit = (pool || []).find((m) => m.id === id);
         if (hit) return hit;
       }
@@ -3258,11 +3500,7 @@
 
     function findLoadedMemoryByFact(fact) {
       if (!dashboardData || !fact) return null;
-      const pools = [
-        dashboardData.projects, dashboardData.decisions, dashboardData.beliefs,
-        dashboardData.preferences, dashboardData.tasks, dashboardData.recent_memories,
-      ];
-      for (const pool of pools) {
+      for (const pool of allLoadedMemoryPools()) {
         const hit = (pool || []).find((m) => m.canonical_fact === fact);
         if (hit) return hit;
       }
@@ -3331,18 +3569,18 @@
     // falling back to a reason-only panel when the fact isn't among the
     // memory pools this dashboard already loaded.
     const CONTEXT_FIELD_REASONS = {
-      current_goal: "This bucket's top-ranked GOAL-role memory (WorkingContextState.current_goal) — the single most salient goal in this Working Context, never picked by AI judgment.",
-      current_focus: "The single highest-final_score memory across every role bucket in this Working Context — what's most salient right now, independent of role.",
-      recent_decisions: "This bucket's DECISION-role memories, newest valid_from first (rank breaks ties) — current vs. superseded is read straight off each decision's own recorded status.",
-      pending_tasks: "This bucket's TASK-role memories, in the ranker's own rank order — never reordered for this view.",
-      open_questions: "This bucket's OPEN_QUESTION-role memories, in the ranker's own rank order.",
+      current_goal: "This section's top-ranked GOAL-role memory (WorkingContextState.current_goal) — the single most salient goal in this Working Context, never picked by AI judgment.",
+      current_focus: "The single highest-final_score memory across every role group in this Working Context — what's most salient right now, independent of role.",
+      recent_decisions: "This section's DECISION-role memories, newest valid_from first (rank breaks ties) — current vs. superseded is read straight off each decision's own recorded status.",
+      pending_tasks: "This section's TASK-role memories, in the ranker's own rank order — never reordered for this view.",
+      open_questions: "This section's OPEN_QUESTION-role memories, in the ranker's own rank order.",
     };
 
     function contextBucketReason(ctx) {
       const grouping = ctx.kind === 'general'
-        ? 'This is the shared "General" bucket: candidates with no ontology evidence at all (no supporting concept) land here instead of anchoring a context of their own.'
-        : "Grouped by its primary concept — the ontology concept with the highest activation score among this bucket's candidates. One Working Context exists per distinct primary concept found in a given retrieval run.";
-      return `${grouping} Status is a pure reduction over this bucket's own role buckets: ACTIVE when it has pending tasks or open questions, DECIDED when it has decisions but no open threads, REFERENCE when it holds only reference material — never a clock, and never an AI judgment.`;
+        ? 'This is the shared "General" section: candidates with no ontology evidence at all (no supporting concept) land here instead of anchoring a context of their own.'
+        : "Grouped by its primary concept — the ontology concept with the highest activation score among this section's candidates. One Working Context exists per distinct primary concept found in a given retrieval run.";
+      return `${grouping} Status is a pure reduction over this section's own role groups: ACTIVE when it has pending tasks or open questions, DECIDED when it has decisions but no open threads, REFERENCE when it holds only reference material — never a clock, and never an AI judgment.`;
     }
 
     function openContextBucket(ctx) {
@@ -3350,7 +3588,7 @@
       openReasonOnly(
         `${ctx.title} — Working Context`,
         fieldReasonBox(contextBucketReason(ctx)),
-        `<p class="empty">${ctx.memory_count} member memor${ctx.memory_count === 1 ? 'y' : 'ies'} across this bucket's role buckets right now. Kind: ${escapeHtml(ctx.kind)} · Status: ${escapeHtml(statusLabel)}.</p>`
+        `<p class="empty">${ctx.memory_count} member memor${ctx.memory_count === 1 ? 'y' : 'ies'} across this section's role groups right now. Kind: ${escapeHtml(ctx.kind)} · Status: ${escapeHtml(statusLabel)}.</p>`
       );
     }
 
@@ -3520,13 +3758,50 @@
       }
     });
 
+    // Renders the active domain tab as grouped sub-sections, one per
+    // memory type with at least one memory (TYPE_ORDER controls display
+    // order within the domain; a type with zero memories contributes no
+    // section at all) -- a two-level layout (domain tab -> type headings)
+    // instead of one tab per MemoryType, per the V2 ontology's "grouped
+    // sections, not 20 tabs" dashboard requirement.
     function renderCategory(category) {
       activeCategory = category;
-      document.querySelectorAll('.tab').forEach((btn) => {
+      // Scoped to #memory-domain-tabs -- .tab is also reused by the
+      // Query Rewriting On/Off segmented control (#query-rewriting-toggle),
+      // which has no data-category. A document-wide query here used to
+      // match those buttons too (undefined === undefined), marking both
+      // "active" at once and corrupting that control's own toggle state.
+      document.querySelectorAll('#memory-domain-tabs .tab').forEach((btn) => {
         btn.classList.toggle('active', btn.dataset.category === category);
       });
+      const container = document.getElementById('category-list');
+      container.innerHTML = '';
       if (!dashboardData) return;
-      renderMemoryList('category-list', dashboardData[category] || [], `No ${CATEGORY_LABELS[category]} yet.`);
+
+      const section = (dashboardData.domains || []).find((d) => d.domain === category);
+      const byType = (section && section.by_type) || {};
+      const order = TYPE_ORDER[category] || Object.keys(byType);
+      const nonEmptyTypes = order.filter((t) => (byType[t] || []).length > 0);
+
+      if (!nonEmptyTypes.length) {
+        container.innerHTML = emptyStateHtml('🗂️', `No ${CATEGORY_LABELS[category]} memories yet.`, true);
+        return;
+      }
+
+      for (const type of nonEmptyTypes) {
+        const meta = typeMeta(type);
+        const group = document.createElement('div');
+        group.className = 'memory-type-group';
+        const heading = document.createElement('h3');
+        heading.className = 'memory-type-heading';
+        heading.textContent = `${meta.icon} ${meta.label}`;
+        group.appendChild(heading);
+        const list = document.createElement('div');
+        list.className = 'memory-list';
+        group.appendChild(list);
+        container.appendChild(group);
+        renderMemoryCardsInto(list, byType[type]);
+      }
     }
 
     // Derive an activity verb from memory state: archived and superseded
@@ -3575,16 +3850,16 @@
       }
     }
 
-    function renderMemoryList(containerId, memories, emptyText) {
-      const container = document.getElementById(containerId);
-      container.innerHTML = '';
-      if (!memories.length) {
-        container.innerHTML = emptyStateHtml('🗂️', emptyText, true);
-        return;
-      }
+    // Shared memory-card builder: appends one card per memory into an
+    // already-resolved container element. Used both by renderMemoryList
+    // (single flat list) and renderCategory's grouped per-type sections.
+    function renderMemoryCardsInto(container, memories) {
       for (const m of memories) {
         const card = document.createElement('div');
         card.className = 'memory-card';
+        const topicsHtml = (m.topics && m.topics.length)
+          ? `<div class="memory-topics">${m.topics.map((t) => `<span class="badge">${escapeHtml(t)}</span>`).join('')}</div>`
+          : '';
         card.innerHTML = `
           <div class="memory-fact">${escapeHtml(m.canonical_fact)}</div>
           <div class="memory-meta">
@@ -3592,6 +3867,7 @@
             ${m.decision ? `<span class="badge">${escapeHtml(decisionStatusLabel(m.decision.status))}</span>` : ''}
             <span>${m.confirmation_count} confirmation${m.confirmation_count === 1 ? '' : 's'}</span>
           </div>
+          ${topicsHtml}
           <div class="memory-scores">
             ${scoreMeter('Confidence', m.confidence)}
             ${scoreMeter('Importance', m.importance)}
@@ -3603,7 +3879,20 @@
       }
     }
 
-    document.querySelectorAll('.tab').forEach((btn) => {
+    function renderMemoryList(containerId, memories, emptyText) {
+      const container = document.getElementById(containerId);
+      container.innerHTML = '';
+      if (!memories.length) {
+        container.innerHTML = emptyStateHtml('🗂️', emptyText, true);
+        return;
+      }
+      renderMemoryCardsInto(container, memories);
+    }
+
+    // Scoped to #memory-domain-tabs -- see the matching scoping note in
+    // renderCategory() above for why a bare '.tab' query here previously
+    // cross-wired clicks on the Query Rewriting toggle's own .tab buttons.
+    document.querySelectorAll('#memory-domain-tabs .tab').forEach((btn) => {
       btn.addEventListener('click', () => renderCategory(btn.dataset.category));
     });
 
@@ -3696,42 +3985,116 @@
     }
 
     // ---------------------------------------------------------------------
-    // Guided Demo Tour — presentation only. Walks the existing dashboard
-    // sections in a fixed order; adds no page of its own and calls no
+    // Guided Demo Tour — presentation only. Walks every major section of
+    // the dashboard in page order; adds no page of its own and calls no
     // retrieval, memory, ontology, ranking, acceptance, planner, or
-    // benchmark logic — every step just scrolls to and highlights a
-    // section that already exists above.
+    // benchmark logic — every step just scrolls to and highlights an
+    // element that already exists above. To cover a new dashboard feature,
+    // add one step object to TOUR_STEPS; the engine below needs no changes.
+    //
+    // `target` is a plain #id selector, resolved to exactly one element
+    // (see obsidian/tests/server/test_e2e_guided_demo.py, which asserts
+    // every target here resolves uniquely). A target that exists but is
+    // hidden (e.g. #space-switcher, which only appears once more than one
+    // Memory Space is configured) still gets its step — tourGoTo() just
+    // skips the highlight/scroll and notes that in the tooltip instead of
+    // silently vanishing a step and throwing off the "Step X of Y" count.
     // ---------------------------------------------------------------------
     const TOUR_STEPS = [
       {
-        target: '#quick-capture',
-        title: 'Remember a conversation',
-        body: 'Paste a note or a chunk of conversation below. Haven runs it through the real extraction pipeline and turns it into structured, durable memories.',
+        target: '#dashboard-home',
+        title: 'Welcome to Haven',
+        body: 'Haven turns your conversations and notes into structured, searchable long-term memory. Every section on this dashboard reads from that same live memory store — nothing here is a mockup. This tour walks through each one so you know exactly what is available and where.',
       },
       {
-        target: '#memories',
-        title: 'Review extracted memories',
-        body: 'Everything Haven has learned lands here, sorted into projects, decisions, beliefs, preferences, and tasks.',
+        target: '#hero-stats',
+        title: 'Your memory at a glance',
+        body: 'These counters summarize everything Haven currently knows: total memories, how many are active versus archived, and how the underlying knowledge graph is growing (concepts and relationships). Retrieval speed here is a real measurement, not a marketing number. Watch them update as you capture notes or import a vault.',
+      },
+      {
+        target: '#connection-status',
+        title: 'Backend & health status',
+        body: 'This dot shows whether the dashboard can currently reach the Haven server — green means connected, and a banner appears above if it cannot. It is the fastest way to tell whether what you are looking at is live data or a stale cache from before a disconnect.',
+      },
+      {
+        target: '#space-switcher',
+        title: 'Switch between Memory Spaces',
+        body: 'When more than one Memory Space is configured, this switcher jumps between them instantly — for example, keeping a personal vault separate from a work one. Every other section reflects whichever space is active. It only appears once a second space exists, so a single-space deployment will not show it.',
       },
       {
         target: '#overview',
-        title: 'View Project Overview',
-        body: 'Before you ask anything, Haven assembles a live picture of what you are working on: objective, active tasks, blockers, and open questions, straight from memory.',
+        title: 'Project Overview',
+        body: 'Before you ask anything, Haven assembles a live briefing of what you are working on — objective, active tasks, blockers, decisions, and open questions — pulled straight from memory. It exists to answer "what is going on?" at a glance, and it is the same context Haven hands a brand-new conversation.',
       },
       {
         target: '#focus',
-        title: 'Continue work in a fresh conversation',
-        body: 'Current focus is what a brand-new conversation resumes from: no re-explaining yourself, Haven hands your assistant the context it needs to continue.',
+        title: 'Current Focus',
+        body: 'Current Focus is the working context a fresh conversation resumes from — the specific thread you were mid-way through, distilled from memory. It exists so opening a new chat never means starting from zero. Check it before diving back in to confirm Haven has the right picture.',
+      },
+      {
+        target: '#quick-capture',
+        title: 'Quick Capture',
+        body: 'Paste or type any Markdown note here — a decision, a preference, a stray thought — and Haven runs it through the exact same extraction pipeline as your conversations. It is the fastest way to add something to long-term memory without leaving the dashboard, and it saves to your active Memory Space only.',
+      },
+      {
+        target: '#import-vault',
+        title: 'Import an Obsidian vault',
+        body: 'Point Haven at a folder of Markdown notes and it scans, previews, and imports them through the same memory pipeline as everything else, extracting decisions, preferences, and facts automatically. Scanning never calls an LLM and your original notes are never modified. Use this to bootstrap Haven from an existing vault instead of re-entering everything by hand.',
+      },
+      {
+        target: '#ask',
+        title: 'Ask your memory',
+        body: 'Search everything Haven knows in plain language — "what did I decide about the database?" — and get an answer grounded in real memories, not a guess. Expand "How Haven found this" under any result to open the Retrieval Inspector: the full ranked list of candidates, their scores, and why each was accepted or rejected.',
       },
       {
         target: '#pipeline',
-        title: 'Open the Explainability Pipeline',
-        body: 'Every retrieval is fully explainable. Ask a question above and this view shows each stage it passed through: what was considered, what was rejected, and why.',
+        title: 'Explainability Pipeline',
+        body: 'This view breaks one retrieval down stage by stage — what was considered, what got filtered out, and the deterministic rule applied at each step — so "why did it say that" always has a concrete answer instead of a black box. Ask a question above first; this section fills in with that query\'s full trace.',
+      },
+      {
+        target: '#activity',
+        title: 'Recent Activity',
+        body: 'A live feed of what Haven has learned most recently — newly captured facts, confirmations of things it already knew, and memories that were superseded or archived. It is the quickest way to confirm a capture or import actually landed. Click any entry to see why it was extracted.',
+      },
+      {
+        target: '#memory-domain-tabs',
+        title: 'Memory Domains',
+        body: 'Haven organizes everything it knows into three domains — Personal, Work, and Knowledge — so related memories stay grouped instead of forming one long undifferentiated list. Switch tabs to browse whichever slice of your memory you care about right now.',
+      },
+      {
+        target: '#category-list',
+        title: 'Memory Types & individual memories',
+        body: 'Within a domain, memories are grouped by type — decisions, preferences, tasks, and more — so you can scan by kind instead of scrolling everything at once. Each card underneath is one memory: the fact itself, its type, and how many times it has been confirmed. Click a card to open its full detail, including provenance and history.',
+      },
+      {
+        target: '#under-the-hood',
+        title: 'Under the hood: write traces',
+        body: 'Every save Haven processes is captured end to end here, including ones that produced zero memories — nothing is hidden. Click a row to open the Write Inspector and walk through the entire extraction pipeline for that save: what came in, what was extracted, and every decision along the way.',
       },
       {
         target: '#benchmarks',
-        title: 'Open the Benchmark Explorer',
-        body: 'Accuracy claims here are not just asserted — every judged benchmark case already on disk is browsable below.',
+        title: 'Benchmark Explorer',
+        body: 'Every judged benchmark case Haven has on disk is browsable here — not a summary, the actual cases, filterable by category, adapter, and pass/fail. It exists so accuracy claims are checkable rather than asserted. Click a row to expand the full case and see exactly why it passed or failed.',
+      },
+      {
+        target: '#vault-panel',
+        title: 'Manage your Memory Space',
+        body: 'This is where your active Memory Space lives on disk: see its path, open it directly in Obsidian, point Haven at a different folder, or load demo data to explore the dashboard with sample memories. Nothing outside Haven\'s own subfolders is ever touched.',
+      },
+      {
+        target: '#spaces-panel',
+        title: 'Memory Spaces',
+        body: 'If your deployment supports multiple spaces, manage them all here — create a new one or review what is already configured. Env-configured deployments manage spaces through environment variables instead, and this panel says so rather than pretending otherwise.',
+      },
+      {
+        target: '#query-rewriting-panel',
+        title: 'Query Rewriter',
+        body: 'Turn this on to have an LLM rewrite vague or underspecified questions before retrieval, then search every rewritten phrasing alongside your original for better recall — retrieval, ranking, and acceptance logic never change, only how many queries get searched. It is off by default, and switching it back off reproduces Haven\'s original, LLM-free behavior exactly, with no restart required.',
+      },
+      {
+        target: '#deployment-footer',
+        title: 'Deployment & health',
+        body: 'The footer always shows where Haven is actually running and which LLM provider is configured, plus a direct link to the raw health endpoint — the ground truth for "what am I looking at" when you are not sure which deployment a dashboard belongs to. That wraps the tour: every major part of Haven is now one click away.',
       },
     ];
 
@@ -3743,6 +4106,13 @@
         tourHighlightEl.classList.remove('tour-highlight');
         tourHighlightEl = null;
       }
+    }
+
+    // Same "is this actually on screen" check jQuery's :visible used —
+    // catches display:none (including the HTML `hidden` attribute, as on
+    // #space-switcher) without needing getComputedStyle.
+    function tourIsVisible(el) {
+      return !!el && !!(el.offsetWidth || el.offsetHeight || el.getClientRects().length);
     }
 
     function tourRenderDots() {
@@ -3760,14 +4130,17 @@
       tourStepIndex = Math.max(0, Math.min(index, TOUR_STEPS.length - 1));
       const step = TOUR_STEPS[tourStepIndex];
       const target = document.querySelector(step.target);
-      if (target) {
+      const visible = tourIsVisible(target);
+      if (visible) {
         target.classList.add('tour-highlight');
         tourHighlightEl = target;
         target.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
       document.getElementById('tour-step-label').textContent = `Step ${tourStepIndex + 1} of ${TOUR_STEPS.length}`;
       document.getElementById('tour-title').textContent = step.title;
-      document.getElementById('tour-body').textContent = step.body;
+      document.getElementById('tour-body').textContent = visible
+        ? step.body
+        : `${step.body} (Not shown in your current deployment right now, so there's nothing on screen to highlight for this step.)`;
       document.getElementById('tour-back-btn').disabled = tourStepIndex === 0;
       document.getElementById('tour-next-btn').textContent =
         tourStepIndex === TOUR_STEPS.length - 1 ? 'Finish' : 'Next';
@@ -3776,6 +4149,7 @@
 
     function startTour() {
       document.getElementById('tour-bar').classList.remove('hidden');
+      document.getElementById('tour-scrim').classList.remove('hidden');
       tourGoTo(0);
     }
 
@@ -3783,6 +4157,7 @@
       tourClearHighlight();
       tourStepIndex = -1;
       document.getElementById('tour-bar').classList.add('hidden');
+      document.getElementById('tour-scrim').classList.add('hidden');
     }
 
     document.getElementById('start-demo-btn').addEventListener('click', startTour);
@@ -4314,10 +4689,18 @@
 
     function renderQueryRewriteStage(trace) {
       const rewrites = trace.rewritten_queries || [];
-      const body = rewrites.length
-        ? `<p>Original: <span class="mono">${escapeHtml(trace.query)}</span></p>
-           <ul>${rewrites.map((q) => `<li class="mono">${escapeHtml(q)}</li>`).join('')}</ul>`
-        : `<p class="empty">No rewrites — original query used as-is: <span class="mono">${escapeHtml(trace.query)}</span></p>`;
+      let body;
+      if (rewrites.length) {
+        body = `<p>Original: <span class="mono">${escapeHtml(trace.query)}</span></p>
+           <ul>${rewrites.map((q) => `<li class="mono">${escapeHtml(q)}</li>`).join('')}</ul>`;
+      } else if (trace.rewriting_enabled) {
+        body = `<p class="empty">Query Rewriting is on, but produced no alternate phrasings this run
+          (either none were needed, or the rewriter failed open) — search fell back to the
+          original query only: <span class="mono">${escapeHtml(trace.query)}</span></p>`;
+      } else {
+        body = `<p class="empty">Query Rewriting is off — original query used as-is:
+          <span class="mono">${escapeHtml(trace.query)}</span></p>`;
+      }
       return renderExpandable(`Query Rewrite (${rewrites.length} rewrite${rewrites.length === 1 ? '' : 's'})`, body);
     }
 
@@ -5446,6 +5829,7 @@
         body.innerHTML = [
           renderGeneralSection(memory),
           reasonHtml,
+          renderClassificationSection(data),
           renderProvenanceSection(data.provenance),
           renderDecisionSection(memory),
           renderOntologySection(data.ontology),
@@ -5482,6 +5866,34 @@
             <dt>Last confirmed</dt><dd>${m.last_confirmed ? formatUtcTimestamp(m.last_confirmed) : '—'}</dd>
             <dt>Archived</dt><dd>${archived}</dd>
           </dl>
+        </section>
+      `;
+    }
+
+    // ---- CLASSIFICATION (why this type / these topics) ----------------------
+    //
+    // Surfaces the Classifier's own explanation (KnowledgeObject.metadata
+    // ["classification_reason"], set once by KnowledgeUpdater._apply_new --
+    // see obsidian/manager_ai/knowledge_updater.py) plus the memory's
+    // MemoryDomain and canonicalized topics (InspectorResponse.domain/
+    // topics, obsidian/server/schemas.py). Renders nothing for a memory
+    // that predates this field (classification_reason is None) and has no
+    // topics -- an honest "nothing to explain" rather than an empty shell.
+    function renderClassificationSection(data) {
+      const hasTopics = data.topics && data.topics.length;
+      if (!data.classification_reason && !hasTopics) return '';
+      const topicsHtml = hasTopics
+        ? `<div class="memory-topics">${data.topics.map((t) => `<span class="badge">${escapeHtml(t.name)}</span>`).join('')}</div>`
+        : '<p class="empty">No topics assigned.</p>';
+      return `
+        <section class="inspector-section">
+          <h3>Why this type &amp; topics</h3>
+          <dl class="detail-grid">
+            <dt>Domain</dt><dd>${data.domain ? escapeHtml(DOMAIN_LABELS[data.domain] || data.domain) : '—'}</dd>
+          </dl>
+          <p>${data.classification_reason ? escapeHtml(data.classification_reason) : 'No classification reason recorded for this memory (it predates this field).'}</p>
+          <h4>Topics</h4>
+          ${topicsHtml}
         </section>
       `;
     }
@@ -5623,12 +6035,18 @@
       stages.push({ name: 'Query', status: 'done', note: `"${trace.query}"` });
 
       const rewriterUsed = trace.rewritten_queries && trace.rewritten_queries.length > 0;
+      let rewriterNote;
+      if (rewriterUsed) {
+        rewriterNote = `${trace.rewritten_queries.length} rewrite(s): ${trace.rewritten_queries.join('; ')}`;
+      } else if (trace.rewriting_enabled) {
+        rewriterNote = 'enabled, but produced no alternate phrasings this run — fell back to the original query only';
+      } else {
+        rewriterNote = 'Query Rewriting is off (Settings → Query Rewriting)';
+      }
       stages.push({
         name: 'Query Rewriter',
         status: rewriterUsed ? 'done' : 'skipped',
-        note: rewriterUsed
-          ? `${trace.rewritten_queries.length} rewrite(s): ${trace.rewritten_queries.join('; ')}`
-          : 'not used for this run',
+        note: rewriterNote,
       });
 
       if (!c) {
@@ -5748,6 +6166,15 @@
     loadVaultInfo();
     loadSpacesInfo();
     loadBenchmarks();
+    loadQueryRewritingSetting();
+
+    // Local dev (Quick Start's `uvicorn` on 127.0.0.1/localhost) is the common
+    // case, so default the footer to "local" and only claim the Alibaba Cloud
+    // backend when the dashboard is actually being served from somewhere else.
+    if (!['localhost', '127.0.0.1'].includes(location.hostname)) {
+      document.getElementById('deployment-footer-text').textContent =
+        'Backend: Alibaba Cloud ECS · LLM: Qwen Cloud (DashScope)';
+    }
 
     // Deep link support: the extension's "Write Inspector" button (see
     // extension/content/controller.js's showSaveSummary) opens

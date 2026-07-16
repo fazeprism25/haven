@@ -4,7 +4,7 @@ Scenario 7 of the Haven end-to-end suite. Per ``dashboard.html``'s own
 comment above ``TOUR_STEPS``, the tour is "presentation only... adds no
 page of its own and calls no retrieval, memory, ontology, ranking,
 acceptance, planner, or benchmark logic -- every step just scrolls to and
-highlights a section that already exists above." There is therefore no
+highlights an element that already exists above." There is therefore no
 backend endpoint to drive for "click Next" / "click Finish" / "click Skip"
 -- those are pure client-side DOM/JS behavior, and this repo has no browser
 automation tooling (Playwright/Selenium) installed, so exercising the
@@ -13,7 +13,7 @@ final report for that documented gap).
 
 What *is* server-testable, and what actually keeps the tour from silently
 breaking, is its structural contract: every step's ``target`` selector
-must resolve to a real, unique section id on the served page, and every
+must resolve to a real, unique element id on the served page, and every
 navigation control (`Skip`, `Back`, `Next`/`Finish`, `Close`, step counter,
 dots) must be present -- on both an empty vault and a populated one, since
 the tour is meant to be usable as someone's very first interaction with
@@ -33,14 +33,33 @@ from obsidian.manager_ai.models import KnowledgeObject
 # Mirrors dashboard.html's own TOUR_STEPS target list (see that file's
 # "Guided Demo Tour" section) -- kept here as plain data so this test fails
 # loudly (rather than silently drifting) if a step's target is renamed
-# without updating this list.
+# without updating this list. Every target is a plain #id selector (not all
+# of them are <section> elements -- e.g. #hero-stats is a div, #deployment-
+# footer is a <footer> -- so uniqueness is checked against any tag below,
+# not just <section>). #space-switcher is included even though it is
+# `hidden` on a single-space deployment: tourGoTo() in dashboard.html is
+# expected to degrade gracefully (skip the highlight, keep the step) rather
+# than that target ever disappearing from the page.
 _TOUR_STEP_TARGETS = (
-    "#quick-capture",
-    "#memories",
+    "#dashboard-home",
+    "#hero-stats",
+    "#connection-status",
+    "#space-switcher",
     "#overview",
     "#focus",
+    "#quick-capture",
+    "#import-vault",
+    "#ask",
     "#pipeline",
+    "#activity",
+    "#memory-domain-tabs",
+    "#category-list",
+    "#under-the-hood",
     "#benchmarks",
+    "#vault-panel",
+    "#spaces-panel",
+    "#query-rewriting-panel",
+    "#deployment-footer",
 )
 
 _TOUR_CONTROL_IDS = (
@@ -68,8 +87,8 @@ def client(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> TestClient:
         yield test_client
 
 
-def _section_ids(html: str) -> set:
-    return set(re.findall(r'<section id="([^"]+)"', html))
+def _element_ids(html: str) -> set:
+    return set(re.findall(r'\bid="([^"]+)"', html))
 
 
 class TestTourStructuralContractOnEmptyVault:
@@ -83,15 +102,15 @@ class TestTourStructuralContractOnEmptyVault:
         assert response.status_code == 200
         assert "text/html" in response.headers["content-type"]
 
-    def test_every_tour_step_target_exists_as_exactly_one_section(
+    def test_every_tour_step_target_exists_as_exactly_one_element(
         self, client: TestClient
     ) -> None:
         html = client.get("/dashboard").text
-        section_ids = _section_ids(html)
+        element_ids = _element_ids(html)
         for target in _TOUR_STEP_TARGETS:
-            section_id = target.lstrip("#")
-            assert section_id in section_ids, f"tour target {target} has no matching section"
-            assert html.count(f'<section id="{section_id}"') == 1
+            element_id = target.lstrip("#")
+            assert element_id in element_ids, f"tour target {target} has no matching element"
+            assert html.count(f'id="{element_id}"') == 1, f"tour target {target} id is not unique"
 
     def test_every_navigation_control_is_present(self, client: TestClient) -> None:
         html = client.get("/dashboard").text
@@ -152,8 +171,8 @@ class TestTourStructuralContractOnPopulatedVault:
         app.state.ontology_pipeline.process(knowledge)
 
         html = client.get("/dashboard").text
-        section_ids = _section_ids(html)
+        element_ids = _element_ids(html)
         for target in _TOUR_STEP_TARGETS:
-            assert target.lstrip("#") in section_ids
+            assert target.lstrip("#") in element_ids
         for control_id in _TOUR_CONTROL_IDS:
             assert f'id="{control_id}"' in html
