@@ -16,10 +16,20 @@ config/vault_selection.json
 # supersedes vault_selection.json above.
 config/spaces.json
 
+# Query Rewriting on/off toggle (see obsidian/server/main.py's
+# _QUERY_REWRITING_CONFIG_PATH) -- machine-specific runtime state, same
+# pattern as spaces.json above.
+config/query_rewriting_setting.json
+
 # Regeneratable output of benchmarks/analysis/classify_failure.py -- the
 # authoritative benchmark report is benchmarks/results/final_report.md.
 benchmarks/reports/
 
 # Per-run benchmark logs -- regeneratable, and leak the local machine's
 # absolute file paths via Python DeprecationWarning stack traces.
-benchmarks/results/deepseek_run_logs/
+benchmarks/results/*_run_logs/
+
+# In-progress checkpoint for a still-running run_benchmarks.py invocation
+# (see run_benchmarks._checkpoint_path) -- deleted automatically once that
+# adapter's run finishes; never a finished, canonical artifact.
+benchmarks/results/.checkpoint_*.json

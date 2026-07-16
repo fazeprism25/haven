@@ -28,11 +28,19 @@ or re-raised raw.
 
 from __future__ import annotations
 
+import json
 import logging
 from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
+
+from obsidian.manager_ai.canonical_matcher import CanonicalMatcher
+from obsidian.manager_ai.classifier import Classifier
+from obsidian.manager_ai.extractor import Extractor
+from obsidian.manager_ai.importance import ImportanceScorer
+from obsidian.manager_ai.knowledge_updater import KnowledgeUpdater
+from obsidian.manager_ai.pipeline import ManagerPipeline
 
 
 @pytest.fixture()
@@ -46,6 +54,50 @@ def client(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> TestClient:
 
     with TestClient(app) as test_client:
         yield test_client
+
+
+class _ScriptedLLM:
+    """Fake ``LLMInterface`` shared by Extractor/Classifier/ImportanceScorer.
+
+    Identical to ``test_save_memory.py``'s fixture of the same name -- these
+    tests need a real, successful extraction so the *downstream* vault-write/
+    checkpoint-write failure under test is what actually gets exercised, not
+    an earlier LLM failure. Duplicated here rather than imported (see
+    ``feedback-minimal-scaffolding``: reuse patterns verbatim, don't add a
+    new shared module for one file's benefit).
+    """
+
+    def __init__(self, extract_response: str, classify_response: str, importance_response: str) -> None:
+        self._extract_response = extract_response
+        self._classify_response = classify_response
+        self._importance_response = importance_response
+
+    def generate(self, prompt: str) -> str:
+        if "Conversation:\n" in prompt:
+            return self._extract_response
+        if "Available memory types:" in prompt:
+            return self._classify_response
+        if "Classification:\n" in prompt:
+            return self._importance_response
+        raise AssertionError(f"Unrecognised prompt shape:\n{prompt}")
+
+
+def _install_scripted_llm(client: TestClient) -> None:
+    """Install a scripted LLM that always extracts a single "I use Terraform." fact."""
+    llm = _ScriptedLLM(
+        extract_response=json.dumps(
+            [{"text": "I use Terraform.", "evidence": "stated in conversation", "confidence": 0.9}]
+        ),
+        classify_response=json.dumps({"memory_type": "fact", "confidence": 0.9, "reason": "stated"}),
+        importance_response=json.dumps({"score": 0.6, "reason": "scored"}),
+    )
+    client.app.state.manager_pipeline = ManagerPipeline(
+        extractor=Extractor(llm=llm),
+        classifier=Classifier(llm=llm),
+        importance_scorer=ImportanceScorer(llm=llm),
+        canonical_matcher=CanonicalMatcher(),
+        knowledge_updater=KnowledgeUpdater(),
+    )
 
 
 class _BoomPipeline:
@@ -217,6 +269,8 @@ def test_unhandled_exception_on_an_unguarded_route_returns_clean_json_500(
 def test_save_memory_returns_clean_500_when_vault_write_fails(
     client: TestClient, monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    _install_scripted_llm(client)
+
     def _boom(self, knowledge):
         raise PermissionError("simulated permission-denied writing to the vault")
 
@@ -234,6 +288,8 @@ def test_save_memory_returns_clean_500_when_vault_write_fails(
 def test_commit_memory_returns_clean_500_when_vault_write_fails(
     client: TestClient, monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    _install_scripted_llm(client)
+
     preview = client.post(
         "/api/v1/memory/preview", json={"canonical_fact": "I use Terraform."}
     )
@@ -264,6 +320,8 @@ def test_commit_memory_returns_clean_500_when_vault_write_fails(
 def test_save_memory_still_succeeds_when_checkpoint_write_fails(
     client: TestClient, monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
 ) -> None:
+    _install_scripted_llm(client)
+
     def _boom(self, checkpoint):
         raise OSError("simulated disk-full writing the checkpoint")
 

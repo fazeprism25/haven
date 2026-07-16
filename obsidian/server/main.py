@@ -52,7 +52,7 @@ import json
 import logging
 import os
 import re
-import shutil
+import stat
 import threading
 import time
 from collections import Counter
@@ -93,6 +93,7 @@ from obsidian.manager_ai.models import (
 from obsidian.manager_ai.pipeline import PIPELINE_VERSION, ManagerPipeline
 from obsidian.memory_engine.engine import MemoryEngine
 from obsidian.memory_engine.memory_store import MemoryStore
+from obsidian.memory_engine.query_rewriter import QueryRewriter
 from obsidian.memory_engine.vault_writer import VaultWriter
 from obsidian.ontology.alias_index import AliasIndex
 from obsidian.ontology.concept_graph_loader import ConceptGraphLoader
@@ -129,6 +130,7 @@ from obsidian.server.schemas import (
     ImportScanRequest,
     ImportScanResponse,
     PreviewMemoryResponse,
+    QueryRewritingSettingResponse,
     RetrieveContextRequest,
     RetrieveContextResponse,
     ReviewMemoryItem,
@@ -140,6 +142,7 @@ from obsidian.server.schemas import (
     SelectVaultResponse,
     SpaceInfo,
     SpacesListResponse,
+    UpdateQueryRewritingSettingRequest,
     UpdateSpaceRequest,
     VaultInfo,
     WorkingContextPreviewRequest,
@@ -490,12 +493,7 @@ def _lookup_working_context(
     if diff.mode == "incremental":
         try:
             app.state.alias_index.rebuild(_load_concepts(app.state.concept_dir))
-            engine = MemoryEngine(
-                app.state.alias_index,
-                app.state.concept_graph,
-                app.state.memory_store,
-                app.state.retrieval_config,
-            )
+            engine = _build_memory_engine()
             raw_query = _build_working_context_query(turns, diff.new_turn_start_index)
             existing_context = engine.query_working_context(raw_query)
         except Exception as exc:
@@ -797,6 +795,98 @@ def _resolve_initial_vault_paths() -> Tuple[Optional[Path], Path, Path, Path, Pa
     )
 
 
+def _remove_with_retry(
+    func: Any, path: str, attempts: int, delay: float
+) -> None:
+    """Call ``func(path)`` (``os.remove``/``os.rmdir``), retrying transient failures.
+
+    Shared retry primitive for :func:`_robust_rmtree` and :func:`_rename_aside`
+    -- see their docstrings for *why* a single remove/rmdir/rename call needs
+    this on Windows. Each retry also clears the path's read-only attribute
+    first (the other common Windows delete failure, e.g. files checked out
+    or synced with it set -- harmless to attempt even when the real cause
+    was a lock, not a permission bit).
+    """
+    last_exc: Optional[OSError] = None
+    for attempt in range(attempts):
+        try:
+            func(path)
+            return
+        except FileNotFoundError:
+            return
+        except OSError as exc:
+            last_exc = exc
+            try:
+                os.chmod(path, stat.S_IWRITE)
+            except OSError:
+                pass
+            time.sleep(delay * (attempt + 1))
+    assert last_exc is not None
+    raise last_exc
+
+
+def _robust_rmtree(directory: Path, *, attempts: int = 6, delay: float = 0.05) -> None:
+    """Delete *directory* and everything under it, tolerating transient Windows locks.
+
+    Plain ``shutil.rmtree`` raises the instant any single file under
+    *directory* is briefly locked by another process holding an open
+    handle without ``FILE_SHARE_DELETE`` -- e.g. OneDrive syncing a
+    just-written demo file, Windows Search indexing it, antivirus scanning
+    it, or (for a real local vault -- see this function's caller and the
+    ``notes_dir`` comment below: ``vault_dir`` is meant to be browsable in a
+    live Obsidian window) the Obsidian desktop app's own file watcher. All
+    of these release the lock again within milliseconds; POSIX has no
+    equivalent restriction (unlinking an open file just detaches the
+    directory entry), which is why this class of failure is specific to
+    Windows and to real local vaults rather than showing up in CI's ``tmp``
+    dirs. Walks the tree manually (rather than relying on
+    ``shutil.rmtree``'s ``onexc``/``onerror`` callback, whose signature
+    differs across the Python versions this package supports) so each
+    individual remove/rmdir call gets its own short retry-with-backoff
+    before the whole operation gives up and re-raises the last error.
+    """
+    if not directory.exists():
+        return
+
+    for root, dirs, files in os.walk(directory, topdown=False):
+        for name in files:
+            _remove_with_retry(os.remove, os.path.join(root, name), attempts, delay)
+        for name in dirs:
+            _remove_with_retry(os.rmdir, os.path.join(root, name), attempts, delay)
+    _remove_with_retry(os.rmdir, str(directory), attempts, delay)
+
+
+def _rename_aside(
+    directory: Path, suffix: str, *, attempts: int = 6, delay: float = 0.05
+) -> Optional[Path]:
+    """Rename *directory* to a same-parent sibling, or return ``None`` if it
+    doesn't exist.
+
+    Unlike deletion, a rename is a metadata-only operation -- it does not
+    require every file inside to be lock-free first -- so this is what
+    actually makes :func:`reset_demo_data` atomic-ish: the instant this call
+    returns, *directory*'s original name is free for a fresh, empty
+    directory to be created in its place, whether or not the old contents
+    (now under the returned backup path) have finished settling. Still
+    retried via :func:`_remove_with_retry`'s sibling logic, since the rename
+    itself briefly touches the directory's own metadata and can hit the same
+    transient-lock window described in :func:`_robust_rmtree`.
+    """
+    if not directory.exists():
+        return None
+    backup = directory.with_name(directory.name + suffix)
+    last_exc: Optional[OSError] = None
+    for attempt in range(attempts):
+        try:
+            directory.rename(backup)
+            return backup
+        except OSError as exc:
+            last_exc = exc
+            time.sleep(delay * (attempt + 1))
+    assert last_exc is not None
+    raise last_exc
+
+
 def _configure_vault_state(
     vault_dir: Path, concept_dir: Path, checkpoint_dir: Path, write_trace_dir: Path
 ) -> None:
@@ -1056,6 +1146,85 @@ def _activate_space(registry: dict, space_id: str) -> None:
     _save_spaces_registry(registry)
 
 
+# ---------------------------------------------------------------------------
+# Query Rewriting (optional, experimental multi-query expansion)
+#
+# A dashboard-facing on/off switch for the already-implemented
+# obsidian.memory_engine.query_rewriter.QueryRewriter -- see that module's
+# and obsidian.memory_engine.engine's docstrings for the (unmodified)
+# rewrite/retrieve/merge pipeline this activates. Off (the default)
+# reproduces retrieval's pre-existing, deterministic behaviour
+# byte-for-byte: every MemoryEngine construction site below passes
+# query_rewriter=None, exactly as it did before this setting existed.
+#
+# Server-level, not vault-scoped: set once in lifespan() (not
+# _configure_vault_state, which reruns on every vault/space switch), so
+# switching Memory Spaces never resets this toggle. A single shared
+# QueryRewriter instance is always constructed -- building one does nothing
+# but set up an empty cache (see that class's docstring); the outbound LLM
+# call only happens if/when a request is actually served with the setting
+# on -- so toggling app.state.query_rewriting_enabled at runtime (see
+# update_query_rewriting_setting below) takes effect on the very next
+# request, with no server restart and no MemoryEngine reconstruction.
+#
+# Persisted the same way _SPACES_CONFIG_PATH is: never read or written by a
+# tier-1 (env-managed) deployment, so the test suite (which sets
+# HAVEN_VAULT_DIR almost universally) never touches the real repo's config/
+# directory. In that mode the toggle still works for the current process --
+# only the "survives an actual restart" guarantee is unavailable, mirroring
+# the same tier-1 limitation _load_spaces_registry already documents.
+# ---------------------------------------------------------------------------
+
+_QUERY_REWRITING_CONFIG_PATH = Path("config/query_rewriting_setting.json")
+
+
+def _load_query_rewriting_enabled() -> bool:
+    if _spaces_env_managed():
+        return False
+    if not _QUERY_REWRITING_CONFIG_PATH.exists():
+        return False
+    try:
+        data = json.loads(_QUERY_REWRITING_CONFIG_PATH.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return False
+    return bool(data.get("enabled", False))
+
+
+def _save_query_rewriting_enabled(enabled: bool) -> None:
+    if _spaces_env_managed():
+        return
+    _QUERY_REWRITING_CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
+    _QUERY_REWRITING_CONFIG_PATH.write_text(
+        json.dumps({"enabled": enabled}), encoding="utf-8"
+    )
+
+
+def _active_query_rewriter() -> Optional[QueryRewriter]:
+    """The shared ``QueryRewriter`` when Query Rewriting is enabled, else ``None``.
+
+    Read fresh at every ``MemoryEngine`` construction site (this module and
+    ``obsidian.server.dashboard``) so a toggle takes effect on the very next
+    call -- no restart, no engine rebuild.
+    """
+    return app.state.query_rewriter if app.state.query_rewriting_enabled else None
+
+
+def _build_memory_engine() -> MemoryEngine:
+    """Construct a ``MemoryEngine`` from the current ``app.state`` collaborators.
+
+    Shared by every route in this module that needs a fresh engine (state
+    like ``query_rewriting_enabled`` can change between requests, so engines
+    aren't cached on ``app.state``).
+    """
+    return MemoryEngine(
+        app.state.alias_index,
+        app.state.concept_graph,
+        app.state.memory_store,
+        app.state.retrieval_config,
+        query_rewriter=_active_query_rewriter(),
+    )
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     # Exposed on app.state so dashboard.py's read routes can also hold it
@@ -1064,6 +1233,11 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     # a router that can't import a main.py module-level name without a
     # circular import.
     app.state.write_lock = _write_lock
+
+    # See "Query Rewriting" section above -- server-level, off by default,
+    # untouched by vault/space switches below.
+    app.state.query_rewriter = QueryRewriter()
+    app.state.query_rewriting_enabled = _load_query_rewriting_enabled()
 
     registry = _load_spaces_registry() or _synthesize_spaces_registry()
     _activate_space(registry, registry["active_space_id"])
@@ -1142,6 +1316,31 @@ router = APIRouter(prefix="/api/v1")
 @router.get("/health")
 def health() -> dict:
     return {"status": "ok"}
+
+
+@router.get("/settings/query-rewriting", response_model=QueryRewritingSettingResponse)
+def get_query_rewriting_setting() -> QueryRewritingSettingResponse:
+    """Whether Query Rewriting (optional, experimental multi-query expansion)
+    is enabled for this Haven server. Off by default."""
+    return QueryRewritingSettingResponse(enabled=app.state.query_rewriting_enabled)
+
+
+@router.put("/settings/query-rewriting", response_model=QueryRewritingSettingResponse)
+def update_query_rewriting_setting(
+    request: UpdateQueryRewritingSettingRequest,
+) -> QueryRewritingSettingResponse:
+    """Enable/disable Query Rewriting for this Haven server.
+
+    Takes effect immediately -- no restart, and no ``MemoryEngine``
+    reconstruction, is required (see ``_active_query_rewriter``, read fresh
+    at every construction site). Persisted to ``_QUERY_REWRITING_CONFIG_PATH``
+    so a server restart resumes at the same setting (see the "Query
+    Rewriting" section above for the one exception: a tier-1, env-managed
+    deployment, which never persists this to disk).
+    """
+    app.state.query_rewriting_enabled = request.enabled
+    _save_query_rewriting_enabled(request.enabled)
+    return QueryRewritingSettingResponse(enabled=request.enabled)
 
 
 @router.get("/vault", response_model=VaultInfo)
@@ -1437,9 +1636,18 @@ def seed_demo_data() -> SeedDemoResponse:
     that already has the demo data seeds a second, ``CONFIRM``ed copy of
     every fact via the same real ``CanonicalMatcher`` any duplicate save
     goes through -- harmless, not an error.
+
+    Which bundled dataset gets seeded depends on the active Memory Space's
+    own name (``app.state.active_space_name``, set by ``_activate_space``)
+    -- see ``demo_seed.dataset_for_space`` -- so a space named e.g. "Personal
+    AI Research" gets a genuinely different demo story instead of a
+    duplicate of Haven's own.
     """
+    memories_file, _ = demo_seed.dataset_for_space(
+        getattr(app.state, "active_space_name", None)
+    )
     bulk_count = demo_seed.seed_bulk_facts(
-        app.state.vault_writer, app.state.ontology_pipeline
+        app.state.vault_writer, app.state.ontology_pipeline, memories_file
     )
     call_count = _replay_demo_conversations()
     return SeedDemoResponse(bulk_facts=bulk_count, conversation_calls=call_count)
@@ -1447,46 +1655,127 @@ def seed_demo_data() -> SeedDemoResponse:
 
 @router.post("/dev/reset_demo", response_model=SeedDemoResponse)
 def reset_demo_data() -> SeedDemoResponse:
-    """Clear the currently active vault entirely, then re-import demo data.
+    """Atomically clear the currently active vault, then re-import demo data.
 
     Only ever touches the four directories ``app.state`` already has on
     record (whatever startup or the last ``POST /api/v1/vault`` call
-    configured) -- never an arbitrary path. There is no undo; the
+    configured) -- never an arbitrary path.
+
+    Clears by *renaming* each directory aside (:func:`_rename_aside`) rather
+    than deleting it in place first. The previous implementation called
+    ``shutil.rmtree`` directly: on Windows, that raises the instant any
+    single file underneath is transiently locked by another process --
+    OneDrive syncing it, Windows Search indexing it, antivirus scanning it,
+    or (for a real local vault) the Obsidian desktop app's own file watcher
+    -- turning an ordinary Reset Demo click into an unhandled 500 that left
+    the vault directory half-deleted. Renaming is a metadata-only operation
+    that doesn't require the old contents to be lock-free first, so the
+    fresh directory Haven reseeds into is created and fully populated
+    *before* the old one is ever touched by a delete (:func:`_robust_rmtree`,
+    used only for the old/broken directories, never for the live one).
+
+    If reseeding then fails for any reason, the fresh (half-seeded)
+    directories are discarded and the pre-reset ones are restored from
+    their backups before a 500 is raised -- a failed reset always leaves
+    the space exactly as it was beforehand, never emptied or half-seeded.
+    On success the backups are discarded (best-effort: a leftover backup
+    directory is a harmless disk leak, not a correctness problem, so a
+    failure to discard one is logged rather than turned into an error for
+    what was otherwise a successful reset).
+
+    Repeated calls are idempotent -- each call's backups are discarded (or,
+    on failure, restored) before the response is returned, so no backup
+    directories accumulate across resets.
+
+    Beyond the failure-rollback window above there is no undo; the
     dashboard is expected to confirm with the user before calling this.
     """
-    for directory in (
-        app.state.vault_dir,
-        app.state.concept_dir,
-        app.state.checkpoint_dir,
-        app.state.write_trace_dir,
-    ):
-        if directory.exists():
-            shutil.rmtree(directory)
-    _configure_vault_state(
+    directories = (
         app.state.vault_dir,
         app.state.concept_dir,
         app.state.checkpoint_dir,
         app.state.write_trace_dir,
     )
+    suffix = f".reset-bak-{uuid4().hex}"
 
-    bulk_count = demo_seed.seed_bulk_facts(
-        app.state.vault_writer, app.state.ontology_pipeline
-    )
-    call_count = _replay_demo_conversations()
+    backups: List[Optional[Path]] = []
+    try:
+        for directory in directories:
+            backups.append(_rename_aside(directory, suffix))
+    except OSError as exc:
+        # Undo whatever was already renamed aside before this one failed --
+        # nothing has been deleted yet, so a plain rename-back is enough.
+        for directory, backup in zip(directories, backups):
+            if backup is not None:
+                backup.rename(directory)
+        raise HTTPException(
+            status_code=500,
+            detail=(
+                "Could not reset demo data: failed to clear an existing "
+                f"directory ({exc}). No changes were made."
+            ),
+        ) from exc
+
+    try:
+        _configure_vault_state(*directories)
+        memories_file, _ = demo_seed.dataset_for_space(
+            getattr(app.state, "active_space_name", None)
+        )
+        bulk_count = demo_seed.seed_bulk_facts(
+            app.state.vault_writer, app.state.ontology_pipeline, memories_file
+        )
+        call_count = _replay_demo_conversations()
+    except Exception as exc:
+        logger.exception("reset_demo: reseed failed, rolling back to pre-reset state")
+        for directory in directories:
+            if directory.exists():
+                _robust_rmtree(directory)
+        for directory, backup in zip(directories, backups):
+            if backup is not None:
+                backup.rename(directory)
+        _configure_vault_state(*directories)
+        raise HTTPException(
+            status_code=500,
+            detail=(
+                "Reset demo data failed and was rolled back to the "
+                f"pre-reset state: {exc}"
+            ),
+        ) from exc
+
+    for backup in backups:
+        if backup is not None:
+            try:
+                _robust_rmtree(backup)
+            except OSError:
+                logger.warning(
+                    "reset_demo: reset succeeded but failed to discard backup "
+                    "directory %s (harmless, left on disk)",
+                    backup,
+                    exc_info=True,
+                )
+
     return SeedDemoResponse(bulk_facts=bulk_count, conversation_calls=call_count)
 
 
 def _replay_demo_conversations() -> int:
-    """Replay demo/demo_conversations.md by calling the real ``save_memory``
-    route function directly (a plain Python call, no HTTP/ASGI round trip
-    needed since we're already inside the server process) -- temporarily
-    swapping ``app.state.manager_pipeline`` for a scripted, no-API-key
-    pipeline (see ``demo_seed.build_scripted_pipeline``) and always
-    restoring the original afterward, so a live "Remember" click right
-    after seeding still uses the real Manager AI LLM, not the demo one.
+    """Replay the active Memory Space's demo conversations file by calling the
+    real ``save_memory`` route function directly (a plain Python call, no
+    HTTP/ASGI round trip needed since we're already inside the server
+    process) -- temporarily swapping ``app.state.manager_pipeline`` for a
+    scripted, no-API-key pipeline (see ``demo_seed.build_scripted_pipeline``)
+    and always restoring the original afterward, so a live "Remember" click
+    right after seeding still uses the real Manager AI LLM, not the demo one.
+
+    Which file is replayed depends on the active Memory Space's name, via the
+    same ``demo_seed.dataset_for_space`` lookup ``seed_demo_data``/
+    ``reset_demo_data`` already used for the bulk-facts pass, so both passes
+    always agree on which story this space is getting.
     """
+    _, conversations_file = demo_seed.dataset_for_space(
+        getattr(app.state, "active_space_name", None)
+    )
     calls = demo_seed.parse_conversations(
-        demo_seed.DEMO_CONVERSATIONS_FILE.read_text(encoding="utf-8")
+        conversations_file.read_text(encoding="utf-8")
     )
     original_pipeline = app.state.manager_pipeline
     app.state.manager_pipeline = demo_seed.build_scripted_pipeline()
@@ -1532,12 +1821,7 @@ def retrieve_context(request: RetrieveContextRequest) -> RetrieveContextResponse
         app.state.memory_store.load()
         app.state.alias_index.rebuild(_load_concepts(app.state.concept_dir))
 
-        engine = MemoryEngine(
-            app.state.alias_index,
-            app.state.concept_graph,
-            app.state.memory_store,
-            app.state.retrieval_config,
-        )
+        engine = _build_memory_engine()
         context, trace = engine.query_with_trace(request.query)
     return RetrieveContextResponse(
         context=context,
@@ -1571,12 +1855,7 @@ def retrieve_working_context(
         app.state.memory_store.load()
         app.state.alias_index.rebuild(_load_concepts(app.state.concept_dir))
 
-        engine = MemoryEngine(
-            app.state.alias_index,
-            app.state.concept_graph,
-            app.state.memory_store,
-            app.state.retrieval_config,
-        )
+        engine = _build_memory_engine()
         if not hasattr(engine, "query_working_context"):
             return WorkingContextPreviewResponse(available=False)
         try:
