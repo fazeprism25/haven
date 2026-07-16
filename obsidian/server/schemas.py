@@ -7,7 +7,7 @@ from typing import Any, Dict, List, Literal, Optional
 
 from pydantic import BaseModel, Field, field_validator, model_validator
 
-from obsidian.core.enums import MemoryType, Role, SourceType
+from obsidian.core.enums import MemoryDomain, MemoryType, Role, SourceType
 from obsidian.ontology.enums import OntologyRelationshipType
 
 
@@ -23,6 +23,21 @@ class RetrieveContextResponse(BaseModel):
     # response_model_exclude_none) so existing callers see no change to
     # the response shape.
     trace: Optional[Dict[str, Any]] = None
+
+
+class QueryRewritingSettingResponse(BaseModel):
+    """Whether Query Rewriting (optional, experimental multi-query expansion —
+    see ``obsidian.memory_engine.query_rewriter``) is enabled for this Haven
+    server. ``enabled=False`` is the default: retrieval is then
+    byte-for-byte identical to Haven's deterministic pipeline with no
+    rewriter configured. See ``GET``/``PUT /api/v1/settings/query-rewriting``.
+    """
+
+    enabled: bool
+
+
+class UpdateQueryRewritingSettingRequest(BaseModel):
+    enabled: bool
 
 
 class ConversationTurnRequest(BaseModel):
@@ -437,7 +452,10 @@ class DashboardMemory(BaseModel):
     recomputed values. ``evidence_chain`` and ``metadata`` are intentionally
     omitted; ``decision`` is the one structured exception, carrying
     :class:`DashboardDecisionDetail` when the memory has one (see that
-    class's docstring).
+    class's docstring). ``topics`` is a plain list of canonicalized topic
+    names (confidence is not exposed here — see
+    :class:`TopicSummary`/``InspectorResponse.topics`` for the confidence-
+    carrying projection used by the Why? inspector).
     """
 
     id: str
@@ -450,11 +468,13 @@ class DashboardMemory(BaseModel):
     valid_until: Optional[datetime] = None
     last_confirmed: Optional[datetime] = None
     decision: Optional[DashboardDecisionDetail] = None
+    topics: List[str] = Field(default_factory=list)
 
 
 class VaultStats(BaseModel):
     total_memories: int
     by_type: Dict[str, int]
+    by_domain: Dict[str, int]
     active_count: int
     archived_count: int
     average_confidence: float
@@ -597,12 +617,26 @@ class ProjectOverview(BaseModel):
     generated_at: Optional[datetime] = None
 
 
+class DomainSection(BaseModel):
+    """One :class:`~obsidian.core.enums.MemoryDomain`'s memories, grouped by type.
+
+    Replaces the old fixed 5-field split (``projects``/``decisions``/
+    ``beliefs``/``preferences``/``tasks``) with a scalable, two-level
+    grouping: a domain (``"personal"``/``"work"``/``"knowledge"``), each
+    broken into ``by_type`` — every :class:`~obsidian.core.enums.MemoryType`
+    resolving to this domain (see
+    :func:`obsidian.core.memory_domain.resolve_domain`) that has at least
+    one memory. A type with zero memories is omitted from ``by_type``
+    entirely rather than included as an empty list, so the dashboard only
+    renders sub-sections that have something to show.
+    """
+
+    domain: str
+    by_type: Dict[str, List[DashboardMemory]]
+
+
 class DashboardResponse(BaseModel):
-    projects: List[DashboardMemory]
-    decisions: List[DashboardMemory]
-    beliefs: List[DashboardMemory]
-    preferences: List[DashboardMemory]
-    tasks: List[DashboardMemory]
+    domains: List[DomainSection]
     recent_memories: List[DashboardMemory]
     vault_stats: VaultStats
     concept_stats: ConceptStats
@@ -653,6 +687,20 @@ class OntologyRelationshipDetail(BaseModel):
     target_id: str
     target_label: str
     relationship_type: OntologyRelationshipType
+    confidence: float
+
+
+class TopicSummary(BaseModel):
+    """One canonicalized topic tag, projected for the Why? inspector.
+
+    A direct field-for-field projection of
+    :class:`~obsidian.core.value_objects.TopicTag`. ``confidence`` is
+    carried here (unlike :attr:`DashboardMemory.topics`, which is names
+    only) per the V2 ontology's requirement to store topic confidence
+    internally even though the dashboard UI doesn't render it yet.
+    """
+
+    name: str
     confidence: float
 
 
@@ -714,6 +762,18 @@ class InspectorResponse(BaseModel):
     # None for memories with no provenance (everything not imported this way)
     # and for the by-query inspector route, which has no single memory.
     provenance: Optional[Dict[str, Any]] = None
+    # The Classifier's own explanation of why this memory received its
+    # memory_type and topics (KnowledgeObject.metadata["classification_reason"],
+    # see obsidian.manager_ai.knowledge_updater._apply_new). None when the
+    # memory predates this field, or for the by-query inspector route.
+    classification_reason: Optional[str] = None
+    # The memory's MemoryDomain (obsidian.core.memory_domain.resolve_domain),
+    # populated only by the by-memory-id inspector route.
+    domain: Optional[MemoryDomain] = None
+    # The memory's canonicalized topics, confidence included (unlike
+    # DashboardMemory.topics) per the V2 ontology's "store confidence
+    # internally, UI doesn't need to render it yet" requirement.
+    topics: List[TopicSummary] = Field(default_factory=list)
 
 
 class WriteTraceSummary(BaseModel):

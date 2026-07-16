@@ -2,8 +2,17 @@
 
 Reproduces and pins the fix for the import HTTP 500 whose root cause was a
 note about "interests": the Classifier LLM sometimes returns a plausible but
-non-existent ``memory_type`` (``"interest"``), which used to raise an uncaught
-``ValueError`` all the way out of ``POST /import/obsidian/preview`` as a 500.
+non-existent ``memory_type`` (originally ``"interest"``), which used to raise
+an uncaught ``ValueError`` all the way out of ``POST /import/obsidian/preview``
+as a 500.
+
+The V2 ontology (see ``obsidian/core/enums.py``) added ``INTEREST`` as a real
+``MemoryType`` member, so ``"interest"`` is no longer an example of an invalid
+value -- these tests now use ``"hobby"`` as the stand-in plausible-but-fake
+category instead. The scenario name (an "interests.md" source note) and the
+underlying contract this file pins are otherwise unchanged: any invented
+category, not specifically ``"interest"``, must trigger the same
+retry-then-skip behavior.
 
 The contract now proven here:
 
@@ -87,9 +96,9 @@ def test_valid_first_response_does_not_retry() -> None:
 
 
 def test_invalid_memory_type_retries_once_then_succeeds() -> None:
-    # First response is the invalid "interest"; the one repair retry returns a
+    # First response is the invalid "hobby"; the one repair retry returns a
     # valid type, so classification succeeds without raising.
-    llm = _QueueLLM([_classify_json("interest"), _classify_json("preference")])
+    llm = _QueueLLM([_classify_json("hobby"), _classify_json("preference")])
     result = Classifier(llm=llm).classify(
         ExtractedFact(text="The user is into AI.", evidence="stated", confidence=0.9)
     )
@@ -101,7 +110,7 @@ def test_persistent_invalid_memory_type_raises_classification_error() -> None:
     # Both the first attempt and the single repair retry are invalid: give up
     # on this one fact with a typed ClassificationError (never a raw
     # ValueError), and never retry more than once.
-    llm = _QueueLLM([_classify_json("interest"), _classify_json("interest")])
+    llm = _QueueLLM([_classify_json("hobby"), _classify_json("hobby")])
     with pytest.raises(ClassificationError):
         Classifier(llm=llm).classify(
             ExtractedFact(text="The user is into AI.", evidence="stated", confidence=0.9)
@@ -112,7 +121,7 @@ def test_persistent_invalid_memory_type_raises_classification_error() -> None:
 def test_repair_prompt_lists_every_valid_memory_type() -> None:
     fact = ExtractedFact(text="The user is into AI.", evidence="stated", confidence=0.9)
     repair = Classifier(llm=_QueueLLM([])).build_repair_prompt(
-        fact, _classify_json("interest"), ValueError("Invalid memory_type value: interest")
+        fact, _classify_json("hobby"), ValueError("Invalid memory_type value: hobby")
     )
     for memory_type in MemoryType:
         assert memory_type.value in repair
@@ -129,7 +138,7 @@ class _KeyedScriptedLLM:
     Routes by stage marker (extract/importance) and otherwise treats a prompt
     as a classify-or-repair call, serving that fact's next queued classify
     response. A single-element queue is returned for every attempt (so a fact
-    scripted to always fail returns "interest" on both its attempts); a
+    scripted to always fail returns "hobby" on both its attempts); a
     multi-element queue is consumed one per attempt (retry-then-succeed).
     """
 
@@ -188,7 +197,7 @@ def test_pipeline_skips_unclassifiable_fact_and_keeps_the_rest() -> None:
         extract_response=_extract_json(good_a, bad, good_c),
         classify_by_text={
             good_a: [_classify_json("fact")],
-            bad: [_classify_json("interest")],  # invalid on both attempts
+            bad: [_classify_json("hobby")],  # invalid on both attempts
             good_c: [_classify_json("project")],
         },
         importance_by_text={
@@ -215,7 +224,7 @@ def test_pipeline_recovers_when_the_repair_retry_succeeds() -> None:
         extract_response=_extract_json(bad_then_good),
         classify_by_text={
             # First attempt invalid, repair attempt valid -> the fact survives.
-            bad_then_good: [_classify_json("interest"), _classify_json("preference")],
+            bad_then_good: [_classify_json("hobby"), _classify_json("preference")],
         },
         importance_by_text={bad_then_good: _importance_json(0.4)},
     )
@@ -261,7 +270,7 @@ def test_import_preview_partial_success_when_one_fact_is_unclassifiable(
             extract_response=_extract_json(good_a, bad, good_c),
             classify_by_text={
                 good_a: [_classify_json("fact")],
-                bad: [_classify_json("interest")],  # invalid on both attempts
+                bad: [_classify_json("hobby")],  # invalid on both attempts
                 good_c: [_classify_json("project")],
             },
             importance_by_text={
@@ -281,4 +290,4 @@ def test_import_preview_partial_success_when_one_fact_is_unclassifiable(
     body = response.json()
     assert body["status"] == "ok"
     texts = {item["text"] for item in body["items"]}
-    assert texts == {good_a, good_c}  # the "interest" fact was skipped
+    assert texts == {good_a, good_c}  # the "hobby" fact was skipped

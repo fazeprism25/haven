@@ -26,6 +26,7 @@ from uuid import UUID
 import yaml
 
 from obsidian.core.enums import MemoryType
+from obsidian.core.value_objects import TopicTag
 from obsidian.manager_ai.knowledge_updater import KnowledgeUpdater
 from obsidian.manager_ai.models import (
     ClassificationResult,
@@ -195,6 +196,69 @@ class TestUpdate:
             pass
         else:  # pragma: no cover - fail path
             raise AssertionError("expected ValueError for UPDATE without knowledge")
+
+
+# ---------------------------------------------------------------------------
+# TestTopicsWiring
+# ---------------------------------------------------------------------------
+
+
+class TestTopicsWiring:
+    """V2 ontology: ``classification.topics``/``.reason`` reach the
+    resulting ``KnowledgeObject`` on NEW, and are carried forward
+    unchanged (not re-derived) on CONFIRM/UPDATE/SUPERSEDE, since none of
+    those paths re-run classification."""
+
+    def test_new_copies_topics_and_reason_from_classification(self) -> None:
+        fact = ExtractedFact(text="The user is watching LlamaIndex.", confidence=0.8)
+        classification = ClassificationResult(
+            memory_type=MemoryType.INTEREST,
+            confidence=0.9,
+            reason="The user is following a technology without adopting it.",
+            topics=(TopicTag(name="AI", confidence=0.7),),
+        )
+        knowledge = KnowledgeUpdater().apply(
+            KnowledgeDecision.NEW, fact, None, classification
+        )
+        assert knowledge.topics == (TopicTag(name="AI", confidence=0.7),)
+        assert knowledge.metadata["classification_reason"] == (
+            "The user is following a technology without adopting it."
+        )
+
+    def test_new_without_classification_has_no_topics_or_reason(self) -> None:
+        fact = ExtractedFact(text="The user uses Obsidian.", confidence=0.8)
+        knowledge = KnowledgeUpdater().apply(KnowledgeDecision.NEW, fact, None)
+        assert knowledge.topics == ()
+        assert "classification_reason" not in knowledge.metadata
+
+    def test_confirm_preserves_existing_topics(self) -> None:
+        existing = KnowledgeObject(
+            canonical_fact="The user is watching LlamaIndex.",
+            memory_type=MemoryType.INTEREST,
+            topics=(TopicTag(name="AI", confidence=0.7),),
+        )
+        fact = ExtractedFact(text="The user is watching LlamaIndex.", confidence=0.9)
+        updated = KnowledgeUpdater().apply(KnowledgeDecision.CONFIRM, fact, existing)
+        assert updated.topics == existing.topics
+
+    def test_update_preserves_existing_topics(self) -> None:
+        existing = KnowledgeObject(
+            canonical_fact="I work at Google",
+            topics=(TopicTag(name="Programming", confidence=0.6),),
+        )
+        fact = ExtractedFact(text="I work at Google as a staff engineer", confidence=0.9)
+        updated = KnowledgeUpdater().apply(KnowledgeDecision.UPDATE, fact, existing)
+        assert updated.topics == existing.topics
+
+    def test_supersede_preserves_existing_topics(self) -> None:
+        existing = KnowledgeObject(
+            canonical_fact="Use Chroma.",
+            memory_type=MemoryType.DECISION,
+            topics=(TopicTag(name="AI", confidence=0.5),),
+        )
+        fact = ExtractedFact(text="Use Qdrant instead.", confidence=0.9)
+        updated = KnowledgeUpdater().apply(KnowledgeDecision.SUPERSEDE, fact, existing)
+        assert updated.topics == existing.topics
 
 
 # ---------------------------------------------------------------------------

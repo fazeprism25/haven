@@ -30,6 +30,12 @@ frontmatter keys, so old vault files (without them) and new vault files
 (with them) parse identically — see ``obsidian/tests/test_vault_writer.py``
 for the backwards-compatibility tests covering this.
 
+A fourth key, ``topics`` — a list of ``{"name": ..., "confidence": ...}``
+objects, from ``KnowledgeObject.topics`` (see
+``obsidian/manager_ai/topic_canonicalizer.py``) — is written the same
+additive way, and only when non-empty, so a pre-V2-ontology memory's
+frontmatter is unaffected byte-for-byte.
+
 Body — Title, Decision, Related Concepts / Relationships
 ----------------------------------------------------------
 The body opens with ``# <canonical_fact>`` — the same text as the
@@ -246,6 +252,13 @@ class VaultWriter:
             "tags": [f"memory/{knowledge.memory_type.value}"],
             "aliases": [knowledge.canonical_fact],
         }
+        if knowledge.topics:
+            # Additive, like tags/aliases/title above: KnowledgeObject.from_dict
+            # ignores this key when absent, so old vault files (without it)
+            # and new vault files (with it) parse identically. Omitted
+            # entirely when empty rather than writing `topics: []`, to keep
+            # pre-V2-ontology memories' frontmatter byte-for-byte unchanged.
+            frontmatter["topics"] = [t.to_dict() for t in knowledge.topics]
         return frontmatter
 
     def _build_body(self, knowledge: KnowledgeObject) -> str:

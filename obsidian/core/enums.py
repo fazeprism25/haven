@@ -108,6 +108,16 @@ class MemoryType(str, Enum):
         A file or component relevant to a current focus.
     OPEN_QUESTION : str
         An explicitly unresolved question.
+    INTEREST : str
+        Something the user is watching, following, or curious about,
+        without having adopted it as a settled preference or decision
+        (e.g. "the user is watching LlamaIndex").
+    TRAIT : str
+        An enduring characteristic or disposition of the user (e.g. "the
+        user likes building systems"), distinct from a one-off
+        ``PREFERENCE``.
+    HABIT : str
+        A recurring behavior or routine.
 
     Notes
     -----
@@ -120,6 +130,17 @@ class MemoryType(str, Enum):
     this kind of content yet, so these types exist for a future write path
     to classify into, not because the Classifier is expected to assign
     them today.
+
+    ``INTEREST``, ``TRAIT``, and ``HABIT`` were added to close a
+    different gap: the "Personal" domain previously had only
+    ``PREFERENCE``, ``SKILL``, and ``GOAL`` to choose from, so the
+    Classifier defaulted signals like "watching a technology" or "likes
+    building systems" into ``PREFERENCE`` even though they aren't really
+    a like/dislike. Purely additive -- no existing member was renamed or
+    reassigned. See ``obsidian/core/memory_domain.py`` for how every
+    member (old and new) is grouped into a ``MemoryDomain`` for display,
+    and ``obsidian/docs/MEMORY_TYPES.md`` for the authoritative
+    disambiguation guidance the Classifier prompt itself uses.
     """
 
     FACT = "fact"
@@ -137,39 +158,37 @@ class MemoryType(str, Enum):
     IMPLEMENTATION_STATE = "implementation_state"
     CODE_AREA = "code_area"
     OPEN_QUESTION = "open_question"
+    INTEREST = "interest"
+    TRAIT = "trait"
+    HABIT = "habit"
 
 
-class RelationshipType(str, Enum):
-    """Type of relationship between two Memories.
+class MemoryDomain(str, Enum):
+    """Fixed grouping dimension over :class:`MemoryType`, for presentation.
+
+    Every :class:`MemoryType` member belongs to exactly one domain -- see
+    the total mapping in :mod:`obsidian.core.memory_domain`. Domains exist
+    so the dashboard can present 18 memory types as a small number of
+    grouped sections instead of one tab per type; they carry no retrieval
+    or ranking meaning of their own.
 
     Values
     ------
-    RELATED_TO : str
-        A generic association (no specific semantics).
-    DEPENDS_ON : str
-        The source Memory depends on the target being true.
-    SUPPORTS : str
-        The source Memory supports or confirms the target.
-    CONTRADICTS : str
-        The source Memory contradicts the target.
-    PARENT : str
-        The source Memory is a parent of the target.
-    CHILD : str
-        The source Memory is a child of the target.
-    REFERENCES : str
-        The source Memory references the target.
-    BELONGS_TO : str
-        The source Memory belongs to the target.
+    PERSONAL : str
+        Preferences, interests, traits, habits, skills, and goals --
+        durable signal about who the user is and what they want.
+    WORK : str
+        Projects, tasks, decisions, questions, blockers, and
+        implementation/code-area state -- the "what's happening" side of
+        Haven's project-state tracking.
+    KNOWLEDGE : str
+        Facts, beliefs, people, events, and rules -- durable knowledge
+        the user holds or has recorded, independent of any one project.
     """
 
-    RELATED_TO = "related_to"
-    DEPENDS_ON = "depends_on"
-    SUPPORTS = "supports"
-    CONTRADICTS = "contradicts"
-    PARENT = "parent"
-    CHILD = "child"
-    REFERENCES = "references"
-    BELONGS_TO = "belongs_to"
+    PERSONAL = "personal"
+    WORK = "work"
+    KNOWLEDGE = "knowledge"
 
 
 class EntityType(str, Enum):

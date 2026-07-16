@@ -158,9 +158,12 @@ def test_classifier_persistent_transport_error_propagates_untouched() -> None:
 def test_classifier_repair_retry_survives_transient_transport_error() -> None:
     # First attempt returns an invalid memory_type (triggers the repair
     # retry); the repair attempt itself hits a transient transport error,
-    # which is retried once and then succeeds.
+    # which is retried once and then succeeds. "hobby" stands in for a
+    # plausible-but-fake category -- "interest" is a real MemoryType as of
+    # the V2 ontology (see obsidian/core/enums.py), so it no longer works
+    # as an invalid-value example.
     llm = _FlakyLLM(
-        [_classify_json("interest"), ConnectionError("boom"), _classify_json("preference")]
+        [_classify_json("hobby"), ConnectionError("boom"), _classify_json("preference")]
     )
     result = Classifier(llm=llm).classify(_fact())
     assert result.memory_type is MemoryType.PREFERENCE

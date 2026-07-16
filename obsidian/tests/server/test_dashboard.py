@@ -44,6 +44,33 @@ def _seed(client: TestClient, **kwargs) -> KnowledgeObject:
     return knowledge
 
 
+def _section(body: dict, domain: str, memory_type: str) -> list:
+    """Return the ``DashboardMemory`` list for *memory_type* under *domain*.
+
+    ``[]`` both when the domain has no entry for that type at all (the
+    common case -- ``DomainSection.by_type`` omits empty types) and when
+    the domain itself is somehow missing, so callers can assert emptiness
+    without a ``KeyError``.
+    """
+    for section in body["domains"]:
+        if section["domain"] == domain:
+            return section["by_type"].get(memory_type, [])
+    return []
+
+
+#: Every (domain, memory_type value) pair the V2 ontology defines -- see
+#: obsidian/core/memory_domain.py's MEMORY_TYPE_DOMAIN.
+ALL_DOMAIN_TYPES = [
+    ("personal", "preference"), ("personal", "interest"), ("personal", "trait"),
+    ("personal", "habit"), ("personal", "skill"), ("personal", "goal"),
+    ("work", "project"), ("work", "task"), ("work", "decision"),
+    ("work", "open_question"), ("work", "blocker"),
+    ("work", "implementation_state"), ("work", "code_area"),
+    ("knowledge", "fact"), ("knowledge", "belief"), ("knowledge", "person"),
+    ("knowledge", "event"), ("knowledge", "rule"),
+]
+
+
 # ---------------------------------------------------------------------------
 # Empty vault
 # ---------------------------------------------------------------------------
@@ -54,15 +81,14 @@ class TestEmptyVault:
         response = client.get("/api/v1/dashboard")
         assert response.status_code == 200
         body = response.json()
-        for section in (
-            "projects",
-            "decisions",
-            "beliefs",
-            "preferences",
-            "tasks",
-            "recent_memories",
-        ):
-            assert body[section] == []
+        assert body["recent_memories"] == []
+        assert {s["domain"] for s in body["domains"]} == {
+            "personal",
+            "work",
+            "knowledge",
+        }
+        for section in body["domains"]:
+            assert section["by_type"] == {}
 
     def test_zeroed_stats(self, client: TestClient) -> None:
         body = client.get("/api/v1/dashboard").json()
@@ -71,6 +97,11 @@ class TestEmptyVault:
         assert body["vault_stats"]["archived_count"] == 0
         assert body["vault_stats"]["average_confidence"] == 0.0
         assert body["vault_stats"]["average_importance"] == 0.0
+        assert body["vault_stats"]["by_domain"] == {
+            "personal": 0,
+            "work": 0,
+            "knowledge": 0,
+        }
         assert body["concept_stats"]["total_concepts"] == 0
         assert body["concept_stats"]["total_relationships"] == 0
         assert body["concept_stats"]["total_attachments"] == 0
@@ -84,43 +115,37 @@ class TestEmptyVault:
 
 class TestMemoryTypeSections:
     @pytest.mark.parametrize(
-        "memory_type, section",
+        "memory_type, domain, type_value",
         [
-            (MemoryType.PROJECT, "projects"),
-            (MemoryType.DECISION, "decisions"),
-            (MemoryType.BELIEF, "beliefs"),
-            (MemoryType.PREFERENCE, "preferences"),
-            (MemoryType.TASK, "tasks"),
+            (MemoryType.PROJECT, "work", "project"),
+            (MemoryType.DECISION, "work", "decision"),
+            (MemoryType.BELIEF, "knowledge", "belief"),
+            (MemoryType.PREFERENCE, "personal", "preference"),
+            (MemoryType.TASK, "work", "task"),
+            (MemoryType.INTEREST, "personal", "interest"),
+            (MemoryType.TRAIT, "personal", "trait"),
+            (MemoryType.HABIT, "personal", "habit"),
+            (MemoryType.FACT, "knowledge", "fact"),
         ],
     )
     def test_memory_appears_in_its_own_section_only(
-        self, client: TestClient, memory_type: MemoryType, section: str
+        self,
+        client: TestClient,
+        memory_type: MemoryType,
+        domain: str,
+        type_value: str,
     ) -> None:
         _seed(client, canonical_fact="A seeded fact.", memory_type=memory_type)
 
         body = client.get("/api/v1/dashboard").json()
-        assert len(body[section]) == 1
-        assert body[section][0]["canonical_fact"] == "A seeded fact."
+        own = _section(body, domain, type_value)
+        assert len(own) == 1
+        assert own[0]["canonical_fact"] == "A seeded fact."
 
-        other_sections = {
-            "projects",
-            "decisions",
-            "beliefs",
-            "preferences",
-            "tasks",
-        } - {section}
-        for other in other_sections:
-            assert body[other] == []
-
-    def test_fact_type_memory_appears_in_no_typed_section(
-        self, client: TestClient
-    ) -> None:
-        _seed(client, canonical_fact="Plain fact.", memory_type=MemoryType.FACT)
-
-        body = client.get("/api/v1/dashboard").json()
-        for section in ("projects", "decisions", "beliefs", "preferences", "tasks"):
-            assert body[section] == []
-        assert len(body["recent_memories"]) == 1
+        for other_domain, other_type in ALL_DOMAIN_TYPES:
+            if (other_domain, other_type) == (domain, type_value):
+                continue
+            assert _section(body, other_domain, other_type) == []
 
     def test_memory_fields_are_complete(self, client: TestClient) -> None:
         knowledge = _seed(
@@ -132,7 +157,8 @@ class TestMemoryTypeSections:
             confirmation_count=3,
         )
 
-        entry = client.get("/api/v1/dashboard").json()["projects"][0]
+        body = client.get("/api/v1/dashboard").json()
+        entry = _section(body, "work", "project")[0]
         assert entry["id"] == str(knowledge.id)
         assert entry["canonical_fact"] == "Haven uses Claude."
         assert entry["memory_type"] == "project"
@@ -143,6 +169,7 @@ class TestMemoryTypeSections:
         assert entry["valid_until"] is None
         assert entry["last_confirmed"] is None
         assert entry["decision"] is None
+        assert entry["topics"] == []
 
 
 # ---------------------------------------------------------------------------
@@ -160,7 +187,8 @@ class TestDecisionMemory:
             memory_type=MemoryType.DECISION,
         )
 
-        entry = client.get("/api/v1/dashboard").json()["decisions"][0]
+        body = client.get("/api/v1/dashboard").json()
+        entry = _section(body, "work", "decision")[0]
         assert entry["decision"] is None
 
     def test_decision_with_metadata_is_fully_projected(
@@ -184,7 +212,8 @@ class TestDecisionMemory:
         app.state.vault_writer.write(knowledge)
         app.state.ontology_pipeline.process(knowledge)
 
-        entry = client.get("/api/v1/dashboard").json()["decisions"][0]
+        body = client.get("/api/v1/dashboard").json()
+        entry = _section(body, "work", "decision")[0]
         assert entry["decision"] == {
             "reason": "Better filtering support.",
             "alternatives_considered": ["Chroma", "Pinecone"],
@@ -204,7 +233,8 @@ class TestDecisionMemory:
         app.state.vault_writer.write(knowledge)
         app.state.ontology_pipeline.process(knowledge)
 
-        entry = client.get("/api/v1/dashboard").json()["decisions"][0]
+        body = client.get("/api/v1/dashboard").json()
+        entry = _section(body, "work", "decision")[0]
         assert entry["last_confirmed"] is not None
 
     def test_non_decision_memory_never_carries_decision_field(
@@ -212,7 +242,8 @@ class TestDecisionMemory:
     ) -> None:
         _seed(client, canonical_fact="A plain project.", memory_type=MemoryType.PROJECT)
 
-        entry = client.get("/api/v1/dashboard").json()["projects"][0]
+        body = client.get("/api/v1/dashboard").json()
+        entry = _section(body, "work", "project")[0]
         assert entry["decision"] is None
 
     def test_inspect_memory_by_id_projects_decision_metadata(
@@ -725,7 +756,7 @@ class TestWorkingContexts:
         body = response.json()
         assert body["working_contexts"] is None
         # The rest of the dashboard is unaffected by the failure.
-        assert len(body["projects"]) == 1
+        assert len(_section(body, "work", "project")) == 1
         assert body["vault_stats"]["total_memories"] == 1
 
     def test_graceful_fallback_when_query_working_context_missing(
@@ -740,7 +771,7 @@ class TestWorkingContexts:
         assert response.status_code == 200
         body = response.json()
         assert body["working_contexts"] is None
-        assert len(body["projects"]) == 1
+        assert len(_section(body, "work", "project")) == 1
 
 
 # ---------------------------------------------------------------------------
@@ -901,7 +932,7 @@ class TestProjectOverview:
         body = response.json()
         assert body["project_overview"] is None
         # The rest of the dashboard is unaffected by the failure.
-        assert len(body["projects"]) == 1
+        assert len(_section(body, "work", "project")) == 1
         assert body["vault_stats"]["total_memories"] == 1
 
 

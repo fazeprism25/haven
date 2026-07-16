@@ -107,6 +107,20 @@ Acts as evidence.
 
 Owns truth.
 
+Carries a `memory_type` (`obsidian.core.enums.MemoryType`) and, since the
+V2 ontology, up to 3 canonicalized `topics`
+(`obsidian.core.value_objects.TopicTag`) — see
+`obsidian/docs/MEMORY_TYPES.md` for the full type list and
+`docs/architecture/ONTOLOGY_V2_MIGRATION.md` for the migration this
+introduced. **This is a different sense of "ontology" than the rest of
+this document**: `MemoryType`/`MemoryDomain`/`Topic` classify individual
+memories along fixed and free-form dimensions, entirely separate from
+the Concept Graph (Concepts/Relationships/Attachments) described below,
+which organizes knowledge *across* memories. A `RELATIONSHIP` memory
+type was deliberately not added for exactly this reason — relationship
+semantics between things already live here, as `Relationship`, not as a
+per-memory classification.
+
 ---
 
 ## Concept

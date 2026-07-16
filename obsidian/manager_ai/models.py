@@ -8,10 +8,11 @@ from __future__ import annotations
 from dataclasses import dataclass, field, replace
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 from uuid import UUID, uuid4
 
 from obsidian.core.enums import MemoryType
+from obsidian.core.value_objects import TopicTag
 
 
 class SupersessionOperation(str, Enum):
@@ -150,6 +151,16 @@ class KnowledgeObject:
         independent facts.
     metadata : dict[str, Any]
         Arbitrary key‑value metadata associated with this object.
+    topics : tuple[TopicTag, ...]
+        Canonicalized topical tags (see
+        :func:`obsidian.manager_ai.topic_canonicalizer.canonicalize_topics`),
+        at most 3, set once from the originating
+        :class:`ClassificationResult` and carried forward unchanged by
+        :class:`~obsidian.manager_ai.knowledge_updater.KnowledgeUpdater`'s
+        confirm/update/supersede paths (classification does not re-run on
+        those paths, so there is nothing new to merge in). Informational
+        only -- not read by retrieval, ranking, or acceptance. Empty for
+        every ``KnowledgeObject`` created before this field existed.
 
     Raises
     ------
@@ -168,12 +179,14 @@ class KnowledgeObject:
     last_confirmed: Optional[datetime] = None
     confirmation_count: int = 0
     metadata: Dict[str, Any] = field(default_factory=dict)
+    topics: Tuple[TopicTag, ...] = ()
 
     def __post_init__(self) -> None:
         if not 0.0 <= self.confidence <= 1.0:
             raise ValueError("confidence must be between 0 and 1")
         if not 0.0 <= self.importance <= 1.0:
             raise ValueError("importance must be between 0 and 1")
+        object.__setattr__(self, "topics", tuple(self.topics))
 
     def to_dict(self) -> Dict[str, Any]:
         """Return a JSON‑serializable dictionary."""
@@ -193,6 +206,7 @@ class KnowledgeObject:
             else None,
             "confirmation_count": self.confirmation_count,
             "metadata": self.metadata,
+            "topics": [t.to_dict() for t in self.topics],
         }
 
     @classmethod
@@ -223,6 +237,9 @@ class KnowledgeObject:
             else data.get("last_confirmed", None),
             confirmation_count=data.get("confirmation_count", 0),
             metadata=data.get("metadata", {}),
+            topics=tuple(
+                TopicTag.from_dict(t) for t in data.get("topics", [])
+            ),
         )
 
 
@@ -422,7 +439,13 @@ class ClassificationResult:
     confidence : float
         The classifier's confidence in this assignment (0.0 – 1.0).
     reason : str
-        A human‑readable explanation of why this type was chosen.
+        A human‑readable explanation of why this type -- and these
+        ``topics`` -- were chosen.
+    topics : tuple[TopicTag, ...]
+        Canonicalized topical tags for this fact (see
+        :func:`obsidian.manager_ai.topic_canonicalizer.canonicalize_topics`),
+        at most 3. Empty when the Classifier's response omitted a
+        ``topics`` key or it canonicalized to nothing.
 
     Raises
     ------
@@ -433,10 +456,12 @@ class ClassificationResult:
     memory_type: MemoryType = MemoryType.FACT
     confidence: float = 0.5
     reason: str = ""
+    topics: Tuple[TopicTag, ...] = ()
 
     def __post_init__(self) -> None:
         if not 0.0 <= self.confidence <= 1.0:
             raise ValueError("confidence must be between 0 and 1")
+        object.__setattr__(self, "topics", tuple(self.topics))
 
     def to_dict(self) -> Dict[str, Any]:
         """Return a JSON‑serializable dictionary."""
@@ -444,6 +469,7 @@ class ClassificationResult:
             "memory_type": self.memory_type.value,
             "confidence": self.confidence,
             "reason": self.reason,
+            "topics": [t.to_dict() for t in self.topics],
         }
 
     @classmethod
@@ -455,6 +481,9 @@ class ClassificationResult:
             else MemoryType.FACT,
             confidence=data.get("confidence", 0.5),
             reason=data.get("reason", ""),
+            topics=tuple(
+                TopicTag.from_dict(t) for t in data.get("topics", [])
+            ),
         )
 
 

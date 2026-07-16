@@ -141,6 +141,17 @@ class KnowledgeUpdater:
         ``classification.confidence`` (confidence in the *type*
         assignment, not the fact itself) is deliberately not folded in
         here, matching that existing precedent.
+
+        When *classification* is given, its ``topics`` (already
+        canonicalized -- see
+        :func:`obsidian.manager_ai.topic_canonicalizer.canonicalize_topics`)
+        are copied onto the new object's ``topics``, and its ``reason`` is
+        stored under ``metadata["classification_reason"]`` -- the same
+        "type-specific data lives in ``metadata``" pattern
+        :class:`~obsidian.manager_ai.models.DecisionMetadata` already uses,
+        so the "Why?" inspector (``obsidian/server/dashboard.py``) can
+        surface why this type and these topics were chosen without a new
+        ``KnowledgeObject`` field.
         """
         evidence = EvidenceEntry(
             source_event_id=fact.source_event_id,
@@ -158,6 +169,11 @@ class KnowledgeUpdater:
         }
         if classification is not None:
             kwargs["memory_type"] = classification.memory_type
+            kwargs["topics"] = classification.topics
+            if classification.reason:
+                kwargs["metadata"] = {
+                    "classification_reason": classification.reason
+                }
         if importance is not None:
             kwargs["importance"] = importance.score
         return KnowledgeObject(**kwargs)
@@ -195,6 +211,7 @@ class KnowledgeUpdater:
             last_confirmed=datetime.utcnow(),
             confirmation_count=knowledge.confirmation_count + 1,
             metadata=knowledge.metadata,
+            topics=knowledge.topics,
         )
 
     @staticmethod
@@ -238,6 +255,7 @@ class KnowledgeUpdater:
             last_confirmed=datetime.utcnow(),
             confirmation_count=knowledge.confirmation_count + 1,
             metadata=knowledge.metadata,
+            topics=knowledge.topics,
         )
 
     @staticmethod
@@ -274,6 +292,7 @@ class KnowledgeUpdater:
             last_confirmed=datetime.utcnow(),
             confirmation_count=1,
             metadata=new_metadata,
+            topics=knowledge.topics,
         )
 
     # ------------------------------------------------------------------

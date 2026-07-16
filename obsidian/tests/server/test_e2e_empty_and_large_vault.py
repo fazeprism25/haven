@@ -54,8 +54,9 @@ class TestEmptyVaultEverySurfaceRespondsCleanly:
 
     def test_dashboard_every_section_honestly_empty(self, client: TestClient) -> None:
         body = client.get("/api/v1/dashboard").json()
-        for section in ("projects", "decisions", "beliefs", "preferences", "tasks", "recent_memories"):
-            assert body[section] == []
+        assert body["recent_memories"] == []
+        for section in body["domains"]:
+            assert section["by_type"] == {}
         assert body["vault_stats"]["total_memories"] == 0
         assert body["concept_stats"]["total_concepts"] == 0
         assert body["working_contexts"] == [
@@ -185,13 +186,16 @@ class TestLargeDemoVaultLoadsAndStaysUsable:
         body = client.get("/api/v1/dashboard").json()
         assert body["vault_stats"]["total_memories"] > 30
         assert body["concept_stats"]["total_concepts"] > 0
-        # Every typed section sums to at most the total (sanity, not a
-        # precise partition since FACT-type memories appear in none of them).
+        # Every domain section sums to exactly the total -- unlike the old
+        # fixed 5-type split, every MemoryType now resolves to some domain
+        # (see obsidian/core/memory_domain.py), so this is now a precise
+        # partition, not just an upper-bound sanity check.
         typed_total = sum(
-            len(body[section])
-            for section in ("projects", "decisions", "beliefs", "preferences", "tasks")
+            len(memories)
+            for section in body["domains"]
+            for memories in section["by_type"].values()
         )
-        assert typed_total <= body["vault_stats"]["total_memories"]
+        assert typed_total == body["vault_stats"]["total_memories"]
 
         # recent_limit still bounds the feed correctly at this larger scale.
         limited = client.get("/api/v1/dashboard", params={"recent_limit": 5}).json()

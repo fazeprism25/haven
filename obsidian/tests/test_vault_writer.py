@@ -44,6 +44,7 @@ import pytest
 import yaml
 
 from obsidian.core.enums import MemoryType
+from obsidian.core.value_objects import TopicTag
 from obsidian.manager_ai.models import (
     DecisionMetadata,
     DecisionStatus,
@@ -188,6 +189,49 @@ class TestObsidianFrontmatterFields:
 
 
 # ---------------------------------------------------------------------------
+# TestTopicsFrontmatter
+#
+# V2 ontology: KnowledgeObject.topics round-trips through VaultWriter's
+# frontmatter the same additive way tags/aliases/title do -- see
+# obsidian/memory_engine/vault_writer.py's module docstring.
+# ---------------------------------------------------------------------------
+
+
+class TestTopicsFrontmatter:
+    def test_topics_omitted_entirely_when_empty(self, tmp_path: Path) -> None:
+        knowledge = KnowledgeObject(canonical_fact="No topics here.")
+        path = VaultWriter(tmp_path).write(knowledge)
+        frontmatter = _frontmatter(path.read_text(encoding="utf-8"))
+        assert "topics" not in frontmatter
+
+    def test_topics_written_and_round_trip(self, tmp_path: Path) -> None:
+        knowledge = KnowledgeObject(
+            canonical_fact="The user is watching LlamaIndex.",
+            memory_type=MemoryType.INTEREST,
+            topics=(TopicTag(name="AI", confidence=0.8),),
+        )
+        path = VaultWriter(tmp_path).write(knowledge)
+        frontmatter = _frontmatter(path.read_text(encoding="utf-8"))
+        assert frontmatter["topics"] == [{"name": "AI", "confidence": 0.8}]
+
+        reloaded = KnowledgeObject.from_dict(frontmatter)
+        assert reloaded.topics == (TopicTag(name="AI", confidence=0.8),)
+
+    def test_old_frontmatter_without_topics_key_still_hydrates(self) -> None:
+        old_style_frontmatter = {
+            "id": "12345678-1234-5678-1234-567812345678",
+            "canonical_fact": "A fact written before topics existed.",
+            "memory_type": "fact",
+            "confidence": 0.5,
+            "importance": 0.5,
+            "confirmation_count": 0,
+            "metadata": {},
+        }
+        reloaded = KnowledgeObject.from_dict(old_style_frontmatter)
+        assert reloaded.topics == ()
+
+
+# ---------------------------------------------------------------------------
 # TestNewProjectStateMemoryTypes
 #
 # See docs/architecture/PROJECT_STATE_KNOWLEDGE_MODEL.md. Confirms the four
@@ -245,6 +289,39 @@ class TestNewProjectStateMemoryTypes:
         frontmatter = _frontmatter(path.read_text(encoding="utf-8"))
         assert frontmatter["tags"] == ["memory/fact"]
         assert frontmatter["aliases"] == ["No graph needed for this."]
+
+
+# ---------------------------------------------------------------------------
+# TestNewPersonalMemoryTypes
+#
+# The three MemoryType members added by the V2 ontology (see
+# obsidian/core/enums.py) round-trip through the real VaultWriter ->
+# Markdown -> KnowledgeObject.from_dict path with zero VaultWriter/
+# MemoryStore code changes -- the same property
+# TestNewProjectStateMemoryTypes established for its own four additions.
+# ---------------------------------------------------------------------------
+
+
+class TestNewPersonalMemoryTypes:
+    @pytest.mark.parametrize(
+        "memory_type",
+        [MemoryType.INTEREST, MemoryType.TRAIT, MemoryType.HABIT],
+    )
+    def test_new_memory_type_round_trips_through_vault_writer(
+        self, tmp_path: Path, memory_type: MemoryType
+    ) -> None:
+        knowledge = KnowledgeObject(
+            canonical_fact="Something worth remembering.", memory_type=memory_type
+        )
+        path = VaultWriter(tmp_path).write(knowledge)
+        frontmatter = _frontmatter(path.read_text(encoding="utf-8"))
+
+        assert frontmatter["memory_type"] == memory_type.value
+        assert frontmatter["tags"] == [f"memory/{memory_type.value}"]
+
+        reloaded = KnowledgeObject.from_dict(frontmatter)
+        assert reloaded.memory_type is memory_type
+        assert reloaded.canonical_fact == knowledge.canonical_fact
 
 
 # ---------------------------------------------------------------------------

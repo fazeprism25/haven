@@ -20,9 +20,9 @@ for the full ontology design.
 
 Earlier drafts of this doc listed a different set (`contradicts`,
 `belongs_to`, `caused_by`, `implements`, `mentions`, `supersedes`) that
-doesn't match the implemented enum above. That list was closer to
+doesn't match the implemented enum above. That list was closer to the old
 `obsidian.core.enums.RelationshipType`, a separate, unused enum attached to
-a legacy `Memory` dataclass that isn't part of the live pipeline (see
-[KNOWN_ISSUES.md](KNOWN_ISSUES.md)). If a relationship type below doesn't
-cover a case you need, add it to `OntologyRelationshipType` directly rather
-than relying on the old list.
+a legacy `Memory` dataclass that wasn't part of the live pipeline and has
+since been deleted (see [KNOWN_ISSUES.md](KNOWN_ISSUES.md)). If a
+relationship type below doesn't cover a case you need, add it to
+`OntologyRelationshipType` directly rather than relying on the old list.

@@ -156,7 +156,9 @@ class TestMemoryWhyOpensWithRealEvidence:
         client.app.state.vault_writer.write(knowledge)
         client.app.state.ontology_pipeline.process(knowledge)
 
-        dashboard_entry = client.get("/api/v1/dashboard").json()["decisions"][0]
+        body = client.get("/api/v1/dashboard").json()
+        work_section = next(s for s in body["domains"] if s["domain"] == "work")
+        dashboard_entry = work_section["by_type"]["decision"][0]
         assert dashboard_entry["decision"]["reason"] == (
             "Best filtering support for our access patterns."
         )
@@ -259,7 +261,7 @@ class TestBenchmarkWhyMatchesCommittedArtifactsOnDisk:
     repo, this test should be repointed at another committed pair."""
 
     _BENCHMARK_ID = "decision_basic_001"
-    _ADAPTER = "mem0"
+    _ADAPTER = "bm25"
     _KIND = "base"
 
     def test_benchmark_appears_in_the_explorer_list(self, client: TestClient) -> None:
@@ -300,7 +302,10 @@ class TestBenchmarkWhyMatchesCommittedArtifactsOnDisk:
         self, client: TestClient
     ) -> None:
         results_path = (
-            Path(__file__).resolve().parents[3] / "benchmarks" / "results" / "results.json"
+            Path(__file__).resolve().parents[3]
+            / "benchmarks"
+            / "results"
+            / f"results_{self._ADAPTER}.json"
         )
         on_disk = json.loads(results_path.read_text(encoding="utf-8"))
         rows = on_disk if isinstance(on_disk, list) else on_disk.get("results", [])
@@ -345,6 +350,6 @@ class TestBenchmarkWhyMatchesCommittedArtifactsOnDisk:
     ) -> None:
         response = client.get(
             "/api/v1/dashboard/benchmarks/does-not-exist",
-            params={"adapter": "mem0", "kind": "base"},
+            params={"adapter": self._ADAPTER, "kind": "base"},
         )
         assert response.status_code == 404

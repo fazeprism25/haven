@@ -53,7 +53,8 @@ from uuid import UUID
 
 from fastapi import APIRouter, HTTPException, Query, Request, Response
 
-from obsidian.core.enums import MemoryType
+from obsidian.core.enums import MemoryDomain, MemoryType
+from obsidian.core.memory_domain import resolve_domain
 from obsidian.manager_ai.models import KnowledgeObject, get_decision_metadata
 from obsidian.memory_engine.engine import MemoryEngine
 from obsidian.ontology.concept_graph import ConceptGraph
@@ -71,6 +72,7 @@ from obsidian.server.schemas import (
     DashboardDecisionDetail,
     DashboardMemory,
     DashboardResponse,
+    DomainSection,
     InspectorResponse,
     MemoryOntology,
     NextActionSummary,
@@ -79,6 +81,7 @@ from obsidian.server.schemas import (
     ProjectOverview,
     ProjectStateItem,
     RetrievalStats,
+    TopicSummary,
     VaultStats,
     WorkingContextSummary,
     WriteTraceDetailResponse,
@@ -144,6 +147,7 @@ def _to_dashboard_memory(ko: KnowledgeObject) -> DashboardMemory:
         valid_until=ko.valid_until,
         last_confirmed=ko.last_confirmed,
         decision=_to_decision_detail(ko),
+        topics=[t.name for t in ko.topics],
     )
 
 
@@ -164,15 +168,42 @@ def _memories_of_type(
     return [_to_dashboard_memory(ko) for ko in _sorted_recent_first(matches)]
 
 
+def _domain_sections(memories: List[KnowledgeObject]) -> List[DomainSection]:
+    """Group every memory by :class:`MemoryDomain`, then by :class:`MemoryType`.
+
+    Replaces the old fixed 5-type ``_memories_of_type`` calls: every one of
+    the 18 :class:`MemoryType` members is reachable here, not just
+    ``project``/``decision``/``belief``/``preference``/``task``. A type
+    with zero memories is omitted from its domain's ``by_type`` entirely
+    (see :class:`~obsidian.server.schemas.DomainSection`'s docstring), and
+    a domain with no memories at all still appears with an empty
+    ``by_type`` so the dashboard can always render all three domain tabs.
+    """
+    sections: Dict[MemoryDomain, Dict[str, List[DashboardMemory]]] = {
+        domain: {} for domain in MemoryDomain
+    }
+    for memory_type in MemoryType:
+        matches = _memories_of_type(memories, memory_type)
+        if matches:
+            sections[resolve_domain(memory_type)][memory_type.value] = matches
+    return [
+        DomainSection(domain=domain.value, by_type=sections[domain])
+        for domain in MemoryDomain
+    ]
+
+
 def _vault_stats(memories: List[KnowledgeObject]) -> VaultStats:
     total = len(memories)
     by_type: Dict[str, int] = {member.value: 0 for member in MemoryType}
+    by_domain: Dict[str, int] = {domain.value: 0 for domain in MemoryDomain}
     for ko in memories:
         by_type[ko.memory_type.value] += 1
+        by_domain[resolve_domain(ko.memory_type).value] += 1
     active = sum(1 for ko in memories if ko.valid_until is None)
     return VaultStats(
         total_memories=total,
         by_type=by_type,
+        by_domain=by_domain,
         active_count=active,
         archived_count=total - active,
         average_confidence=(sum(ko.confidence for ko in memories) / total)
@@ -251,12 +282,23 @@ def _ontology_for_memory(graph: ConceptGraph, memory_id: UUID) -> MemoryOntology
 
 
 def _build_engine(request: Request) -> MemoryEngine:
+    """Build a ``MemoryEngine`` for this request, honoring the Query Rewriting
+    setting (``obsidian.server.main``'s ``GET``/``PUT /api/v1/settings/query-rewriting``).
+
+    Reads ``app_state.query_rewriting_enabled`` fresh on every call, exactly
+    like every ``MemoryEngine`` construction site in ``obsidian.server.main``
+    does via ``_active_query_rewriter`` -- so a toggle takes effect on the
+    dashboard's Retrieval Inspector immediately, with no restart.
+    """
     app_state = request.app.state
     return MemoryEngine(
         app_state.alias_index,
         app_state.concept_graph,
         app_state.memory_store,
         app_state.retrieval_config,
+        query_rewriter=(
+            app_state.query_rewriter if app_state.query_rewriting_enabled else None
+        ),
     )
 
 
@@ -552,11 +594,7 @@ def get_dashboard(
         concepts = _load_concepts(app_state.concept_dir)
 
         return DashboardResponse(
-            projects=_memories_of_type(memories, MemoryType.PROJECT),
-            decisions=_memories_of_type(memories, MemoryType.DECISION),
-            beliefs=_memories_of_type(memories, MemoryType.BELIEF),
-            preferences=_memories_of_type(memories, MemoryType.PREFERENCE),
-            tasks=_memories_of_type(memories, MemoryType.TASK),
+            domains=_domain_sections(memories),
             recent_memories=[
                 _to_dashboard_memory(ko)
                 for ko in _sorted_recent_first(memories)[:recent_limit]
@@ -641,6 +679,12 @@ def inspect_memory(request: Request, memory_id: str) -> InspectorResponse:
             working_contexts=working_contexts,
             structured_prompt=structured_prompt,
             provenance=knowledge.metadata.get("provenance"),
+            classification_reason=knowledge.metadata.get("classification_reason"),
+            domain=resolve_domain(knowledge.memory_type),
+            topics=[
+                TopicSummary(name=t.name, confidence=t.confidence)
+                for t in knowledge.topics
+            ],
         )
 
 

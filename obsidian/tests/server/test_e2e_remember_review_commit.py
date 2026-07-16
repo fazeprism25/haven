@@ -34,6 +34,19 @@ from obsidian.manager_ai.pipeline import ManagerPipeline
 from obsidian.memory_engine.memory_store import MemoryStore
 
 
+def _dashboard_section(dashboard: dict, domain: str, memory_type: str) -> list:
+    """Return the ``DashboardMemory`` list for *memory_type* under *domain*.
+
+    Mirrors ``test_dashboard.py``'s ``_section`` helper -- duplicated here
+    rather than imported, matching this directory's convention of not
+    cross-importing test helpers between files.
+    """
+    for section in dashboard["domains"]:
+        if section["domain"] == domain:
+            return section["by_type"].get(memory_type, [])
+    return []
+
+
 @pytest.fixture()
 def client(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> TestClient:
     monkeypatch.setenv("HAVEN_VAULT_DIR", str(tmp_path / "vault"))
@@ -139,7 +152,7 @@ class TestFullRememberReviewCommitDashboardCycle:
         # Nothing durable happened yet: dashboard still empty.
         dashboard = client.get("/api/v1/dashboard").json()
         assert dashboard["recent_memories"] == []
-        assert dashboard["projects"] == []
+        assert _dashboard_section(dashboard, "work", "project") == []
 
     def test_commit_then_dashboard_reflects_the_new_memory_everywhere_relevant(
         self, client: TestClient
@@ -162,11 +175,12 @@ class TestFullRememberReviewCommitDashboardCycle:
         assert commit["status"] == "success"
 
         dashboard = client.get("/api/v1/dashboard").json()
+        projects = _dashboard_section(dashboard, "work", "project")
 
         # 1. Typed section (project).
-        assert len(dashboard["projects"]) == 1
-        assert dashboard["projects"][0]["canonical_fact"] == commit["canonical_fact"]
-        assert dashboard["projects"][0]["id"] == commit["id"]
+        assert len(projects) == 1
+        assert projects[0]["canonical_fact"] == commit["canonical_fact"]
+        assert projects[0]["id"] == commit["id"]
 
         # 2. Recent memories feed.
         assert [m["id"] for m in dashboard["recent_memories"]] == [commit["id"]]
@@ -174,6 +188,7 @@ class TestFullRememberReviewCommitDashboardCycle:
         # 3. Vault + retrieval stats.
         assert dashboard["vault_stats"]["total_memories"] == 1
         assert dashboard["vault_stats"]["by_type"]["project"] == 1
+        assert dashboard["vault_stats"]["by_domain"]["work"] == 1
         assert dashboard["retrieval_stats"]["vault_memory_count"] == 1
 
         # 4. Concept/ontology stats picked up the proper noun "Haven".
@@ -182,8 +197,8 @@ class TestFullRememberReviewCommitDashboardCycle:
         # 5. Working Context / Resume panel reflects the new memory too.
         assert dashboard["working_contexts"] is not None
         assert any(
-            dashboard["projects"][0]["canonical_fact"] in (ctx["current_focus"] or "")
-            or dashboard["projects"][0]["canonical_fact"] in ctx.get("recent_decisions", [])
+            projects[0]["canonical_fact"] in (ctx["current_focus"] or "")
+            or projects[0]["canonical_fact"] in ctx.get("recent_decisions", [])
             or ctx["memory_count"] > 0
             for ctx in dashboard["working_contexts"]
         )
@@ -252,11 +267,11 @@ class TestReviewEditsReflectInDashboard:
         ).json()
 
         dashboard = client.get("/api/v1/dashboard").json()
-        assert dashboard["projects"][0]["canonical_fact"] == (
+        assert _dashboard_section(dashboard, "work", "project")[0]["canonical_fact"] == (
             "The user uses Notion for project planning."
         )
         # The edit, not the raw extraction, is what got classified/typed.
-        assert dashboard["decisions"] == []
+        assert _dashboard_section(dashboard, "work", "decision") == []
         assert commit["review_summary"] == {"saved": 1, "edited": 1, "added": 0, "removed": 0}
 
     def test_deleted_item_never_appears_anywhere_in_dashboard(
@@ -342,7 +357,8 @@ class TestDirectRememberWithoutReviewAlsoReachesDashboard:
         assert response.status_code == 200
 
         dashboard = client.get("/api/v1/dashboard").json()
-        assert len(dashboard["decisions"]) == 1
-        assert dashboard["decisions"][0]["canonical_fact"] == (
+        decisions = _dashboard_section(dashboard, "work", "decision")
+        assert len(decisions) == 1
+        assert decisions[0]["canonical_fact"] == (
             "The user decided to use SQLite for local storage."
         )
