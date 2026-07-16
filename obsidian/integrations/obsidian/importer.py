@@ -126,6 +126,20 @@ def _first_heading(body: str) -> Optional[str]:
     return None
 
 
+def _resolve_title(relative_path: str, fm_title: Optional[str], body: str) -> str:
+    """Resolve a human-readable title from an already-split note.
+
+    Preference order: frontmatter ``title:`` -> first ``# H1`` heading ->
+    the filename stem. Always returns something non-empty.
+    """
+    if fm_title:
+        return fm_title
+    heading = _first_heading(body)
+    if heading:
+        return heading
+    return Path(relative_path).stem
+
+
 def note_title(relative_path: str, text: str) -> str:
     """Resolve a human-readable title for a note.
 
@@ -133,12 +147,7 @@ def note_title(relative_path: str, text: str) -> str:
     the filename stem. Always returns something non-empty.
     """
     fm_title, body = _split_frontmatter(text)
-    if fm_title:
-        return fm_title
-    heading = _first_heading(body)
-    if heading:
-        return heading
-    return Path(relative_path).stem
+    return _resolve_title(relative_path, fm_title, body)
 
 
 def note_to_turns(relative_path: str, absolute_path: Path) -> List[Tuple[Role, str]]:
@@ -150,8 +159,8 @@ def note_to_turns(relative_path: str, absolute_path: Path) -> List[Tuple[Role, s
     extraction). Reads the file read-only; never writes to it.
     """
     text = Path(absolute_path).read_text(encoding="utf-8")
-    _fm_title, body = _split_frontmatter(text)
-    title = note_title(relative_path, text)
+    fm_title, body = _split_frontmatter(text)
+    title = _resolve_title(relative_path, fm_title, body)
     content = f"{title}\n\n{body}".strip() if body.strip() else title
     return [(Role.USER, content)]
 

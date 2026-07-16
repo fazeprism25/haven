@@ -11,6 +11,13 @@ key and produces real, schema-current `WriteTrace` and
 `ConversationCheckpoint` files: the same artifacts a judge would get by
 actually clicking "Remember" on these conversations themselves.
 
+Both threads below continue the same story as `demo_memories.md` -- Haven's
+own development, told truthfully -- from two contributors' points of view:
+the maintainer running the benchmark/documentation-honesty pass, and a
+teammate handling the Alibaba Cloud deployment. (`demo_conversations_personal.md`
+is the equivalent file for the second, "Personal AI Research" demo Memory
+Space -- see `obsidian/server/demo_seed.py`'s `dataset_for_space`.)
+
 ## Format
 
 Each `##` heading is one fictional person's conversation thread, tagged
@@ -27,79 +34,58 @@ deterministically-extracted fact when it starts with `FACT[id]:` (see
 `fake_llm.py`'s marker syntax); plain turns (e.g. assistant replies) are
 never extracted, exactly like an unremarkable line in a real conversation.
 Each fact's `MemoryType` is inferred from its own wording (see
-`_infer_memory_type` in `seed_demo.py`) -- not declared here -- so keep new
-facts recognizable as a goal/decision/preference/project/task if you want
-them to land in the matching Dashboard category.
+`_MEMORY_TYPE_KEYWORDS`/`infer_memory_type` in `demo_seed.py`) -- not
+declared here -- so keep new facts recognizable as a
+decision/blocker/rule/open-question/goal/preference/project/task if you
+want them to land in the matching Dashboard category.
 
-## Priya, Software Engineer [external_key=priya-standup]
+## Me, Haven's maintainer [external_key=haven-benchmark-honesty]
 
-### Call 1 -- first run: goal, decision, preference, project, task
+### Call 1 -- first run: project, decision, goal, preference, task
 
-- user: FACT[priya-project]: I'm building a billing-service rewrite for our internal platform team.
-- user: FACT[priya-decision]: I decided to use gRPC instead of REST for the new billing-service, since it needs to talk to five other internal services with strict latency budgets.
-- user: FACT[priya-goal]: My goal this quarter is to ship the billing-service rewrite before the Q3 freeze.
-- user: FACT[priya-preference]: I prefer writing integration tests before merging any service-boundary change.
-- user: FACT[priya-task]: I need to set up a staging gRPC endpoint for the billing-service by Friday.
-- assistant: Got it -- I've noted the project, the gRPC decision, this quarter's goal, your testing preference, and the staging task.
+- user: FACT[me-project]: I maintain Haven's benchmark suite, comparing the full pipeline against naive baselines like BM25, Return-All, and Recency.
+- user: FACT[me-decision]: I chose a DeepSeek judge over the local Ollama qwen3:8b judge for the canonical 288-case benchmark pass, since it scores retrieval quality more consistently.
+- user: FACT[me-goal]: My goal this week is to close the CanonicalMatcher SUPERSEDE gap so Haven's pass rate clears the naive baselines on contradiction-heavy categories.
+- user: FACT[me-preference]: I prefer citing the exact result file behind a benchmark claim over a clean-sounding number I can't trace.
+- user: FACT[me-task]: I need to re-run the 288-case benchmark suite before merging any retrieval-affecting change.
+- assistant: Got it -- I've noted the benchmark suite project, the DeepSeek judge decision, this week's SUPERSEDE goal, your citation preference, and the re-run task.
 
 ### Call 2 -- same standup notes reopened unchanged (duplicate)
 
-- user: FACT[priya-project]: I'm building a billing-service rewrite for our internal platform team.
-- user: FACT[priya-decision]: I decided to use gRPC instead of REST for the new billing-service, since it needs to talk to five other internal services with strict latency budgets.
-- user: FACT[priya-goal]: My goal this quarter is to ship the billing-service rewrite before the Q3 freeze.
-- user: FACT[priya-preference]: I prefer writing integration tests before merging any service-boundary change.
-- user: FACT[priya-task]: I need to set up a staging gRPC endpoint for the billing-service by Friday.
-- assistant: Got it -- I've noted the project, the gRPC decision, this quarter's goal, your testing preference, and the staging task.
+- user: FACT[me-project]: I maintain Haven's benchmark suite, comparing the full pipeline against naive baselines like BM25, Return-All, and Recency.
+- user: FACT[me-decision]: I chose a DeepSeek judge over the local Ollama qwen3:8b judge for the canonical 288-case benchmark pass, since it scores retrieval quality more consistently.
+- user: FACT[me-goal]: My goal this week is to close the CanonicalMatcher SUPERSEDE gap so Haven's pass rate clears the naive baselines on contradiction-heavy categories.
+- user: FACT[me-preference]: I prefer citing the exact result file behind a benchmark claim over a clean-sounding number I can't trace.
+- user: FACT[me-task]: I need to re-run the 288-case benchmark suite before merging any retrieval-affecting change.
+- assistant: Got it -- I've noted the benchmark suite project, the DeepSeek judge decision, this week's SUPERSEDE goal, your citation preference, and the re-run task.
 
-### Call 3 -- follow-up: staging endpoint done, new task (incremental)
+### Call 3 -- follow-up: benchmark run finished, new task (incremental)
 
-- user: FACT[priya-project]: I'm building a billing-service rewrite for our internal platform team.
-- user: FACT[priya-decision]: I decided to use gRPC instead of REST for the new billing-service, since it needs to talk to five other internal services with strict latency budgets.
-- user: FACT[priya-goal]: My goal this quarter is to ship the billing-service rewrite before the Q3 freeze.
-- user: FACT[priya-preference]: I prefer writing integration tests before merging any service-boundary change.
-- user: FACT[priya-task]: I need to set up a staging gRPC endpoint for the billing-service by Friday.
-- assistant: Got it -- I've noted the project, the gRPC decision, this quarter's goal, your testing preference, and the staging task.
-- user: FACT[priya-followup]: I finished the staging gRPC endpoint, so my new task is to write a load test for the billing-service before the freeze.
-- assistant: Nice progress -- noted the new load-test task.
+- user: FACT[me-project]: I maintain Haven's benchmark suite, comparing the full pipeline against naive baselines like BM25, Return-All, and Recency.
+- user: FACT[me-decision]: I chose a DeepSeek judge over the local Ollama qwen3:8b judge for the canonical 288-case benchmark pass, since it scores retrieval quality more consistently.
+- user: FACT[me-goal]: My goal this week is to close the CanonicalMatcher SUPERSEDE gap so Haven's pass rate clears the naive baselines on contradiction-heavy categories.
+- user: FACT[me-preference]: I prefer citing the exact result file behind a benchmark claim over a clean-sounding number I can't trace.
+- user: FACT[me-task]: I need to re-run the 288-case benchmark suite before merging any retrieval-affecting change.
+- assistant: Got it -- I've noted the benchmark suite project, the DeepSeek judge decision, this week's SUPERSEDE goal, your citation preference, and the re-run task.
+- user: FACT[me-followup]: I finished the 288-case benchmark run, so my new task is to strip the fabricated benchmark numbers from the README and replace them with the real 240/288 story.
+- assistant: Nice progress -- the documentation-honesty pass is now on my task list too.
 
-## Maya, University Student [external_key=maya-notes]
+## Teammate, handling the Alibaba Cloud deployment [external_key=haven-deployment]
 
-### Call 1 -- first run: goal, decision, preference, project, task
+### Call 1 -- first run: project, decision, preference, task
 
-- user: FACT[maya-project]: I'm working on my senior capstone project, a mobile app that helps students split shared grocery bills.
-- user: FACT[maya-decision]: I decided to use Flutter instead of native Swift and Kotlin for my capstone app, so I only have to maintain one codebase before the demo deadline.
-- user: FACT[maya-goal]: My goal this semester is to finish a working capstone prototype before winter break.
-- user: FACT[maya-preference]: I prefer studying on the campus library's silent floor rather than my dorm room.
-- user: FACT[maya-task]: I need to finish the capstone's payment-splitting algorithm before my advisor meeting next week.
-- assistant: Sounds like a solid plan for the semester.
+- user: FACT[team-project]: I'm working on hardening the Alibaba Cloud deployment's provisioning script for Haven's hackathon demo.
+- user: FACT[team-decision]: I decided to deploy Haven on Alibaba Cloud because the Qwen DashScope integration cuts latency for a same-region deployment.
+- user: FACT[team-preference]: I prefer running a security review before any production deployment goes live, even for a demo.
+- user: FACT[team-task]: I need to finish hardening the Alibaba Cloud provisioning script before the demo link can go live.
+- assistant: Got it -- noted the deployment project, the Alibaba Cloud decision, your pre-deploy review preference, and the hardening task.
 
-### Call 2 -- follow-up: algorithm done, new task (incremental)
+### Call 2 -- follow-up: security review still pending (incremental)
 
-- user: FACT[maya-project]: I'm working on my senior capstone project, a mobile app that helps students split shared grocery bills.
-- user: FACT[maya-decision]: I decided to use Flutter instead of native Swift and Kotlin for my capstone app, so I only have to maintain one codebase before the demo deadline.
-- user: FACT[maya-goal]: My goal this semester is to finish a working capstone prototype before winter break.
-- user: FACT[maya-preference]: I prefer studying on the campus library's silent floor rather than my dorm room.
-- user: FACT[maya-task]: I need to finish the capstone's payment-splitting algorithm before my advisor meeting next week.
-- assistant: Sounds like a solid plan for the semester.
-- user: FACT[maya-followup]: I finished the payment-splitting algorithm, so my new task is to write the advisor meeting slides this weekend.
-- assistant: Great, that should make the meeting go smoothly.
-
-## Jordan, Product Manager [external_key=jordan-planning]
-
-### Call 1 -- first run: goal, decision, preference, project, task
-
-- user: FACT[jordan-project]: I'm leading the roadmap for our team's new analytics dashboard product.
-- user: FACT[jordan-decision]: I decided to prioritize the export-to-CSV feature over new chart types this quarter, since three of our biggest customers asked for it directly.
-- user: FACT[jordan-goal]: My goal this quarter is to ship the export-to-CSV feature and get it in front of our top five customers.
-- user: FACT[jordan-preference]: I prefer running customer interviews before writing any PRD.
-- user: FACT[jordan-task]: I need to schedule interviews with our top five customers before the next planning cycle.
-- assistant: That's a clear set of priorities for the quarter.
-
-### Call 2 -- same planning doc reopened unchanged (duplicate)
-
-- user: FACT[jordan-project]: I'm leading the roadmap for our team's new analytics dashboard product.
-- user: FACT[jordan-decision]: I decided to prioritize the export-to-CSV feature over new chart types this quarter, since three of our biggest customers asked for it directly.
-- user: FACT[jordan-goal]: My goal this quarter is to ship the export-to-CSV feature and get it in front of our top five customers.
-- user: FACT[jordan-preference]: I prefer running customer interviews before writing any PRD.
-- user: FACT[jordan-task]: I need to schedule interviews with our top five customers before the next planning cycle.
-- assistant: That's a clear set of priorities for the quarter.
+- user: FACT[team-project]: I'm working on hardening the Alibaba Cloud deployment's provisioning script for Haven's hackathon demo.
+- user: FACT[team-decision]: I decided to deploy Haven on Alibaba Cloud because the Qwen DashScope integration cuts latency for a same-region deployment.
+- user: FACT[team-preference]: I prefer running a security review before any production deployment goes live, even for a demo.
+- user: FACT[team-task]: I need to finish hardening the Alibaba Cloud provisioning script before the demo link can go live.
+- assistant: Got it -- noted the deployment project, the Alibaba Cloud decision, your pre-deploy review preference, and the hardening task.
+- user: FACT[team-blocker]: The Alibaba Cloud deployment is blocked on a pending security review of the provisioning script before the demo link can go live.
+- assistant: Understood -- flagging that as a blocker until the security review clears.

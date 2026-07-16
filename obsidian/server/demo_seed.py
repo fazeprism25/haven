@@ -22,8 +22,9 @@ from __future__ import annotations
 
 import json
 import re
+from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Dict, List, Optional, Tuple
 
 from obsidian.core.enums import MemoryType
 from obsidian.manager_ai.canonical_matcher import CanonicalMatcher
@@ -42,6 +43,35 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 DEMO_MEMORIES_FILE = REPO_ROOT / "demo" / "demo_memories.md"
 DEMO_CONVERSATIONS_FILE = REPO_ROOT / "demo" / "demo_conversations.md"
 
+# A second bundled dataset for a demo Memory Space named anything containing
+# "personal"/"research" (see dataset_for_space below) -- lets "Import demo
+# data" tell a genuinely different story in a second space instead of
+# duplicating Haven's own, so switching Memory Spaces visibly changes every
+# Dashboard section.
+DEMO_MEMORIES_FILE_PERSONAL = REPO_ROOT / "demo" / "demo_memories_personal.md"
+DEMO_CONVERSATIONS_FILE_PERSONAL = REPO_ROOT / "demo" / "demo_conversations_personal.md"
+
+_PERSONAL_SPACE_KEYWORDS = ("personal", "research")
+
+
+def dataset_for_space(space_name: Optional[str]) -> Tuple[Path, Path]:
+    """Pick which bundled (memories, conversations) file pair to seed for *space_name*.
+
+    Matches "personal"/"research" (case-insensitive) anywhere in the active
+    Memory Space's own name -- e.g. a space named "Personal AI Research" --
+    since that's the only per-space signal ``POST /api/v1/dev/seed_demo``
+    already has on hand (``app.state.active_space_name``, set by
+    ``obsidian.server.main._activate_space``). Any other name, or no name at
+    all (an env-managed deployment with Memory Spaces off), falls back to the
+    default Haven dataset -- the same dataset every existing caller already
+    gets today.
+    """
+    name = (space_name or "").lower()
+    if any(keyword in name for keyword in _PERSONAL_SPACE_KEYWORDS):
+        return DEMO_MEMORIES_FILE_PERSONAL, DEMO_CONVERSATIONS_FILE_PERSONAL
+    return DEMO_MEMORIES_FILE, DEMO_CONVERSATIONS_FILE
+
+
 SECTION_MEMORY_TYPES = {
     "Projects": MemoryType.PROJECT,
     "Decisions": MemoryType.DECISION,
@@ -50,13 +80,54 @@ SECTION_MEMORY_TYPES = {
     "Active Tasks": MemoryType.TASK,
     "Technical Stack": MemoryType.FACT,
     "Future Roadmap": MemoryType.GOAL,
+    "Blockers": MemoryType.BLOCKER,
+    "Open Questions": MemoryType.OPEN_QUESTION,
+    "Rules": MemoryType.RULE,
+    "Implementation State": MemoryType.IMPLEMENTATION_STATE,
+    "Code Areas": MemoryType.CODE_AREA,
+    "People": MemoryType.PERSON,
+    "Events": MemoryType.EVENT,
+    "Skills": MemoryType.SKILL,
+    "Interests": MemoryType.INTEREST,
+    "Traits": MemoryType.TRAIT,
+    "Habits": MemoryType.HABIT,
 }
 
+# Matches an optional "(T-90d)" chronology marker at the start of a bullet --
+# see parse_bulk_memories below. Lets demo/demo_memories.md stagger facts
+# across Haven's real development timeline (idea -> ... -> hackathon
+# submission) instead of every bullet landing at the exact same instant.
+_DAYS_AGO_RE = re.compile(r"^\(T-(?P<days>\d+)d\)\s*(?P<text>.+)$")
 
-def parse_bulk_memories(text: str) -> List[Tuple[MemoryType, str]]:
-    """Parse ``demo/demo_memories.md``'s ``## Section`` + ``- bullet`` format."""
-    memories: List[Tuple[MemoryType, str]] = []
+# Stamped onto every bulk-seeded KnowledgeObject's metadata["classification_reason"]
+# -- the same field the dashboard's "Why?" inspector reads for a memory's
+# provenance (obsidian.server.dashboard.inspect_memory). Bulk facts never go
+# through the real Classifier (see seed_bulk_facts's docstring), so leaving
+# this unset would render an empty classification panel; this is an honest
+# description of that fact, not a fabricated per-fact reasoning trace. The
+# memory's actual retrieval ranking/ontology evidence -- which *is* real,
+# computed live -- is shown separately, in the same modal's Retrieval/
+# Ontology sections.
+_BULK_CLASSIFICATION_REASON = (
+    "Seeded directly via the demo bulk-import path -- no live Classifier call. "
+    "Its memory type comes from this fact's section heading in demo/demo_memories.md. "
+    "The Retrieval and Ontology sections below, however, are computed live against "
+    "this memory right now, exactly like any other memory in the vault."
+)
+
+
+def parse_bulk_memories(text: str) -> List[Tuple[MemoryType, str, Optional[datetime]]]:
+    """Parse ``demo/demo_memories.md``'s ``## Section`` + ``- bullet`` format.
+
+    A bullet may start with a ``(T-90d)`` marker (see ``_DAYS_AGO_RE``) to
+    place it 90 days in the past instead of "now" -- stripped from the
+    returned fact text either way. The third tuple element is that resolved
+    ``valid_from`` (``None`` when no marker is present, meaning "use
+    ``KnowledgeObject``'s own default of now").
+    """
+    memories: List[Tuple[MemoryType, str, Optional[datetime]]] = []
     memory_type = MemoryType.FACT
+    now = datetime.utcnow()
     for line in text.splitlines():
         heading = re.match(r"^##\s+(.+)", line)
         if heading:
@@ -64,21 +135,41 @@ def parse_bulk_memories(text: str) -> List[Tuple[MemoryType, str]]:
             continue
         bullet = re.match(r"^[-*]\s+(.+)", line)
         if bullet:
-            memories.append((memory_type, bullet.group(1).strip()))
+            raw = bullet.group(1).strip()
+            valid_from = None
+            days_ago = _DAYS_AGO_RE.match(raw)
+            if days_ago:
+                valid_from = now - timedelta(days=int(days_ago.group("days")))
+                raw = days_ago.group("text").strip()
+            memories.append((memory_type, raw, valid_from))
     return memories
 
 
-def seed_bulk_facts(vault_writer: VaultWriter, ontology_pipeline: OntologyPipeline) -> int:
-    """Write every ``demo/demo_memories.md`` fact through the write path.
+def seed_bulk_facts(
+    vault_writer: VaultWriter,
+    ontology_pipeline: OntologyPipeline,
+    memories_file: Path = DEMO_MEMORIES_FILE,
+) -> int:
+    """Write every fact in *memories_file* through the write path.
 
     No LLM call, no checkpoints, no write traces -- these facts are
     constructed directly as ``KnowledgeObject``s, exactly like
-    ``HavenAdapter.add()``'s "store verbatim" convention. Returns the
-    number of memories written.
+    ``HavenAdapter.add()``'s "store verbatim" convention. *memories_file*
+    defaults to the primary Haven dataset, so every pre-existing caller
+    (``scripts/seed_demo.py``) is unaffected; ``obsidian.server.main`` passes
+    the space-appropriate file resolved via :func:`dataset_for_space`.
+    Returns the number of memories written.
     """
-    memories = parse_bulk_memories(DEMO_MEMORIES_FILE.read_text(encoding="utf-8"))
-    for memory_type, canonical_fact in memories:
-        knowledge = KnowledgeObject(canonical_fact=canonical_fact, memory_type=memory_type)
+    memories = parse_bulk_memories(memories_file.read_text(encoding="utf-8"))
+    for memory_type, canonical_fact, valid_from in memories:
+        kwargs = {
+            "canonical_fact": canonical_fact,
+            "memory_type": memory_type,
+            "metadata": {"classification_reason": _BULK_CLASSIFICATION_REASON},
+        }
+        if valid_from is not None:
+            kwargs["valid_from"] = valid_from
+        knowledge = KnowledgeObject(**kwargs)
         vault_writer.write(knowledge)
         ontology_pipeline.process(knowledge)
     return len(memories)
@@ -97,6 +188,9 @@ _TURN_RE = re.compile(r"^[-*]\s+(?P<role>\w+):\s*(?P<content>.+)$")
 # more generic one that could also appear in the same sentence.
 _MEMORY_TYPE_KEYWORDS: List[Tuple[MemoryType, Tuple[str, ...]]] = [
     (MemoryType.DECISION, ("i decided", "i chose", "i picked")),
+    (MemoryType.BLOCKER, ("is blocking", "is blocked on", "the blocker is")),
+    (MemoryType.RULE, ("the rule is", "as a rule,")),
+    (MemoryType.OPEN_QUESTION, ("open question is", "still not sure whether", "haven't decided whether")),
     (MemoryType.GOAL, ("my goal", "i'm aiming to")),
     (MemoryType.PREFERENCE, ("i prefer",)),
     (MemoryType.PROJECT, ("i'm building", "i'm working on", "i maintain", "i'm leading")),
