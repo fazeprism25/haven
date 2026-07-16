@@ -1260,6 +1260,7 @@ class MemoryEngine:
             coverage=_coverage_report_trace(coverage_report),
             gap_recovery=_gap_recovery_trace(gap_recovery_decision),
             project_state=_project_state_trace(project_state),
+            rewriting_enabled=self._query_rewriter is not None,
         )
         return context, trace
 

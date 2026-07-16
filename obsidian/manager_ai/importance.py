@@ -11,14 +11,14 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass
-from typing import Any, Dict, Protocol
+from typing import Any, Dict
 
 from obsidian.manager_ai.models import (
     ClassificationResult,
     ExtractedFact,
     ImportanceResult,
 )
-from obsidian.manager_ai.transport_retry import generate_with_transport_retry
+from obsidian.manager_ai.transport_retry import LLMInterface, generate_with_transport_retry
 
 
 class ImportanceScoringError(Exception):
@@ -34,23 +34,6 @@ class ImportanceScoringError(Exception):
     aborts a whole note (see
     :meth:`~obsidian.manager_ai.pipeline.ManagerPipeline.extract_classify_score`).
     """
-
-
-# ---------------------------------------------------------------------------
-# LLM interface (dependency injection)
-# ---------------------------------------------------------------------------
-
-
-class LLMInterface(Protocol):
-    """Minimal interface for the LLM used by the ImportanceScorer.
-
-    The concrete implementation (e.g. Qwen, OpenAI) will be injected
-    at runtime.
-    """
-
-    def generate(self, prompt: str) -> str:
-        """Return the raw text response for *prompt*."""
-        ...
 
 
 # ---------------------------------------------------------------------------

@@ -49,7 +49,13 @@ TRANSPORT_EXCEPTIONS: Tuple[Type[BaseException], ...] = (
 
 
 class LLMInterface(Protocol):
-    """Minimal interface for the LLM passed to :func:`generate_with_transport_retry`."""
+    """Minimal interface for the LLM used by the Manager AI pipeline.
+
+    Shared by every stage (``Extractor``, ``Classifier``,
+    ``ImportanceScorer``) and :func:`generate_with_transport_retry`, all of
+    which only ever need ``generate(prompt) -> str``. The concrete
+    implementation (e.g. Qwen, OpenAI) is injected at runtime.
+    """
 
     def generate(self, prompt: str) -> str:
         """Return the raw text response for *prompt*."""

@@ -1149,6 +1149,43 @@ class TestRetrievalTrace:
         restored = RetrievalTrace.from_dict(data)
         assert restored.project_state is None
 
+    def test_rewriting_enabled_defaults_to_false(self) -> None:
+        # Backward compatibility: a trace built the way it was before this
+        # field existed (no rewriting_enabled kwarg) must still construct.
+        trace = RetrievalTrace(
+            query="q",
+            rewritten_queries=(),
+            candidates=(),
+            pipeline_stats=make_pipeline_stats(),
+        )
+        assert trace.rewriting_enabled is False
+
+    def test_rewriting_enabled_round_trips_through_serialisation(self) -> None:
+        trace = RetrievalTrace(
+            query="q",
+            rewritten_queries=("a rewrite",),
+            candidates=(),
+            pipeline_stats=make_pipeline_stats(),
+            rewriting_enabled=True,
+        )
+        assert trace.to_dict()["rewriting_enabled"] is True
+        restored = RetrievalTrace.from_dict(trace.to_dict())
+        assert restored.rewriting_enabled is True
+
+    def test_missing_rewriting_enabled_key_deserialises_to_false(self) -> None:
+        # Backward compatibility: a RetrievalTrace serialised before this
+        # field existed has no "rewriting_enabled" key at all.
+        stats = make_pipeline_stats()
+        data = {
+            "query": "q",
+            "rewritten_queries": [],
+            "candidates": [],
+            "pipeline_stats": stats.to_dict(),
+            "created_at": datetime.utcnow().isoformat(),
+        }
+        restored = RetrievalTrace.from_dict(data)
+        assert restored.rewriting_enabled is False
+
 
 # ===========================================================================
 # ContextCategoryRequirementTrace

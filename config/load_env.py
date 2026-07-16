@@ -1,4 +1,5 @@
-"""Shared local-config loader for Manager AI and the benchmark judge.
+"""Shared local-config loader for Manager AI, the Query Rewriter, and the
+benchmark judge -- Haven's three independent, Qwen-configured AI call sites.
 
 Real config files (e.g. ``config/manager_ai.env``) are git-ignored -- only
 the ``*.env.example`` templates next to this file are committed. Loading
@@ -25,10 +26,15 @@ def load_env_file(filename: str) -> None:
 
 
 def load_manager_ai_env() -> None:
-    """Load ``config/manager_ai.env`` (see manager_ai.*.env.example)."""
+    """Load ``config/manager_ai.env`` (see manager_ai.env.example)."""
     load_env_file("manager_ai.env")
 
 
+def load_query_rewriter_env() -> None:
+    """Load ``config/query_rewriter.env`` (see query_rewriter.env.example)."""
+    load_env_file("query_rewriter.env")
+
+
 def load_benchmark_judge_env() -> None:
-    """Load ``config/benchmark_judge.env`` (see benchmark_judge.qwen.env.example)."""
+    """Load ``config/benchmark_judge.env`` (see benchmark_judge.env.example)."""
     load_env_file("benchmark_judge.env")

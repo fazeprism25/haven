@@ -1275,6 +1275,50 @@ class TestQueryWithTrace:
 
         assert trace.rewritten_queries == ()
 
+    def test_rewriting_enabled_true_when_rewriter_configured(self, tmp_path: Path) -> None:
+        haven = concept("Haven")
+        ko = make_ko("Haven is a personal second-brain project")
+        att = Attachment.create(ko.id, haven.id)
+        rewriter = _FixedRewriter(rewrites=("second brain",))
+        engine, _ = build_engine(
+            tmp_path, [haven], [ko], attachments=[att], query_rewriter=rewriter
+        )
+
+        _, trace = engine.query_with_trace("Haven")
+
+        assert trace.rewriting_enabled is True
+
+    def test_rewriting_enabled_false_by_default(self, tmp_path: Path) -> None:
+        haven = concept("Haven")
+        ko = make_ko("Haven is a personal second-brain project")
+        att = Attachment.create(ko.id, haven.id)
+        engine, _ = build_engine(tmp_path, [haven], [ko], attachments=[att])
+
+        _, trace = engine.query_with_trace("Haven")
+
+        assert trace.rewriting_enabled is False
+
+    def test_rewriting_enabled_true_even_when_rewriter_fails_open(
+        self, tmp_path: Path
+    ) -> None:
+        # A configured-but-empty-result rewriter (QueryRewriter's own
+        # fail-open contract -- see that module's docstring) is still
+        # "enabled": rewriting_enabled distinguishes "no rewriter
+        # configured" from "configured, found/returned nothing to add",
+        # which rewritten_queries alone cannot (both give ()).
+        haven = concept("Haven")
+        ko = make_ko("Haven is a personal second-brain project")
+        att = Attachment.create(ko.id, haven.id)
+        rewriter = _FixedRewriter(rewrites=())
+        engine, _ = build_engine(
+            tmp_path, [haven], [ko], attachments=[att], query_rewriter=rewriter
+        )
+
+        _, trace = engine.query_with_trace("Haven")
+
+        assert trace.rewriting_enabled is True
+        assert trace.rewritten_queries == ()
+
     def test_pipeline_stats_reflect_the_run(self, tmp_path: Path) -> None:
         haven = concept("Haven")
         ko = make_ko("Haven is a personal second-brain project")

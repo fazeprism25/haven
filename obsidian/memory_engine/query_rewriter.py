@@ -28,9 +28,15 @@ Explicitly out of scope
 * **No benchmark changes.** :mod:`benchmarks.judges.llm_judge` is read-only
   reference for the OpenAI-compatible client pattern; nothing in that
   module is imported or modified.
-* **No MemoryEngine wiring.** :class:`~obsidian.memory_engine.engine.MemoryEngine`
-  does not construct or call this class (yet). Wiring it into the
-  retrieval pipeline is a separate, future change.
+* **No MemoryEngine wiring of its own.** This module never constructs or
+  calls :class:`~obsidian.memory_engine.engine.MemoryEngine` itself --
+  wiring is entirely the caller's responsibility, via
+  :class:`MemoryEngine`'s optional ``query_rewriter`` constructor
+  parameter (see that module's "Optional multi-query expansion"). Haven's
+  server (:mod:`obsidian.server.main`) constructs one shared instance at
+  startup and passes it to every ``MemoryEngine`` it builds only when the
+  "Query Rewriting" dashboard setting is on (off by default) -- see
+  ``GET``/``PUT /api/v1/settings/query-rewriting``.
 
 Fail-open contract
 -------------------
@@ -76,6 +82,10 @@ Design decisions
   ``QUERY_REWRITER_*`` environment variables rather than the judge's
   ``QWEN_*`` ones — this is a production module, not a benchmark tool, and
   should not be coupled to the benchmark harness's configuration surface.
+  Its own local config file (``config/query_rewriter.env``, see
+  :func:`obsidian.manager_ai.llm`'s and
+  :mod:`benchmarks.judges.llm_judge`'s identical ``load_*_env()`` calls) is
+  loaded the same way, independently of the other two.
 * **Cache is per-instance, in-memory, unbounded.** ``QueryRewriter`` is
   expected to be constructed once and reused, analogous to
   :class:`~obsidian.memory_engine.hybrid_candidate_retriever.HybridCandidateRetriever`;
@@ -90,6 +100,8 @@ import os
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple
 
+from config.load_env import load_query_rewriter_env
+
 try:
     from openai import OpenAI
 except ImportError:  # pragma: no cover - exercised only when openai isn't installed
@@ -98,6 +110,8 @@ except ImportError:  # pragma: no cover - exercised only when openai isn't insta
     # missing `openai` package must not break importing this module (and
     # therefore the whole engine/server) for callers who never use it.
     OpenAI = None  # type: ignore[assignment,misc]
+
+load_query_rewriter_env()
 
 DEFAULT_MODEL = "qwen-plus"
 DEFAULT_BASE_URL = "https://dashscope-intl.aliyuncs.com/compatible-mode/v1"

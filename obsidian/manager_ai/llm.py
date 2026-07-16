@@ -1,9 +1,10 @@
 """Concrete ``LLMInterface`` implementation.
 
 Every Manager AI stage (``Extractor``, ``Classifier``, ``ImportanceScorer``)
-depends on its own local ``LLMInterface`` ``Protocol`` (``generate(prompt) -> str``),
-not a concrete provider, so this module supplies exactly one thing: a class
-implementing that protocol. It contains no pipeline logic of its own.
+depends on the shared ``obsidian.manager_ai.transport_retry.LLMInterface``
+``Protocol`` (``generate(prompt) -> str``), not a concrete provider, so this
+module supplies exactly one thing: a class implementing that protocol. It
+contains no pipeline logic of its own.
 
 Mirrors :mod:`obsidian.memory_engine.query_rewriter`'s ``_get_client``/
 ``_resolve_model`` OpenAI-compatible client pattern (env-var-configured API

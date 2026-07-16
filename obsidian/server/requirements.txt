@@ -1,3 +1,11 @@
 fastapi>=0.115
 uvicorn[standard]>=0.30
 python-dotenv>=1.0
+
+# Needed for real Manager AI / Query Rewriter calls (Qwen Cloud, OpenAI-compatible).
+# obsidian/manager_ai/llm.py and obsidian/memory_engine/query_rewriter.py both
+# import this lazily behind a try/except, so the server still boots and serves
+# the demo endpoints without it -- but /api/v1/memory, /memory/preview, and
+# Quick Capture raise a clear RuntimeError instead of doing real extraction
+# until this is installed.
+openai>=1.90.0

@@ -12,13 +12,13 @@ import json
 import logging
 import os
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional, Protocol
+from typing import Any, Dict, List, Optional
 from uuid import UUID
 
 from obsidian.core.errors import ExtractionError
 from obsidian.core.types import Conversation
 from obsidian.manager_ai.models import ExtractedFact
-from obsidian.manager_ai.transport_retry import generate_with_transport_retry
+from obsidian.manager_ai.transport_retry import LLMInterface, generate_with_transport_retry
 from obsidian.ontology.retrieval_models import WorkingContext
 
 logger = logging.getLogger(__name__)
@@ -57,23 +57,6 @@ class ExtractionTrace:
     prompt: str
     raw_response: str
     facts: List[ExtractedFact]
-
-
-# ---------------------------------------------------------------------------
-# LLM interface (dependency injection)
-# ---------------------------------------------------------------------------
-
-
-class LLMInterface(Protocol):
-    """Minimal interface for the LLM used by the Extractor.
-
-    The concrete implementation (e.g. Qwen, OpenAI) will be injected
-    at runtime.
-    """
-
-    def generate(self, prompt: str) -> str:
-        """Return the raw text response for *prompt*."""
-        ...
 
 
 # ---------------------------------------------------------------------------

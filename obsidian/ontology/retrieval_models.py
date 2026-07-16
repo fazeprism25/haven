@@ -1370,6 +1370,19 @@ class RetrievalTrace:
         configured and rewriting succeeded. Empty when no rewriter is
         configured, or when rewriting yielded no alternates (including
         its documented fail-open case).
+    rewriting_enabled : bool
+        Whether a ``QueryRewriter`` was configured on the ``MemoryEngine``
+        for this call (see that class's ``query_rewriter`` constructor
+        parameter) -- ``False`` is Haven's deterministic default. This is
+        the one signal ``rewritten_queries`` alone cannot give: an empty
+        ``rewritten_queries`` means "no alternates" either way, but only
+        when ``rewriting_enabled`` is ``True`` does that mean rewriting was
+        attempted and, per ``QueryRewriter``'s own fail-open contract,
+        legitimately found nothing to add *or* failed open -- the two are
+        indistinguishable by that contract's own design (see
+        :mod:`obsidian.memory_engine.query_rewriter`'s "Fail-open
+        contract"), so retrieval fell back to the original query alone
+        either way, with no error surfaced to the caller.
     candidates : tuple[CandidateTrace, ...]
         One entry per unique memory considered, accepted or rejected,
         ordered by ascending ``final_rank``.
@@ -1427,6 +1440,7 @@ class RetrievalTrace:
     coverage: Optional[CoverageReportTrace] = None
     gap_recovery: Optional[GapRecoveryTrace] = None
     project_state: Optional[ProjectStateTrace] = None
+    rewriting_enabled: bool = False
 
     def __post_init__(self) -> None:
         object.__setattr__(
@@ -1458,6 +1472,7 @@ class RetrievalTrace:
             "project_state": (
                 self.project_state.to_dict() if self.project_state is not None else None
             ),
+            "rewriting_enabled": self.rewriting_enabled,
         }
 
     @classmethod
@@ -1499,6 +1514,7 @@ class RetrievalTrace:
                 if project_state_data is not None
                 else None
             ),
+            rewriting_enabled=bool(data.get("rewriting_enabled", False)),
         )
 
 
@@ -1610,6 +1626,13 @@ class ContextStatus(str, Enum):
 #: reachable only via an explicit ``metadata["role"]`` override (still true
 #: for every other type; the override still wins over this table, see
 #: :func:`resolve_role`).
+#:
+#: ``INTEREST``, ``TRAIT``, and ``HABIT`` (added for the V2 ontology's
+#: "Personal" domain -- see ``obsidian/core/memory_domain.py``) map to
+#: ``REFERENCE``, the same role ``PREFERENCE``/``SKILL``/``PERSON``/
+#: ``EVENT``/``PROJECT`` already resolve to: none of them represent an
+#: actionable decision/goal/task/belief for Working Context purposes, so
+#: they fall into the same "background reference material" bucket.
 _MEMORY_TYPE_ROLE: Dict[MemoryType, "MemoryRole"] = {
     MemoryType.DECISION: MemoryRole.DECISION,
     MemoryType.GOAL: MemoryRole.GOAL,
@@ -1626,6 +1649,9 @@ _MEMORY_TYPE_ROLE: Dict[MemoryType, "MemoryRole"] = {
     MemoryType.IMPLEMENTATION_STATE: MemoryRole.REFERENCE,
     MemoryType.CODE_AREA: MemoryRole.REFERENCE,
     MemoryType.OPEN_QUESTION: MemoryRole.OPEN_QUESTION,
+    MemoryType.INTEREST: MemoryRole.REFERENCE,
+    MemoryType.TRAIT: MemoryRole.REFERENCE,
+    MemoryType.HABIT: MemoryRole.REFERENCE,
 }
 
 #: How many members each list field of :class:`WorkingContextState` keeps.
