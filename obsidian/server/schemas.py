@@ -602,6 +602,15 @@ class ProjectOverview(BaseModel):
     ``gaps`` means this run's reconstruction didn't surface anything for that
     category — not that the vault has no such fact at all (see
     :mod:`obsidian.memory_engine.project_state`'s module docstring).
+
+    ``constraints``/``implementation_state``/``code_areas`` mirror the
+    ``ProjectState`` fields of the same name (``RULE``/``IMPLEMENTATION_STATE``/
+    ``CODE_AREA``-typed candidates respectively) — added alongside
+    ``active_tasks``/``active_blockers``/``open_questions``/``recent_decisions``
+    so every ``PROJECT_STATE_FIELD_NAMES`` category tracked in ``gaps`` also
+    has a corresponding populated list here; previously these three were
+    computed by ``ProjectStateBuilder`` but never surfaced past this schema,
+    so the dashboard had no way to render them even when non-empty.
     """
 
     current_objective: Optional[ProjectStateItem] = None
@@ -611,6 +620,9 @@ class ProjectOverview(BaseModel):
     active_blockers: List[ProjectStateItem] = Field(default_factory=list)
     open_questions: List[ProjectStateItem] = Field(default_factory=list)
     recent_decisions: List[ProjectStateItem] = Field(default_factory=list)
+    constraints: List[ProjectStateItem] = Field(default_factory=list)
+    implementation_state: List[ProjectStateItem] = Field(default_factory=list)
+    code_areas: List[ProjectStateItem] = Field(default_factory=list)
     recommended_next_action: Optional[NextActionSummary] = None
     gaps: List[str] = Field(default_factory=list)
     field_coverage: float = 0.0

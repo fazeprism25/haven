@@ -56,6 +56,7 @@ from fastapi import APIRouter, HTTPException, Query, Request, Response
 from obsidian.core.enums import MemoryDomain, MemoryType
 from obsidian.core.memory_domain import resolve_domain
 from obsidian.manager_ai.models import KnowledgeObject, get_decision_metadata
+from obsidian.memory_engine.acceptance_stage import AcceptanceConfig
 from obsidian.memory_engine.engine import MemoryEngine
 from obsidian.ontology.concept_graph import ConceptGraph
 from obsidian.ontology.concept_parser import ConceptParser
@@ -302,6 +303,74 @@ def _build_engine(request: Request) -> MemoryEngine:
     )
 
 
+# ``AcceptanceStage``'s default thresholds (see that module's own
+# ``AcceptanceConfig``) are tuned for a real, focused, single-topic user
+# query: a handful of candidates should clearly outscore the rest, so a
+# tight relative-floor (0.55) and a low hard cap (8) are the right call
+# there. ``_project_overview``/``_working_context_summaries`` below do not
+# issue that kind of query -- their "digest query" is every vault memory's
+# own ``canonical_fact`` concatenated into one string (hundreds to
+# thousands of words spanning every topic and every ``MemoryType``), used
+# only to fan the pipeline's own ranking/acceptance/allocation out across
+# the *whole* vault rather than to find a few best matches. Against that
+# kind of query, keyword-overlap score is diluted almost uniformly across
+# every candidate, so the default acceptance thresholds -- built for "a few
+# candidates clearly stand out" -- instead keep only a handful of
+# statistical outliers and reject everything else, regardless of category.
+# Confirmed empirically against the seeded demo data (81 memories across 18
+# types): the default config accepted only 3 of 81 candidates, so rarer
+# categories (``BLOCKER``, ``RULE``, ``IMPLEMENTATION_STATE``,
+# ``CODE_AREA``, ``OPEN_QUESTION``, even ``GOAL``) were crowded out
+# entirely -- ``ProjectStateBuilder`` then correctly reported them as
+# ``gaps``, since its input genuinely contained nothing for them (it is not
+# the source of this bug -- see ``obsidian.memory_engine.project_state``).
+#
+# This config trades away Acceptance's "a few best matches" judgment for
+# "keep effectively everything the keyword/ontology layer already thinks is
+# relevant" -- appropriate only for a digest query, never for a real user
+# question: ``relative_floor_ratio=0.0`` and ``min_gap=1.0`` disable stages
+# 3/4 outright (no ``final_score`` gap in ``[0.0, 1.0]`` can ever reach
+# 1.0), ``abstention_score=0.0`` guarantees stage 2 never abstains, and
+# ``acceptance_max_k`` is set well above any realistic demo/personal vault
+# size so stage 5's cap never binds either. The real, still-enforced budget
+# is downstream: ``DeterministicSlotAllocator``'s ``RetrievalConfig.max_results``
+# (untouched here) and ``ProjectStateBuilder``'s own per-category bucketing
+# do the actual selection work from there. Used only by the two digest-query
+# call sites below -- every real single-topic query (``inspect_query``,
+# ``inspect_memory``, ``POST /retrieve_context``, the extension, the
+# benchmarks) keeps the untouched default ``AcceptanceConfig`` via
+# ``_build_engine``, so this introduces zero regression risk to actual
+# retrieval quality.
+_DIGEST_ACCEPTANCE_CONFIG = AcceptanceConfig(
+    abstention_score=0.0,
+    min_gap=1.0,
+    relative_floor_ratio=0.0,
+    acceptance_max_k=500,
+)
+
+
+def _build_digest_engine(request: Request) -> MemoryEngine:
+    """Build a ``MemoryEngine`` for a whole-vault "digest query" call.
+
+    Identical to :func:`_build_engine` (same collaborators, same Query
+    Rewriting behavior) except for ``acceptance_config`` -- see
+    :data:`_DIGEST_ACCEPTANCE_CONFIG`'s docstring for why a digest query
+    needs a different acceptance posture than a real user query. Used by
+    :func:`_project_overview` and :func:`_working_context_summaries` only.
+    """
+    app_state = request.app.state
+    return MemoryEngine(
+        app_state.alias_index,
+        app_state.concept_graph,
+        app_state.memory_store,
+        app_state.retrieval_config,
+        acceptance_config=_DIGEST_ACCEPTANCE_CONFIG,
+        query_rewriter=(
+            app_state.query_rewriter if app_state.query_rewriting_enabled else None
+        ),
+    )
+
+
 def _context_memory_count(context: WorkingContext) -> int:
     """Total memories across every role bucket in *context*."""
     return sum(len(bucket.members) for bucket in context.buckets)
@@ -408,7 +477,7 @@ def _working_context_summaries(
     fail-open contract :mod:`obsidian.memory_engine.query_rewriter` already
     uses for its own best-effort enhancement.
     """
-    engine = _build_engine(request)
+    engine = _build_digest_engine(request)
     if not hasattr(engine, "query_working_context"):
         return None
     try:
@@ -533,7 +602,7 @@ def _project_overview(
     already uses, so a Project Overview problem can never take down the rest
     of the dashboard.
     """
-    engine = _build_engine(request)
+    engine = _build_digest_engine(request)
     try:
         digest_query = " ".join(ko.canonical_fact for ko in memories)
         _, trace = engine.query_with_trace(digest_query)
@@ -555,6 +624,9 @@ def _project_overview(
         active_blockers=[_state_ref_to_item(r) for r in state.blockers],
         open_questions=[_state_ref_to_item(r) for r in state.open_questions],
         recent_decisions=[_state_ref_to_item(r) for r in state.decisions],
+        constraints=[_state_ref_to_item(r) for r in state.constraints],
+        implementation_state=[_state_ref_to_item(r) for r in state.implementation_state],
+        code_areas=[_state_ref_to_item(r) for r in state.code_areas],
         recommended_next_action=_recommended_next_action(state),
         gaps=list(state.gaps),
         field_coverage=state.confidence,

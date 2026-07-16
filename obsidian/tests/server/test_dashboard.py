@@ -935,6 +935,103 @@ class TestProjectOverview:
         assert len(_section(body, "work", "project")) == 1
         assert body["vault_stats"]["total_memories"] == 1
 
+    def test_rule_is_tracked_as_constraint(self, client: TestClient) -> None:
+        _seed(
+            client,
+            canonical_fact="Rule: never bypass the write lock.",
+            memory_type=MemoryType.RULE,
+        )
+
+        overview = client.get("/api/v1/dashboard").json()["project_overview"]
+        assert [c["fact"] for c in overview["constraints"]] == [
+            "Rule: never bypass the write lock."
+        ]
+        assert "constraints" not in overview["gaps"]
+
+    def test_implementation_state_is_tracked(self, client: TestClient) -> None:
+        _seed(
+            client,
+            canonical_fact="The write pipeline is fully wired end to end.",
+            memory_type=MemoryType.IMPLEMENTATION_STATE,
+        )
+
+        overview = client.get("/api/v1/dashboard").json()["project_overview"]
+        assert [i["fact"] for i in overview["implementation_state"]] == [
+            "The write pipeline is fully wired end to end."
+        ]
+        assert "implementation_state" not in overview["gaps"]
+
+    def test_code_area_is_tracked(self, client: TestClient) -> None:
+        _seed(
+            client,
+            canonical_fact="`obsidian/server/dashboard.py` renders the Project Overview.",
+            memory_type=MemoryType.CODE_AREA,
+        )
+
+        overview = client.get("/api/v1/dashboard").json()["project_overview"]
+        assert [a["fact"] for a in overview["code_areas"]] == [
+            "`obsidian/server/dashboard.py` renders the Project Overview."
+        ]
+        assert "code_areas" not in overview["gaps"]
+
+    def test_every_category_survives_a_large_multi_topic_vault(
+        self, client: TestClient
+    ) -> None:
+        """Regression test for the crowding-out bug the digest query used to hit.
+
+        ``_project_overview``/``_working_context_summaries`` build their
+        "digest query" by concatenating every vault memory's own
+        ``canonical_fact`` into one giant string. Against the *default*
+        ``AcceptanceConfig`` (tuned for a real, focused, single-topic user
+        query -- a tight relative-floor and a low hard cap of 8), that
+        diffuse, all-topics query diluted keyword-overlap score almost
+        uniformly across every candidate, so only a handful of statistical
+        outliers survived acceptance regardless of category -- rarer
+        categories (``BLOCKER``, ``RULE``, ``IMPLEMENTATION_STATE``,
+        ``CODE_AREA``, ``OPEN_QUESTION``, even ``GOAL``) were crowded out
+        entirely once the vault held more than a handful of memories. Fixed
+        by giving the digest-query call sites their own, much more
+        permissive ``AcceptanceConfig`` (see
+        ``obsidian.server.dashboard._DIGEST_ACCEPTANCE_CONFIG``) -- this
+        test seeds one memory per ``PROJECT_STATE_FIELD_NAMES`` category
+        plus enough unrelated filler across other ``MemoryType``s to
+        reproduce the dilution, and asserts every category still survives.
+        """
+        one_per_category = [
+            (MemoryType.GOAL, "My goal is to ship a fully populated Project Overview."),
+            (MemoryType.DECISION, "I decided to relax acceptance for digest queries."),
+            (MemoryType.TASK, "I need to add regression coverage for this fix."),
+            (MemoryType.BLOCKER, "The blocker is crowding-out in the acceptance stage."),
+            (MemoryType.RULE, "The rule is: never let a digest query starve a category."),
+            (
+                MemoryType.IMPLEMENTATION_STATE,
+                "The digest-query acceptance override is now wired end to end.",
+            ),
+            (MemoryType.CODE_AREA, "`obsidian/server/dashboard.py` owns Project Overview."),
+            (MemoryType.OPEN_QUESTION, "Open question: should Working Context get this too?"),
+        ]
+        filler = [
+            (MemoryType.FACT, f"Filler fact number {i} about an unrelated topic."
+             ) for i in range(20)
+        ] + [
+            (MemoryType.PREFERENCE, f"Filler preference number {i}.") for i in range(10)
+        ] + [
+            (MemoryType.PROJECT, f"Filler project number {i}.") for i in range(10)
+        ]
+        for memory_type, fact in one_per_category + filler:
+            _seed(client, canonical_fact=fact, memory_type=memory_type)
+
+        overview = client.get("/api/v1/dashboard").json()["project_overview"]
+        assert overview["gaps"] == []
+        assert overview["current_objective"] is not None
+        assert overview["active_tasks"]
+        assert overview["active_blockers"]
+        assert overview["open_questions"]
+        assert overview["recent_decisions"]
+        assert overview["constraints"]
+        assert overview["implementation_state"]
+        assert overview["code_areas"]
+
 
 # ---------------------------------------------------------------------------
 # Dashboard UI (GET /dashboard)

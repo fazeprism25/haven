@@ -1833,6 +1833,18 @@
             <div class="overview-list-header"><span>⚖️ Recent Decisions</span></div>
             <div id="overview-decisions-list"></div>
           </div>
+          <div class="overview-list-card">
+            <div class="overview-list-header"><span>📏 Constraints</span></div>
+            <div id="overview-constraints-list"></div>
+          </div>
+          <div class="overview-list-card">
+            <div class="overview-list-header"><span>🧩 Implementation State</span></div>
+            <div id="overview-implementation-list"></div>
+          </div>
+          <div class="overview-list-card">
+            <div class="overview-list-header"><span>🗂️ Code Areas</span></div>
+            <div id="overview-code-areas-list"></div>
+          </div>
         </div>
 
         <div class="overview-secondary-grid">
@@ -3521,6 +3533,9 @@
       active_blocker: 'A direct, verbatim pointer to a memory tracked as a blocker. Blockers are never AI-synthesized — if nothing is tracked, this list stays empty rather than guessing one.',
       open_question: 'A direct, verbatim pointer to a memory tracked as an open question.',
       recent_decision: "Current vs. superseded is decided purely by each decision's own recorded status — never by AI judgment.",
+      constraint: 'A direct, verbatim pointer to a memory tracked as a rule — Haven treats rules as constraints on the current project.',
+      implementation_state: 'A direct, verbatim pointer to a memory tracked as implementation state.',
+      code_area: 'A direct, verbatim pointer to a memory tracked as a code area.',
     };
 
     const NEXT_ACTION_PRIORITY = [
@@ -3771,6 +3786,9 @@
         ['Blockers', overview.active_blockers.length],
         ['Open questions', overview.open_questions.length],
         ['Decisions tracked', overview.recent_decisions.length],
+        ['Constraints', overview.constraints.length],
+        ['Implementation state', overview.implementation_state.length],
+        ['Code areas', overview.code_areas.length],
       ];
       document.getElementById('overview-progress-row').innerHTML = progressTiles.map(([label, value]) => `
         <div class="overview-progress-tile">
@@ -3787,6 +3805,12 @@
         overviewListHtml(overview.open_questions, 'No open questions tracked yet.', 'open_question');
       document.getElementById('overview-decisions-list').innerHTML =
         overviewListHtml(overview.recent_decisions, 'No decisions tracked yet.', 'recent_decision');
+      document.getElementById('overview-constraints-list').innerHTML =
+        overviewListHtml(overview.constraints, 'No constraints tracked yet.', 'constraint');
+      document.getElementById('overview-implementation-list').innerHTML =
+        overviewListHtml(overview.implementation_state, 'No implementation state tracked yet.', 'implementation_state');
+      document.getElementById('overview-code-areas-list').innerHTML =
+        overviewListHtml(overview.code_areas, 'No code areas tracked yet.', 'code_area');
 
       const activityList = document.getElementById('overview-activity-list');
       const recent = dashboardData.recent_memories ? dashboardData.recent_memories.slice(0, 5) : [];
@@ -3843,12 +3867,18 @@
         const { reason, item } = overview.recommended_next_action;
         const memoryType = { blocker: 'blocker', active_task: 'task', open_question: 'open_question', current_objective: 'goal' }[reason];
         openProjectStateItem(item, memoryType, nextActionReasonHtml(reason));
-      } else if (['active_task', 'active_blocker', 'open_question', 'recent_decision'].includes(field)) {
+      } else if (['active_task', 'active_blocker', 'open_question', 'recent_decision', 'constraint', 'implementation_state', 'code_area'].includes(field)) {
         const listKey = {
           active_task: 'active_tasks', active_blocker: 'active_blockers',
           open_question: 'open_questions', recent_decision: 'recent_decisions',
+          constraint: 'constraints', implementation_state: 'implementation_state',
+          code_area: 'code_areas',
         }[field];
-        const memoryType = { active_task: 'task', active_blocker: 'blocker', open_question: 'open_question', recent_decision: 'decision' }[field];
+        const memoryType = {
+          active_task: 'task', active_blocker: 'blocker', open_question: 'open_question',
+          recent_decision: 'decision', constraint: 'rule',
+          implementation_state: 'implementation_state', code_area: 'code_area',
+        }[field];
         const item = (overview[listKey] || []).find((i) => i.id === el.dataset.itemId);
         if (item) openProjectStateItem(item, memoryType, FIELD_REASONS[field]);
       } else if (field === 'gap') {
