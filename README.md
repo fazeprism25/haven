@@ -287,6 +287,42 @@ Expected state after seeding is documented step-by-step in
 
 ---
 
+## ☁️ Production deployment
+
+Haven's FastAPI server also runs as a live, unmodified deployment on **Alibaba
+Cloud** — the same `uvicorn obsidian.server.main:app` process from Quick Start,
+just fronted by production process management instead of a dev terminal:
+
+| Layer | What it is |
+|---|---|
+| Backend | Alibaba Cloud ECS (Simple Application Server), 1 vCPU / 2 GB, Ubuntu 22.04 |
+| Process manager | systemd (`haven.service`) — single uvicorn worker, no `--reload`, bound to `127.0.0.1:8765` only |
+| Reverse proxy | nginx — the only thing reachable from outside; proxies to the systemd-managed uvicorn process |
+| Access control | HTTP Basic Auth in front of the whole app at the nginx layer (added here, not in `obsidian/server/main.py` — see [why](deploy/alibaba-cloud/README.md#5-why-basic-auth-is-here-even-though-the-app-code-wasnt-touched)), except `GET /api/v1/health`, which stays open |
+| AI provider | Alibaba Cloud DashScope (Qwen Cloud) — the same `DEFAULT_BASE_URL` Manager AI, the Query Rewriter, and the benchmark judge already point at for every LLM call |
+| Documentation | GitHub Pages, from `obsidian/docs/media/haven-article.html` |
+| Repository | GitHub (this repo) |
+
+**Why the docs and the backend live in different places:** GitHub Pages is a
+static site host — it serves the interactive article, nothing that runs
+Python. The backend needs a real process (systemd), a filesystem for the
+Markdown vault, and outbound calls to DashScope, so it runs on an actual VM
+(ECS) instead. Two hosts, two jobs — the docs site never talks to the ECS
+backend, and the ECS backend has no role in serving the docs.
+
+Full provisioning steps, sizing rationale, and update/restart/backup
+procedures: [`deploy/alibaba-cloud/README.md`](deploy/alibaba-cloud/README.md).
+
+**Current state:** plain HTTP on the instance's public IP — no domain or TLS
+is configured yet (`deploy/alibaba-cloud/README.md` §7 covers adding both via
+`certbot` if/when a domain is pointed at the instance).
+
+<!-- TODO: Insert screenshot of the deployed dashboard's login prompt (Basic Auth) on Alibaba Cloud. -->
+<!-- TODO: Insert screenshot of the Alibaba Cloud console showing the running instance. -->
+<!-- TODO: Insert screenshot of the `curl http://<public-ip>/api/v1/health` transcript. -->
+
+---
+
 ## 🧠 How it works
 
 Haven is three pipelines and a surface:
@@ -594,7 +630,9 @@ number, a file in this repo, or a limitation stated here.
 **Current limitations** (from the
 [final report](benchmarks/results/final_report.md), verbatim in spirit):
 
-- Single-user by design, local-only deployment, no authentication
+- Single-user by design, no authentication built into the app itself (the
+  [Alibaba Cloud deployment](deploy/alibaba-cloud/README.md) adds Basic Auth
+  at the nginx layer in front of it, rather than in `obsidian/server/main.py`)
 - Dashboard refreshes on click rather than pushing updates
 - `SUPERSEDE` knowledge decisions are implemented and tested in
   `KnowledgeUpdater` but not yet driven automatically by the production

@@ -78,11 +78,14 @@ source (ChatGPT, Claude, Slack, etc.)" framing is aspirational for
 everything but ChatGPT (live capture) and an Obsidian vault (bulk
 import).
 
-## Server is single-user, localhost-only, unauthenticated
+## Server is single-user, unauthenticated by design
 
-By design (documented in `obsidian/server/README.md`), with no auth layer.
-Fine for a local hackathon demo; would need auth before being exposed
-beyond `127.0.0.1`.
+By design (documented in `obsidian/server/README.md`), the app itself has no
+auth layer — fine for a local hackathon demo running on `127.0.0.1`. The
+[Alibaba Cloud deployment](../../deploy/alibaba-cloud/README.md) exposes it
+beyond localhost, so auth was added — deliberately at the nginx reverse-proxy
+layer (HTTP Basic Auth) rather than inside `obsidian/server/main.py`, keeping
+this exact limitation true of the app code itself.
 
 ## Legacy/dead scaffolding (removed)
 
@@ -117,6 +120,12 @@ someone diffing history):
   to a bare `vault/` directory relative to the current working directory,
   which is how the stray `vault/Alice_works_at_Acme_Corp._00000000.md`
   ended up tracked at the repo root — both are now removed.
+- `obsidian/core/value_objects.py`'s unused `MemoryIdentity`,
+  `TemporalContext`, `MemoryMetadata`, and `Relationship` dataclasses, the
+  `RelationshipType` enum they depended on (`obsidian/core/enums.py`), and
+  `obsidian/core/validation.py` (its `validate_*` helpers had no callers
+  outside the module itself). `value_objects.py`'s `Entity` is kept — it's
+  the real model `core.types.Event.entities` uses.
 - `obsidian/context_manager/` (empty directory), `obsidian/vault/` (empty
   `Beliefs/`, `Decisions/`, ... category folders), and
   `obsidian/templates/` (per-type Markdown templates, all 0 bytes) — the

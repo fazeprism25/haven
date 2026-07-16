@@ -50,6 +50,8 @@ outside the directories above and are **not** part of upstream mem0:
 | `config/` | Haven runtime config (manager AI env templates, memory space selection) |
 | `haven_data/` | Local Haven vault/checkpoint data — gitignored, machine-specific |
 | `demo/` | Scripted demo conversation/memory fixtures used by `scripts/seed_demo.py` and `obsidian/server/demo_seed.py` |
+| `extension/` | Haven's Chrome extension (Manifest V3) — `content/` captures ChatGPT conversations via a site adapter, `popup/` is the settings + search UI, `background.js` proxies requests to `obsidian/server/`, `config.js` holds shared constants/helpers |
+| `docs/architecture/` | Haven-specific design docs and investigation notes (ontology spec, retrieval/ranking decisions, benchmark audits) carved out of the root `docs/` Mintlify tree — not part of the mem0 documentation site |
 
 ### Core Package Dependencies
 

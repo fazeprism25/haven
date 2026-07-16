@@ -467,6 +467,40 @@ dashboard, and the Retrieval Inspector are documented in full in
 (`extension/`) is the primary client: it calls `/retrieve_context` and
 `/memory` from ChatGPT's compose box.
 
+## Deployment architecture
+
+Everything above runs unmodified whether it's started locally via `uvicorn`
+(Quick Start) or as the production deployment on Alibaba Cloud — deployment
+only adds process management and a reverse proxy in front of the same app,
+nothing in `obsidian/` changes:
+
+```
+Browser
+  │
+  ▼
+Alibaba Cloud ECS (Simple Application Server, Ubuntu 22.04)
+  │
+  ▼
+nginx (reverse proxy + HTTP Basic Auth, except GET /api/v1/health)
+  │
+  ▼
+FastAPI (obsidian.server.main:app, under systemd — haven.service, 127.0.0.1:8765 only)
+  │
+  ▼
+Memory Engine / Manager AI / OntologyPipeline
+  │
+  ▼
+Vault (Markdown + YAML on local disk)
+
+LLM calls (Manager AI, Query Rewriter, benchmark judge)
+  │
+  ▼
+Alibaba Cloud DashScope (Qwen Cloud)
+```
+
+Full provisioning steps and rationale:
+[`deploy/alibaba-cloud/README.md`](../../deploy/alibaba-cloud/README.md).
+
 ## Benchmarking
 
 `benchmarks/` at the repo root (a sibling of `obsidian/`, not inside it)

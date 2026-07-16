@@ -52,6 +52,51 @@ started from), created automatically on first run. Override with:
 
 Both are optional; unset means the defaults above are used.
 
+## Configure Manager AI (optional for the demo — needed for real extraction)
+
+`POST /api/v1/dev/seed_demo`'s bulk facts are constructed directly as
+`KnowledgeObject`s (no LLM); its scripted conversations run through the
+real Manager AI pipeline wired to a deterministic, marker-based fake LLM
+(`obsidian/server/demo_seed.py`) — so the demo needs no API key either way.
+`POST /api/v1/memory` always runs the full Manager AI pipeline (see that
+route below), so any real call to it — the browser extension's "Remember",
+`POST /api/v1/memory/preview` (Extractor → Classifier → ImportanceScorer),
+and Quick Capture — needs Manager AI bound to a live provider. Haven is
+standardized on **Qwen Cloud** (Alibaba DashScope, OpenAI-compatible) for
+every AI call site; there is no other supported provider.
+
+```
+cp config/manager_ai.env.example config/manager_ai.env
+# then edit config/manager_ai.env and set MANAGER_AI_API_KEY
+```
+
+`config/manager_ai.env` is git-ignored (machine-specific secrets never get
+committed) and loaded automatically on server startup, filling in whichever
+of `MANAGER_AI_API_KEY` / `MANAGER_AI_BASE_URL` / `MANAGER_AI_MODEL` /
+`MANAGER_AI_TIMEOUT_SECONDS` aren't already set as real OS environment
+variables — an OS-level env var always wins over the file, so this works
+unchanged in CI or a container. Without `MANAGER_AI_API_KEY` set (via
+either method), extraction calls raise a clear error rather than silently
+no-oping.
+
+Two other, unrelated call sites follow the exact same pattern, each with
+its own independent config file and API key — setting one up does not
+enable the others:
+
+- **Benchmark judge** (`benchmarks/judges/llm_judge.py`, scores benchmark
+  runs) — `cp config/benchmark_judge.env.example config/benchmark_judge.env`,
+  set `QWEN_API_KEY`. See `benchmarks/README.md`.
+- **Query Rewriter** (`obsidian/memory_engine/query_rewriter.py`, optional
+  multi-query expansion on the read path) — `cp
+  config/query_rewriter.env.example config/query_rewriter.env`, set
+  `QUERY_REWRITER_API_KEY`. Fails open to "no rewrites" if unset, so this
+  is purely opt-in. A single shared instance is always constructed at
+  server startup, but Haven only ever wires it into a `MemoryEngine` when
+  the dashboard's **Settings → Query Rewriting** switch is set to *On* —
+  off by default, toggleable at runtime with no restart via `GET`/`PUT
+  /api/v1/settings/query-rewriting`. With it off, retrieval is
+  byte-for-byte identical to Haven's deterministic pipeline.
+
 ## Endpoints
 
 All routes are versioned under `/api/v1`.
@@ -208,23 +253,47 @@ Memory Spaces existed.
 
 ### `POST /api/v1/dev/seed_demo`
 
-Imports the bundled demo dataset (`demo/demo_memories.md` +
-`demo/demo_conversations.md`) into the *currently active* vault -- reuses
+Imports a bundled demo dataset into the *currently active* vault -- reuses
 the exact logic `scripts/seed_demo.py` uses (`obsidian.server.demo_seed`),
 needs no API key, and does not clear existing content first (see
-`.../dev/reset_demo` below for that). Response:
+`.../dev/reset_demo` below for that). Which dataset gets seeded depends on
+the active Memory Space's own name (`demo_seed.dataset_for_space`): any
+space named e.g. "Personal AI Research" gets `demo/demo_memories_personal.md`
++ `demo/demo_conversations_personal.md`; every other space gets the primary
+dataset, `demo/demo_memories.md` + `demo/demo_conversations.md` -- Haven's
+own development told truthfully (idea -> deterministic-retrieval
+architecture -> the write/read pipelines -> Query Rewriter -> the 288-case
+benchmark -> Ontology V2 -> the Alibaba Cloud deployment -> hackathon
+submission), covering every one of the 18 `MemoryType`s so every Dashboard
+section -- Project Overview, Browse Memories, Resume Work, the Retrieval
+Inspector -- has real content instead of "Not tracked yet". Response:
 
 ```json
-{ "bulk_facts": 30, "conversation_calls": 7 }
+{ "bulk_facts": 71, "conversation_calls": 5 }
 ```
+
+For the Obsidian Import flow specifically, `demo/sample_obsidian_vault/`
+bundles 5 small, wiki-linked Markdown notes telling this same story (a
+`Haven.md` hub linking out to `Ontology V2.md`, `Query Rewriter.md`,
+`Benchmark Results.md`, and `Alibaba Cloud Deployment.md`) -- point the
+Import flow's folder field at that path to see scan -> review -> commit
+against real, human-authored notes rather than Haven's own generated vault
+files.
 
 ### `POST /api/v1/dev/reset_demo`
 
-Clears the currently active vault's four directories entirely, then
+Atomically clears the currently active vault's four directories, then
 re-imports the demo dataset -- same response shape as `seed_demo` above.
 Only ever touches the directories the server already has on record for
-the active vault, never an arbitrary path. There is no undo; the
-dashboard confirms with the user before calling this.
+the active vault, never an arbitrary path. Clears by renaming each
+directory aside rather than deleting it in place first, so a transient
+Windows file lock (OneDrive syncing, Search indexing, antivirus, or a live
+Obsidian window's own file watcher on a real local vault) can't turn the
+click into a 500 that leaves the vault half-deleted; if reseeding then
+fails, the pre-reset directories are restored from those backups and the
+error is reported rather than swallowed. Beyond that failure-rollback
+window there is no undo; the dashboard confirms with the user before
+calling this.
 
 ### `POST /api/v1/retrieve_context`
 
@@ -254,35 +323,53 @@ change until then.
 
 ### `POST /api/v1/memory`
 
-Request:
+Request (legacy single-fact shape):
 
 ```json
 { "canonical_fact": "I use Terraform for infra.", "memory_type": "fact" }
 ```
 
-`memory_type` is optional and defaults to `"fact"`; it must be one of the
-values in `obsidian.core.enums.MemoryType` (`fact`, `preference`, `belief`,
-`decision`, `goal`, `project`, `person`, `task`, `event`, `skill`, `rule`,
-`blocker`, `implementation_state`, `code_area`, `open_question` — the last
-four exist for a future write path; nothing in the Extractor's prompt asks
-for this content yet).
+Or the full-conversation shape — `conversation`: an ordered list of
+`{"role": "user"|"assistant"|..., "content": "..."}` turns — which takes
+precedence when both are present, so the pipeline sees the whole dialogue
+instead of one synthesized event. Either shape optionally carries
+`external_key`/`source` (opts into conversation-level duplicate
+prevention/incremental ingestion — see below) and `provenance`. See
+`SaveMemoryRequest` in `obsidian/server/schemas.py` for the full field
+list. `memory_type` is accepted for backward compatibility but not read by
+this route — the Classifier assigns its own `MemoryType` to every
+extracted fact regardless of what the caller sends.
 
 Response:
 
 ```json
-{ "id": "…", "canonical_fact": "I use Terraform for infra.", "memory_type": "fact" }
+{ "id": "…", "canonical_fact": "I use Terraform for infra.", "memory_type": "fact", "status": "success", "trace_id": "…" }
 ```
 
-Constructs a `KnowledgeObject` directly from the request — no LLM
-extraction/classification/importance scoring runs here, the same
-"store verbatim" convention `HavenAdapter.add()` and
-`scripts/seed_demo.py` already use — and persists it via the same
-collaborators already held on `app.state`:
+Runs the request through the full Manager AI pipeline —
+**Extractor → Classifier → ImportanceScorer → CanonicalMatcher →
+KnowledgeUpdater** (`app.state.manager_pipeline`, matched against every
+`KnowledgeObject` already in the vault) — the same pipeline
+`POST /api/v1/memory/preview` + `/memory/commit` run in two steps (see
+"Memory Review" below). This always calls out to Manager AI's configured
+LLM provider (see "Configure Manager AI" above); there is no
+LLM-free path through this route. Each resulting `KnowledgeObject` (zero,
+one, or several — the Extractor may decide there's nothing worth
+remembering) is persisted via the same collaborators already held on
+`app.state`:
 
 ```python
 app.state.vault_writer.write(knowledge)
 app.state.ontology_pipeline.process(knowledge)
 ```
+
+`SaveMemoryResponse` only has room for one result, so the first produced
+object's fields are returned when more than one was created. Raises `422`
+if the pipeline extracted nothing worth remembering, or short-circuits
+with `status="duplicate"` (no pipeline run at all) if `external_key` is
+supplied and the transcript exactly matches an already-processed
+checkpoint — see `obsidian.server.main.save_memory`'s own docstring for
+the full conversation-checkpointing / incremental-ingestion contract.
 
 Because `ontology_pipeline.process` mutates the shared, in-process
 `concept_graph` directly, a fact saved this way is immediately reachable
