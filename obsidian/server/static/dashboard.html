@@ -1643,13 +1643,20 @@
     inset: 0;
     z-index: 150;
     background: transparent;
+    /* Non-blocking guided tour, not a modal: this layer exists only as a
+       hook for showing/hiding alongside .tour-bar, so it must never
+       intercept clicks meant for the page underneath. The spotlight dimming
+       comes from .tour-highlight's own box-shadow, which -- being paint,
+       not a layered element -- never captures pointer events either, so
+       the rest of the app (including the highlighted element itself) stays
+       fully interactive while the tour is open. */
+    pointer-events: none;
   }
   .tour-scrim.hidden { display: none; }
   .tour-bar {
     position: fixed;
-    left: 50%;
+    right: 24px;
     bottom: 24px;
-    transform: translateX(-50%);
     z-index: 200;
     width: 420px;
     max-width: calc(100vw - 32px);
