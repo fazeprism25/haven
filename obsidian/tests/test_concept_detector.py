@@ -236,6 +236,53 @@ class TestDetectFromTextFiltering:
 
 
 # ---------------------------------------------------------------------------
+# TestContractionFiltering
+# ---------------------------------------------------------------------------
+#
+# A solo capitalized contraction of a stop word (e.g. "I'm", "It's") is not
+# a concept — the capitalized-span heuristic has no notion of contractions
+# (see the module docstring's "Limitations"), so "I'm building Haven" used
+# to detect a bogus "I'm" concept alongside the real "Haven" one. See
+# obsidian.ontology.text_utils.strip_clitic.
+
+
+class TestContractionFiltering:
+    def test_im_contraction_filtered(self, detector: ConceptDetector) -> None:
+        result = detector.detect_from_text("I'm building Haven, a personal second-brain system.")
+        assert "Haven" in result
+        assert "I'm" not in result
+
+    def test_its_contraction_filtered(self, detector: ConceptDetector) -> None:
+        result = detector.detect_from_text("It's Haven's turn to shine.")
+        assert "It's" not in result
+
+    def test_thats_contraction_filtered(self, detector: ConceptDetector) -> None:
+        result = detector.detect_from_text("That's a good idea about Haven.")
+        assert "That's" not in result
+        assert "Haven" in result
+
+    def test_were_contraction_filtered(self, detector: ConceptDetector) -> None:
+        result = detector.detect_from_text("We're shipping Haven soon.")
+        assert "We're" not in result
+        assert "Haven" in result
+
+    def test_possessive_on_real_concept_not_dropped(
+        self, detector: ConceptDetector
+    ) -> None:
+        # "Haven's" is a possessive on a real entity, not a stop-word
+        # contraction — strip_clitic("Haven's") -> "Haven", which is not in
+        # STOP_WORDS, so the whole token must survive trimming.
+        result = detector.detect_from_text("Haven's retrieval pipeline is deterministic.")
+        assert any(label.startswith("Haven") for label in result)
+
+    def test_odd_apostrophe_name_not_mistaken_for_contraction(
+        self, detector: ConceptDetector
+    ) -> None:
+        result = detector.detect_from_text("O'Brien reviewed the design.")
+        assert "O'Brien" in result
+
+
+# ---------------------------------------------------------------------------
 # TestDetectFromTextDeduplication
 # ---------------------------------------------------------------------------
 
@@ -569,6 +616,18 @@ class TestPrivateHelpers:
 
     def test_trim_preserves_middle(self) -> None:
         assert _trim_stop_words("New York") == "New York"
+
+    def test_trim_im_contraction(self) -> None:
+        assert _trim_stop_words("I'm") == ""
+
+    def test_trim_its_contraction(self) -> None:
+        assert _trim_stop_words("It's") == ""
+
+    def test_trim_possessive_on_real_name_preserved(self) -> None:
+        assert _trim_stop_words("Haven's") == "Haven's"
+
+    def test_trim_odd_apostrophe_name_preserved(self) -> None:
+        assert _trim_stop_words("O'Brien") == "O'Brien"
 
     # _is_valid_label
 

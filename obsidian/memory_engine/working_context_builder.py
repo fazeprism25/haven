@@ -103,6 +103,29 @@ _GENERAL_KEY = "ctx:general"
 _GENERAL_TITLE = "General"
 
 
+def primary_concept_id(ranked: RankedCandidate) -> Optional[UUID]:
+    """Return *ranked*'s highest-activation supporting concept id, if any.
+
+    This is the same "which concept does this candidate anchor to" rule
+    :meth:`WorkingContextBuilder.build` uses to group candidates into
+    contexts (see "Grouping rule" above), promoted to a module-level
+    function so other callers that need to reason about topic grouping
+    *before* :class:`WorkingContext` objects exist — e.g.
+    :class:`~obsidian.memory_engine.engine.MemoryEngine`'s per-topic
+    acceptance grouping — can reuse the exact same rule instead of
+    re-deriving it. Ties broken by ascending ``str(concept_id)`` so the
+    choice never depends on ``supporting_concepts`` insertion order.
+    """
+    supporting_concepts = ranked.candidate.supporting_concepts
+    if not supporting_concepts:
+        return None
+
+    def key(activated: ActivatedConcept) -> tuple:
+        return (-activated.activation_score, str(activated.concept_id))
+
+    return min(supporting_concepts, key=key).concept_id
+
+
 class WorkingContextBuilder:
     """Groups ranked candidates into one or more Working Contexts.
 
@@ -143,7 +166,7 @@ class WorkingContextBuilder:
         grouped: Dict[UUID, List[RankedCandidate]] = {}
         general: List[RankedCandidate] = []
         for ranked in ordered:
-            anchor = self._primary_concept_id(ranked)
+            anchor = primary_concept_id(ranked)
             if anchor is None:
                 general.append(ranked)
             else:
@@ -172,22 +195,6 @@ class WorkingContextBuilder:
             )
 
         return contexts
-
-    @staticmethod
-    def _primary_concept_id(ranked: RankedCandidate) -> Optional[UUID]:
-        """Return the highest-activation supporting concept id, if any.
-
-        Ties broken by ascending ``str(concept_id)`` so the choice never
-        depends on ``supporting_concepts`` insertion order.
-        """
-        supporting_concepts = ranked.candidate.supporting_concepts
-        if not supporting_concepts:
-            return None
-
-        def key(activated: ActivatedConcept) -> tuple:
-            return (-activated.activation_score, str(activated.concept_id))
-
-        return min(supporting_concepts, key=key).concept_id
 
     @staticmethod
     def _build_context(

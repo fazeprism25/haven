@@ -351,7 +351,10 @@ from obsidian.memory_engine.memory_store import MemoryStore
 from obsidian.memory_engine.project_state import ProjectState, ProjectStateBuilder
 from obsidian.memory_engine.query_rewriter import QueryRewriter
 from obsidian.memory_engine.structured_prompt_builder import StructuredPromptBuilder
-from obsidian.memory_engine.working_context_builder import WorkingContextBuilder
+from obsidian.memory_engine.working_context_builder import (
+    WorkingContextBuilder,
+    primary_concept_id,
+)
 from obsidian.ontology.alias_index import AliasIndex
 from obsidian.ontology.concept_graph import ConceptGraph
 from obsidian.ontology.retrieval_config import RetrievalConfig
@@ -814,7 +817,12 @@ class MemoryEngine:
         also needs the intermediate ``AcceptanceDecision`` list (to build
         each :class:`~obsidian.ontology.retrieval_models.CandidateTrace`),
         which this helper discards -- reusing it there would mean calling
-        :class:`AcceptanceStage` twice for one request.
+        :class:`AcceptanceStage` twice for one request. This is also the one
+        acceptance call site that runs topic-diversified (see
+        :meth:`_accept_by_topic`) rather than global acceptance --
+        :meth:`query_with_trace`'s own inline call is untouched and stays
+        global, since a single pointed question has exactly one topic to
+        answer and diversifying across topics would be meaningless there.
 
         Category-fallback retrieval (see
         ``docs/architecture/GENERIC_CONTINUATION_QUERY_ANALYSIS.md`` §4/§5
@@ -855,10 +863,7 @@ class MemoryEngine:
             The allocated candidates, as returned by
             :meth:`DeterministicSlotAllocator.allocate`.
         """
-        decisions = self._acceptance_stage.accept(
-            ranked_all, self._config, self._acceptance_config
-        )
-        accepted_candidates = [d.candidate for d in decisions if d.accepted]
+        accepted_candidates = self._accept_by_topic(ranked_all)
 
         if (
             not accepted_candidates
@@ -869,14 +874,110 @@ class MemoryEngine:
                 context_plan, ranked_all, now
             )
             if fallback_ranked:
-                fallback_decisions = self._acceptance_stage.accept(
-                    fallback_ranked, self._config, self._acceptance_config
-                )
-                accepted_candidates = [
-                    d.candidate for d in fallback_decisions if d.accepted
-                ]
+                accepted_candidates = self._accept_by_topic(fallback_ranked)
 
         return self._slot_allocator.allocate(accepted_candidates, self._config)
+
+    def _accept_by_topic(
+        self, ranked_all: List[RankedCandidate]
+    ) -> List[RankedCandidate]:
+        """Run :class:`AcceptanceStage` once per topic group, instead of once globally.
+
+        Root cause this addresses
+        --------------------------
+        :class:`AcceptanceStage`'s relative-quality floor (stage 4) and hard
+        cap (stage 5) are both anchored to a *single* top score across
+        whatever candidate list they are handed (see that module's
+        docstring). For a genuinely single-topic query that is exactly the
+        right behaviour. But :meth:`query_working_context`/
+        :meth:`query_structured` exist specifically to reconstruct a
+        *multi-topic* working context (project state, architecture
+        decisions, benchmarks, roadmap, blockers -- see
+        ``docs/architecture/PROJECT_STATE_WORKING_CONTEXT_INTEGRATION.md``),
+        and :class:`~obsidian.memory_engine.working_context_builder.WorkingContextBuilder`
+        already groups the allocated candidates by topic (primary concept)
+        for exactly that reason. Running one global acceptance pass
+        *before* that grouping means whichever single topic happens to
+        score highest overall (typically the most recent/most
+        lexically-matched one) sets the top score every other topic's
+        candidates get compared against -- a topic that is itself
+        internally coherent and well-supported can still be floor-cut or
+        cap-excluded wholesale, purely because a *different* topic scored
+        higher on this particular query. This was measured directly: a
+        broad "catch me up" query against a multi-topic vault returned
+        candidates from only one or two topics, even when the query
+        explicitly mentioned keywords for several others.
+
+        Why this fix, not a bigger cap or a permissive floor
+        ------------------------------------------------------
+        Simply raising ``acceptance_max_k`` or loosening
+        ``relative_floor_ratio`` (the same lever the dashboard's digest
+        engine uses for its own different problem -- see
+        ``obsidian/server/dashboard.py``'s ``_DIGEST_ACCEPTANCE_CONFIG``)
+        would let low-relevance candidates through *within* whichever topic
+        already dominates, without doing anything to surface the topics
+        that are currently being crowded out entirely. The digest engine's
+        problem is genuinely different: its query is the concatenation of
+        every memory in the vault, so "let almost everything through" is
+        the correct policy for that all-inclusive input. A real, specific
+        "catch me up" query is not all-inclusive text -- it is one query
+        that happens to span several coherent topics, so the right fix is
+        to evaluate each topic on its own terms (its own top score, its own
+        relative floor, its own cap), not to weaken the floor/cap globally.
+
+        Mechanism
+        ---------
+        Groups *ranked_all* by :func:`~obsidian.memory_engine.working_context_builder.primary_concept_id`
+        -- the exact same anchor-concept rule
+        :class:`~obsidian.memory_engine.working_context_builder.WorkingContextBuilder`
+        uses downstream to build :class:`~obsidian.ontology.retrieval_models.WorkingContext`
+        objects, so a candidate is scored against the same peers it will
+        later be *grouped* with, not an unrelated global pool. Every
+        zero-evidence candidate (no supporting concepts) shares one
+        ``None`` group, mirroring :class:`WorkingContextBuilder`'s own
+        ``GENERAL`` bucket. :class:`AcceptanceStage` itself runs completely
+        unmodified, once per group, with the exact same
+        :class:`~obsidian.memory_engine.acceptance_stage.AcceptanceConfig`
+        thresholds used everywhere else in the pipeline -- no new constant,
+        no new threshold, no change to what "good enough" means within a
+        topic. :class:`~obsidian.memory_engine.deterministic_slot_allocator.DeterministicSlotAllocator`
+        (unchanged, downstream) still applies ``RetrievalConfig.max_results``
+        as an overall ceiling across every group's survivors combined, so a
+        vault with many small topics still cannot flood the final context.
+
+        Scope
+        -----
+        Only :meth:`_accept_and_allocate` calls this -- i.e. only
+        :meth:`_allocate` (:meth:`query_working_context`) and
+        :meth:`query_structured`. :meth:`query`/:meth:`query_with_trace`
+        keep their own inline, global :class:`AcceptanceStage` call
+        untouched, so the Retrieval Inspector, benchmarks, and every other
+        single-topic consumer of this engine see byte-identical behaviour
+        to before this method existed.
+
+        Parameters
+        ----------
+        ranked_all : list[RankedCandidate]
+            Every scored candidate for this query, in any order.
+
+        Returns
+        -------
+        list[RankedCandidate]
+            The union of every topic group's accepted candidates. Order is
+            not meaningful -- both :class:`DeterministicSlotAllocator` and
+            :class:`WorkingContextBuilder` re-sort their input themselves.
+        """
+        groups: Dict[Optional[UUID], List[RankedCandidate]] = {}
+        for ranked in ranked_all:
+            groups.setdefault(primary_concept_id(ranked), []).append(ranked)
+
+        accepted: List[RankedCandidate] = []
+        for anchor in sorted(groups, key=lambda a: (a is None, str(a))):
+            decisions = self._acceptance_stage.accept(
+                groups[anchor], self._config, self._acceptance_config
+            )
+            accepted.extend(d.candidate for d in decisions if d.accepted)
+        return accepted
 
     #: Bound on how many fallback candidates :meth:`_category_fallback_candidates`
     #: contributes per requested category, before those candidates are even

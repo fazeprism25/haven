@@ -79,7 +79,7 @@ import re
 from typing import List, Set
 
 from obsidian.manager_ai.models import KnowledgeObject
-from obsidian.ontology.text_utils import STOP_WORDS, normalize
+from obsidian.ontology.text_utils import STOP_WORDS, normalize, strip_clitic
 
 
 # ---------------------------------------------------------------------------
@@ -212,6 +212,21 @@ def _extract_capitalized_spans(text: str) -> List[str]:
     return spans
 
 
+def _is_stop_word_token(word: str) -> bool:
+    """Return ``True`` if *word* is a stop word, contraction included.
+
+    A plain stop word (``"the"``, ``"I"``) matches directly via
+    :func:`normalize`. A contraction whose clitic-stripped form is a stop
+    word (``"I'm"`` -> ``"I"``, ``"It's"`` -> ``"It"``) also counts — the
+    whole token is dropped rather than reduced to its stripped form, since
+    a bare pronoun/auxiliary contraction is never itself a concept name.
+    A possessive on a real proper noun (``"Haven's"`` -> ``"Haven"``) does
+    *not* match, since ``"haven"`` is not in :data:`STOP_WORDS`, so it is
+    correctly left alone by this check.
+    """
+    return normalize(word) in STOP_WORDS or normalize(strip_clitic(word)) in STOP_WORDS
+
+
 def _trim_stop_words(label: str) -> str:
     """Remove leading and trailing stop-word tokens from *label*.
 
@@ -219,6 +234,12 @@ def _trim_stop_words(label: str) -> str:
     they may be part of a multi-word proper noun (e.g. ``"Tower of London"``
     would never be a span — ``"of"`` is lowercase and breaks the run —
     but defensive trimming protects against edge cases in unusual text).
+
+    A token is also trimmed when it is a contraction of a stop word (e.g.
+    ``"I'm"``, ``"It's"``, ``"That's"``) — see :func:`_is_stop_word_token`
+    — so a sentence like ``"I'm building Haven"`` does not detect a bogus
+    ``"I'm"`` concept purely because the capitalized-span heuristic (see
+    the module docstring's "Limitations") has no notion of contractions.
 
     Parameters
     ----------
@@ -237,15 +258,19 @@ def _trim_stop_words(label: str) -> str:
     'Memory Engine'
     >>> _trim_stop_words("I")
     ''
+    >>> _trim_stop_words("I'm")
+    ''
+    >>> _trim_stop_words("Haven's")
+    "Haven's"
     >>> _trim_stop_words("Haven")
     'Haven'
     """
     words = label.split()
 
-    while words and normalize(words[0]) in STOP_WORDS:
+    while words and _is_stop_word_token(words[0]):
         words = words[1:]
 
-    while words and normalize(words[-1]) in STOP_WORDS:
+    while words and _is_stop_word_token(words[-1]):
         words = words[:-1]
 
     return " ".join(words)

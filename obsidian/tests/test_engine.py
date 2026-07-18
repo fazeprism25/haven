@@ -1540,6 +1540,185 @@ class TestWorkingContextQueries:
 
 
 # ---------------------------------------------------------------------------
+# TestTopicDiversifiedAcceptance
+# ---------------------------------------------------------------------------
+
+
+class TestTopicDiversifiedAcceptance:
+    """query_working_context/query_structured accept per topic, not globally.
+
+    See :meth:`MemoryEngine._accept_by_topic`'s docstring for the root
+    cause and design rationale (measured on the real hackathon demo
+    dataset: a broad "catch me up" query surfaced only one or two of the
+    vault's several active topics). These tests build a scenario where one
+    concept's candidate scores far higher than two others' -- exactly the
+    shape that made the old, single global :class:`AcceptanceStage.accept`
+    call's relative-quality floor reject the low scorers wholesale, purely
+    because a *different* topic happened to score higher on this query.
+    """
+
+    def _build_three_topic_engine(
+        self,
+        tmp_path: Path,
+        config: Optional[RetrievalConfig] = None,
+    ) -> Tuple[MemoryEngine, KnowledgeObject, KnowledgeObject, KnowledgeObject]:
+        dominant = concept("Dominant")
+        alpha = concept("Alpha")
+        beta = concept("Beta")
+        ko_dominant = make_ko(
+            "Dominant fact about the Dominant topic",
+            importance=0.95,
+            confidence=0.95,
+            confirmation_count=5,
+        )
+        ko_alpha = make_ko(
+            "Alpha fact about the Alpha topic", importance=0.1, confidence=0.1
+        )
+        ko_beta = make_ko(
+            "Beta fact about the Beta topic", importance=0.1, confidence=0.1
+        )
+        attachments = [
+            Attachment.create(ko_dominant.id, dominant.id),
+            Attachment.create(ko_alpha.id, alpha.id),
+            Attachment.create(ko_beta.id, beta.id),
+        ]
+        engine, _ = build_engine(
+            tmp_path,
+            [dominant, alpha, beta],
+            [ko_dominant, ko_alpha, ko_beta],
+            attachments=attachments,
+            config=config,
+        )
+        return engine, ko_dominant, ko_alpha, ko_beta
+
+    def test_scenario_actually_exercises_the_relative_floor_cut(
+        self, tmp_path: Path
+    ) -> None:
+        """Confirms this fixture reproduces the failure mode being fixed.
+
+        Global :class:`AcceptanceStage.accept` over the same ranked pool
+        (bypassing :class:`MemoryEngine` entirely) keeps only the dominant
+        topic -- the exact behaviour the tests below prove
+        :meth:`MemoryEngine.query_working_context` no longer has. Without
+        this check, a future change to the ranking formula could silently
+        make this fixture stop exercising the relative floor at all.
+        """
+        from obsidian.memory_engine.acceptance_stage import AcceptanceStage
+
+        engine, ko_dominant, ko_alpha, ko_beta = self._build_three_topic_engine(
+            tmp_path
+        )
+
+        prefix = engine._run_retrieval("Tell me about Dominant, Alpha, and Beta")
+        decisions = AcceptanceStage().accept(
+            prefix.ranked_all, RetrievalConfig(), AcceptanceConfig()
+        )
+        accepted_facts = {
+            d.candidate.candidate.knowledge_object.canonical_fact
+            for d in decisions
+            if d.accepted
+        }
+
+        assert ko_dominant.canonical_fact in accepted_facts
+        assert ko_alpha.canonical_fact not in accepted_facts
+        assert ko_beta.canonical_fact not in accepted_facts
+
+    def test_working_context_represents_every_topic(self, tmp_path: Path) -> None:
+        engine, ko_dominant, ko_alpha, ko_beta = self._build_three_topic_engine(
+            tmp_path
+        )
+
+        contexts = engine.query_working_context(
+            "Tell me about Dominant, Alpha, and Beta"
+        )
+
+        facts = {
+            ranked.candidate.knowledge_object.canonical_fact
+            for context in contexts
+            for bucket in context.buckets
+            for ranked in bucket.members
+        }
+        assert ko_dominant.canonical_fact in facts
+        assert ko_alpha.canonical_fact in facts
+        assert ko_beta.canonical_fact in facts
+        assert len(contexts) >= 3
+
+    def test_structured_prompt_represents_every_topic(self, tmp_path: Path) -> None:
+        engine, ko_dominant, ko_alpha, ko_beta = self._build_three_topic_engine(
+            tmp_path
+        )
+
+        result = engine.query_structured("Tell me about Dominant, Alpha, and Beta")
+
+        assert ko_dominant.canonical_fact in result
+        assert ko_alpha.canonical_fact in result
+        assert ko_beta.canonical_fact in result
+
+    def test_pointed_query_and_query_with_trace_unaffected(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """query()/query_with_trace() keep their global, single-topic behaviour.
+
+        Only :meth:`MemoryEngine._allocate` (:meth:`query_working_context`)
+        and :meth:`query_structured` diversify by topic -- a pointed
+        question still gets the single best-matching topic's answer,
+        exactly as before this change.
+        """
+        engine, ko_dominant, ko_alpha, _ = self._build_three_topic_engine(tmp_path)
+
+        monkeypatch.setattr(engine_module, "datetime", _FrozenDatetime)
+
+        result = engine.query("Tell me about Dominant, Alpha, and Beta")
+        _, trace = engine.query_with_trace("Tell me about Dominant, Alpha, and Beta")
+
+        assert ko_dominant.canonical_fact in result
+        assert ko_alpha.canonical_fact not in result
+        assert trace.pipeline_stats.total_accepted_candidates == 1
+
+    def test_overall_slot_budget_still_caps_total_output(
+        self, tmp_path: Path
+    ) -> None:
+        """RetrievalConfig.max_results remains the overall ceiling.
+
+        Per-topic acceptance can only make more topics *eligible*; the
+        existing, unmodified :class:`DeterministicSlotAllocator` downstream
+        still enforces one overall cap across every topic's survivors
+        combined, so a vault with many small topics cannot flood the
+        rendered context.
+        """
+        engine, ko_dominant, ko_alpha, ko_beta = self._build_three_topic_engine(
+            tmp_path, config=RetrievalConfig(max_results=2)
+        )
+
+        contexts = engine.query_working_context(
+            "Tell me about Dominant, Alpha, and Beta"
+        )
+
+        facts = {
+            ranked.candidate.knowledge_object.canonical_fact
+            for context in contexts
+            for bucket in context.buckets
+            for ranked in bucket.members
+        }
+        assert len(facts) == 2
+        assert ko_dominant.canonical_fact in facts
+
+    def test_deterministic_repeated_calls(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        engine, _, _, _ = self._build_three_topic_engine(tmp_path)
+
+        monkeypatch.setattr(engine_module, "datetime", _FrozenDatetime)
+
+        first = engine.query_working_context("Tell me about Dominant, Alpha, and Beta")
+        for _ in range(5):
+            assert (
+                engine.query_working_context("Tell me about Dominant, Alpha, and Beta")
+                == first
+            )
+
+
+# ---------------------------------------------------------------------------
 # TestStructuredQueries
 # ---------------------------------------------------------------------------
 

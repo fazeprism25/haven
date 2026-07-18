@@ -132,6 +132,48 @@ _TOKEN_RE: re.Pattern[str] = re.compile(r"[a-z0-9]+")
 
 
 # ---------------------------------------------------------------------------
+# Clitic handling
+# ---------------------------------------------------------------------------
+
+CLITIC_SUFFIXES: FrozenSet[str] = frozenset({"s", "t", "m", "re", "ve", "ll", "d"})
+"""English contraction/possessive suffixes, e.g. the ``"m"`` in ``"I'm"``.
+
+Content-identical duplicate of
+``obsidian.memory_engine.keyword_candidate_retriever``'s own
+``_CLITIC_SUFFIXES`` — that module deliberately duplicates rather than
+imports this package's tokeniser (see its own "Design decisions" for why:
+its hard architectural boundary is "no ontology imports"). This module is
+the ontology-side twin of that same fix, used by
+:mod:`~obsidian.ontology.concept_detector` instead, which already lives in
+this package and already imports :data:`STOP_WORDS` from here.
+"""
+
+
+def strip_clitic(token: str) -> str:
+    """Drop a trailing English contraction/possessive clitic from *token*.
+
+    ``"I'm"`` -> ``"I"``, ``"Haven's"`` -> ``"Haven"``, ``"don't"`` ->
+    ``"don"``. Returns *token* unchanged if it has no apostrophe, or if the
+    text after its apostrophe is not in :data:`CLITIC_SUFFIXES` (e.g.
+    ``"O'Brien"``, left intact). Pure function: same input always yields
+    the same output.
+
+    Examples
+    --------
+    >>> strip_clitic("I'm")
+    'I'
+    >>> strip_clitic("Haven's")
+    'Haven'
+    >>> strip_clitic("O'Brien")
+    "O'Brien"
+    """
+    base, separator, suffix = token.partition("'")
+    if separator and suffix.lower() in CLITIC_SUFFIXES:
+        return base
+    return token
+
+
+# ---------------------------------------------------------------------------
 # Public API
 # ---------------------------------------------------------------------------
 
