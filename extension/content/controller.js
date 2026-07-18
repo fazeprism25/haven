@@ -221,6 +221,16 @@
     return !response.ok && response.status === undefined;
   }
 
+  // A slow-but-alive server (e.g. /memory/preview's multi-call LLM chain
+  // outrunning REQUEST_TIMEOUT_MS) is also a connectivity failure by the
+  // check above -- background.js's fetch() never got a response either.
+  // This distinguishes that case (flagged via `timeout`, set on the
+  // AbortError branch of background.js's catch) so callers can say "still
+  // working, try again" instead of the misleading "server is offline".
+  function isTimeoutFailure(response) {
+    return !response.ok && response.timeout === true;
+  }
+
   async function refreshHealth() {
     setStatus("loading");
     const response = await HavenClient.checkHealth();
@@ -892,7 +902,12 @@
       // Graceful fallback: the exact pre-existing flow, untouched, for when
       // Working Context APIs are unavailable.
       if (!legacy.ok) {
-        if (isConnectivityFailure(legacy)) {
+        if (isTimeoutFailure(legacy)) {
+          setStatus("error");
+          showError(
+            "Haven is taking longer than expected to process this conversation. Please wait a moment and try again."
+          );
+        } else if (isConnectivityFailure(legacy)) {
           setStatus("offline");
           showError("Haven server is offline.");
         } else {
@@ -975,7 +990,12 @@
     setRememberLoading(false);
 
     if (!preview.ok) {
-      if (isConnectivityFailure(preview)) {
+      if (isTimeoutFailure(preview)) {
+        setStatus("error");
+        showError(
+          "Haven is taking longer than expected to process this conversation. Please wait a moment and try again."
+        );
+      } else if (isConnectivityFailure(preview)) {
         setStatus("offline");
         showError("Haven server is offline.");
       } else {
@@ -1012,7 +1032,12 @@
     setRememberLoading(false);
 
     if (!response.ok) {
-      if (isConnectivityFailure(response)) {
+      if (isTimeoutFailure(response)) {
+        setStatus("error");
+        showError(
+          "Haven is taking longer than expected to process this conversation. Please wait a moment and try again."
+        );
+      } else if (isConnectivityFailure(response)) {
         setStatus("offline");
         showError("Haven server is offline.");
       } else {

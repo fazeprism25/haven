@@ -90,3 +90,52 @@ test("regression: an exception before fetch (e.g. chrome.storage rejecting while
 
   storageGetImpl = async () => ({});
 });
+
+test("a request that aborts on the REQUEST_TIMEOUT_MS deadline is tagged `timeout: true`, distinct from a genuine network failure", async () => {
+  // Reproduces the real pre-hackathon bug: /memory/preview's multi-call LLM
+  // chain can outrun the timeout on a slow-but-alive server. Both this and
+  // an actually-unreachable server produce `status: undefined`, so
+  // content/controller.js needs a separate signal (this `timeout` flag) to
+  // avoid telling the user "Haven server is offline" when it's really just
+  // still working -- see controller.js's isTimeoutFailure().
+  const originalFetch = globalThis.fetch;
+  // Simulates the effect of AbortController.abort() firing (what actually
+  // happens once REQUEST_TIMEOUT_MS elapses) without waiting on a real
+  // 60-second timer in this test.
+  globalThis.fetch = async () => {
+    const error = new Error("The operation was aborted.");
+    error.name = "AbortError";
+    throw error;
+  };
+
+  const responses = [];
+  registeredListener(
+    { type: "HAVEN_MEMORY_PREVIEW", payload: { canonical_fact: "test" } },
+    {},
+    (response) => responses.push(response)
+  );
+  await new Promise((resolve) => setTimeout(resolve, 0));
+
+  assert.equal(responses[0].ok, false);
+  assert.equal(responses[0].timeout, true);
+  assert.equal(responses[0].status, undefined);
+
+  globalThis.fetch = originalFetch;
+});
+
+test("a genuine network failure (e.g. connection refused) is not tagged `timeout`", async () => {
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async () => {
+    throw new Error("Failed to fetch");
+  };
+
+  const responses = [];
+  registeredListener({ type: "HAVEN_HEALTH_CHECK" }, {}, (response) => responses.push(response));
+  await new Promise((resolve) => setTimeout(resolve, 0));
+
+  assert.equal(responses[0].ok, false);
+  assert.equal(responses[0].timeout, false);
+  assert.equal(responses[0].status, undefined);
+
+  globalThis.fetch = originalFetch;
+});

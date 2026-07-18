@@ -90,11 +90,16 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
       const data = await response.json();
       sendResponse({ ok: true, data });
     } catch (error) {
-      const message =
-        error.name === "AbortError"
-          ? `Haven server did not respond within ${REQUEST_TIMEOUT_MS / 1000}s.`
-          : error.message;
-      sendResponse({ ok: false, error: message });
+      const isTimeout = error.name === "AbortError";
+      const message = isTimeout
+        ? `Haven server did not respond within ${REQUEST_TIMEOUT_MS / 1000}s.`
+        : error.message;
+      // `timeout` lets callers (content/controller.js) tell "the request
+      // timed out -- the server is probably still working" apart from a
+      // genuine offline/unreachable server, which also has `status`
+      // undefined but a different error string. Don't rely on the error
+      // string itself for that distinction: it's not a stable contract.
+      sendResponse({ ok: false, error: message, timeout: isTimeout });
     } finally {
       clearTimeout(timeoutId);
     }

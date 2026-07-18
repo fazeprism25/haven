@@ -27,10 +27,12 @@ export const ENDPOINTS = {
 // Every request background.js makes is aborted if the Haven server hasn't
 // responded within this window, so a hung/unreachable server surfaces as a
 // clear "timed out" error instead of leaving the UI stuck on "Loading…"
-// forever. Generous because a fresh server process may still be warming up
+// forever. Generous because /memory/preview runs several synchronous LLM
+// calls in sequence (Extractor -> Classifier -> ImportanceScorer ->
+// CanonicalMatcher) and a fresh server process may still be warming up
 // (loading the vault/concept index from disk), but short enough that a
 // truly dead server is reported well within a user's patience.
-export const REQUEST_TIMEOUT_MS = 15000;
+export const REQUEST_TIMEOUT_MS = 60000;
 
 // Settings persisted via chrome.storage.local, read by background.js (server
 // URL) and content/controller.js (autoPreview/autoRemember). One shared
