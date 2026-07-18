@@ -335,6 +335,28 @@
     gap: 14px;
     margin-top: 40px;
   }
+  .hero-why {
+    margin-top: 28px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 20px 24px;
+    box-shadow: var(--shadow-sm);
+  }
+  .hero-why-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0 0 8px;
+  }
+  .hero-why-desc {
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--muted);
+    max-width: 720px;
+    margin: 0 0 14px;
+  }
+  .hero-why-chips { display: flex; flex-wrap: wrap; gap: 8px; }
   .stat-card {
     position: relative;
     background: var(--card);
@@ -1787,6 +1809,26 @@
         <div class="stat-card"><div class="stat-icon">🕸️</div><div class="stat-value skeleton" id="stat-concepts">—</div><div class="stat-label">Concepts</div></div>
         <div class="stat-card"><div class="stat-icon">🔗</div><div class="stat-value skeleton" id="stat-relationships">—</div><div class="stat-label">Relationships</div></div>
         <div class="stat-card"><div class="stat-icon">⚡</div><div class="stat-value skeleton" id="stat-latency">—</div><div class="stat-label">Retrieval speed</div></div>
+      </div>
+
+      <div class="hero-why">
+        <p class="hero-why-title">Why Haven is different</p>
+        <p class="hero-why-desc">
+          Traditional memory systems primarily retrieve similar memories. Haven
+          goes further by reconstructing your Working Context before the AI
+          begins reasoning, allowing it to resume work instead of simply
+          recalling information.
+        </p>
+        <div class="hero-why-chips">
+          <span class="badge">🧠 Working Context Reconstruction</span>
+          <span class="badge">🧩 Structured Memories</span>
+          <span class="badge">🌐 Ontology Graph</span>
+          <span class="badge">📊 Explainable Retrieval</span>
+          <span class="badge">📂 Memory Spaces</span>
+          <span class="badge">📄 Local Markdown Vault</span>
+          <span class="badge">⚡ Incremental Ingestion</span>
+          <span class="badge">🌍 Browser Extension</span>
+        </div>
       </div>
     </div>
   </header>
