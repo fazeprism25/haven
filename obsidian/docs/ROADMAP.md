@@ -16,9 +16,14 @@ What's next, roughly in priority order. Sourced from
    "Current Limitations" calls the remaining `SUPERSEDE` gap out as
    "canonical supersession pipeline not yet integrated into production
    writes").
-2. **`RankedCandidate[] → WorkingContext[]` assembly stage**, so
-   `StructuredPromptBuilder`'s richer XML prompt can replace the flat
-   `ContextBuilder` output as the live `/retrieve_context` renderer.
+2. **Freshness check + bounded gap-fill fallback for `CONTINUATION` queries**
+   (Step 2 of the `ProjectState`×`WorkingContext` integration), so a
+   continuation query stops paying full retrieval cost on every call —
+   `StructuredPromptBuilder`'s `<HavenContext>`/`<ProjectState>` prompt is
+   already live via `POST /retrieve_working_context`, this step is purely a
+   performance/staleness optimization on top of it. See
+   [`docs/architecture/PROJECT_STATE_WORKING_CONTEXT_INTEGRATION.md`](../../docs/architecture/PROJECT_STATE_WORKING_CONTEXT_INTEGRATION.md)
+   §7.
 3. **Fill the 5 still-empty benchmark dataset categories** (`active_context`,
    `insights`, `memory_recall`, `mistake_prevention`, `open_problems`) and
    fix the keyword-overlap denominator edge case the final report flags.

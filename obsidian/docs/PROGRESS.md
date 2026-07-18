@@ -68,16 +68,26 @@ retrieval call.
 - [x] DeterministicSlotAllocator
 - [x] ContextBuilder (flat renderer — live, backs `/retrieve_context`)
 - [x] QueryRewriter (optional multi-query expansion, fails open on error)
-- [x] StructuredPromptBuilder (XML renderer — implemented and tested, **not
-      yet wired into `/retrieve_context`**; needs a
-      `RankedCandidate[] → WorkingContext[]` assembly stage)
-- [x] MemoryEngine (`query`, `query_with_trace`)
+- [x] WorkingContextBuilder (groups allocated candidates by anchor concept —
+      the assembly stage `StructuredPromptBuilder` needed; live via
+      `MemoryEngine.query_working_context`)
+- [x] StructuredPromptBuilder (XML renderer — live via
+      `MemoryEngine.query_structured` / `POST /retrieve_working_context`,
+      including an optional `<ProjectState>` for `CONTINUATION`-mode
+      queries; `POST /retrieve_context` is intentionally unaffected and
+      still only calls `ContextBuilder`, see `ARCHITECTURE.md`)
+- [x] ProjectState (deterministic project-status snapshot from a query's
+      accepted candidates — `ProjectStateBuilder`, rendered by
+      `StructuredPromptBuilder` for `CONTINUATION` queries; also attached to
+      `RetrievalTrace` for every query)
+- [x] MemoryEngine (`query`, `query_with_trace`, `query_working_context`,
+      `query_structured`)
 
 ## Server, Dashboard, Extension
 
 - [x] FastAPI server (`obsidian/server/`) — `/health`, `/retrieve_context`,
-      `/memory`, `/dashboard`, `/dashboard/inspect`,
-      `/dashboard/inspect/memory/{id}`
+      `/retrieve_working_context`, `/memory`, `/dashboard`,
+      `/dashboard/inspect`, `/dashboard/inspect/memory/{id}`
 - [x] Memory Dashboard (`GET /dashboard`) — overview, categories, recent
       memories, Retrieval Inspector, Memory Inspector panel
 - [x] Browser extension (`extension/`) — Use Haven / Remember buttons on
@@ -118,9 +128,12 @@ retrieval call.
 
 ## Prompt assembly
 
-- [ ] `RankedCandidate[] → WorkingContext[]` assembly stage, so
-      `StructuredPromptBuilder` can replace `ContextBuilder` as the live
-      `/retrieve_context` renderer.
+- [ ] Step 2 of `ProjectState`×`WorkingContext` integration: a freshness
+      check + bounded gap-fill fallback so a `CONTINUATION` query stops
+      paying full retrieval cost every call (every such query still runs
+      the complete pipeline today). See
+      [`docs/architecture/PROJECT_STATE_WORKING_CONTEXT_INTEGRATION.md`](../../docs/architecture/PROJECT_STATE_WORKING_CONTEXT_INTEGRATION.md)
+      §7.
 
 ## Other importers
 

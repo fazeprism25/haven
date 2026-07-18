@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1680 920" font-family="'Segoe UI', Helvetica, Arial, sans-serif">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1680 1040" font-family="'Segoe UI', Helvetica, Arial, sans-serif">
   <defs>
     <marker id="arrowB" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
       <path d="M0,0 L10,5 L0,10 z" fill="#1a1a1a"/>
@@ -22,7 +22,7 @@
     .lbl { font-size:13px; font-weight:600; fill:#141414; text-anchor:middle; }
     .lblSm { font-size:11.5px; font-weight:600; fill:#141414; text-anchor:middle; }
     .path { font-family:'Consolas','SF Mono',Menlo,monospace; font-size:9.8px; fill:#6b6b6b; text-anchor:middle; }
-    .note { font-family:'Consolas','SF Mono',Menlo,monospace; font-size:10px; fill:#7c3aed; text-anchor:middle; }
+    .note { font-family:'Consolas','SF Mono',Menlo,monospace; font-size:9.8px; fill:#7c3aed; text-anchor:middle; }
     .arrow { stroke:#1a1a1a; stroke-width:1.6; fill:none; marker-end:url(#arrowB); }
     .arrowDashed { stroke:#8a8a8a; stroke-width:1.5; fill:none; stroke-dasharray:6,4; marker-end:url(#arrowG); }
     .arrowAccent { stroke:#7c3aed; stroke-width:1.5; fill:none; stroke-dasharray:6,4; marker-end:url(#arrowV); }
@@ -35,7 +35,7 @@
     .legendTitle { font-size:11px; font-weight:700; fill:#333333; }
   </style>
 
-  <rect class="bg" x="0" y="0" width="1680" height="920"/>
+  <rect class="bg" x="0" y="0" width="1680" height="1040"/>
 
   <text class="title" x="840" y="36">Haven Architecture</text>
   <text class="subtitle" x="840" y="56">Write (Manager AI) and read (Memory Engine) are separate lanes that meet at a Markdown vault + concept graph.</text>
@@ -116,69 +116,89 @@
   <line class="arrow" x1="450" y1="795" x2="690" y2="795"/>
 
   <!-- ===================== READ LANE (mirrors write, bottom-to-top flow) ===================== -->
-  <!-- r7 raw query input -->
-  <rect class="box" x="1170" y="762" width="300" height="66"/>
-  <text class="lbl" x="1320" y="789">raw query</text>
-  <text class="path" x="1320" y="805">extension · dashboard · benchmark adapter</text>
+  <!-- r9 raw query input -->
+  <rect class="box" x="1170" y="867" width="300" height="66"/>
+  <text class="lbl" x="1320" y="894">raw query</text>
+  <text class="path" x="1320" y="910">extension · dashboard · benchmark adapter</text>
 
-  <!-- r6 QueryRewriter (LLM, optional) -->
-  <rect class="boxAccentDashed" x="1170" y="657" width="300" height="66"/>
-  <text class="lbl" x="1320" y="684">QueryRewriter</text>
-  <text class="path" x="1320" y="700">memory_engine/query_rewriter.py — LLM call</text>
-  <text class="note" x="1320" y="714">opt-in, off by default · fail-open</text>
+  <!-- r8 QueryRewriter (LLM, optional) -->
+  <rect class="boxAccentDashed" x="1170" y="762" width="300" height="66"/>
+  <text class="lbl" x="1320" y="789">QueryRewriter</text>
+  <text class="path" x="1320" y="805">memory_engine/query_rewriter.py — LLM call</text>
+  <text class="note" x="1320" y="819">opt-in, off by default · fail-open</text>
 
-  <!-- r5 HybridCandidateRetriever -->
+  <!-- r7 HybridCandidateRetriever -->
+  <rect class="box" x="1170" y="657" width="300" height="66"/>
+  <text class="lbl" x="1320" y="684">HybridCandidateRetriever</text>
+  <text class="path" x="1320" y="702">memory_engine/hybrid_candidate_retriever.py</text>
+  <text class="note" x="1320" y="716" fill="#5a5a5a">keyword ∪ concept-activation, merged by id</text>
+
+  <!-- r6 DeterministicRanker -->
   <rect class="box" x="1170" y="552" width="300" height="66"/>
-  <text class="lbl" x="1320" y="579">HybridCandidateRetriever</text>
-  <text class="path" x="1320" y="597">memory_engine/hybrid_candidate_retriever.py</text>
-  <text class="note" x="1320" y="611" fill="#5a5a5a">keyword ∪ concept-activation, merged by id</text>
+  <text class="lbl" x="1320" y="579">DeterministicRanker</text>
+  <text class="path" x="1320" y="597">memory_engine/deterministic_ranker.py</text>
+  <text class="note" x="1320" y="611" fill="#5a5a5a">scores every candidate, filters nothing</text>
 
-  <!-- r4 DeterministicRanker -->
-  <rect class="box" x="1170" y="447" width="300" height="66"/>
-  <text class="lbl" x="1320" y="474">DeterministicRanker</text>
-  <text class="path" x="1320" y="492">memory_engine/deterministic_ranker.py</text>
-  <text class="note" x="1320" y="506" fill="#5a5a5a">scores every candidate, filters nothing</text>
+  <!-- r5 AcceptanceStage (gate) -->
+  <polygon class="gate" points="1180,447 1460,447 1440,513 1200,513"/>
+  <text class="lbl" x="1320" y="473">AcceptanceStage</text>
+  <text class="path" x="1320" y="491">memory_engine/acceptance_stage.py</text>
+  <text class="note" x="1320" y="505" fill="#5a5a5a">min score → abstain → gap cut → floor → cap</text>
 
-  <!-- r3 AcceptanceStage (gate) -->
-  <polygon class="gate" points="1180,342 1460,342 1440,408 1200,408"/>
-  <text class="lbl" x="1320" y="368">AcceptanceStage</text>
-  <text class="path" x="1320" y="386">memory_engine/acceptance_stage.py</text>
-  <text class="note" x="1320" y="400" fill="#5a5a5a">min score → abstain → gap cut → floor → cap</text>
+  <!-- r4 DeterministicSlotAllocator -->
+  <rect class="box" x="1170" y="342" width="300" height="66"/>
+  <text class="lbl" x="1320" y="369">DeterministicSlotAllocator</text>
+  <text class="path" x="1320" y="387">memory_engine/deterministic_slot_allocator.py</text>
+  <text class="note" x="1320" y="401" fill="#5a5a5a">context-budget cap — rarely binds after AcceptanceStage</text>
 
-  <!-- r2 ContextBuilder -->
-  <rect class="box" x="1170" y="237" width="300" height="66"/>
-  <text class="lbl" x="1320" y="264">ContextBuilder</text>
-  <text class="path" x="1320" y="282">memory_engine/context_builder.py</text>
+  <!-- r3 fork: two live renderers off the same allocated candidates -->
+  <rect class="box" x="1170" y="237" width="145" height="66"/>
+  <text class="lblSm" x="1242" y="263">ContextBuilder</text>
+  <text class="note" x="1242" y="278">flat text — legacy</text>
+  <text class="note" x="1242" y="292">/retrieve_context</text>
+
+  <rect class="box" x="1325" y="237" width="145" height="66"/>
+  <text class="lblSm" x="1397" y="256" style="font-size:10.5px">WorkingContextBuilder</text>
+  <text class="note" x="1397" y="269" style="font-size:9.2px">→ StructuredPromptBuilder</text>
+  <text class="note" x="1397" y="281" style="font-size:8.3px">+ProjectState (continuation)</text>
+  <text class="path" x="1397" y="293" style="font-size:8.3px">/retrieve_working_context</text>
 
   <!-- r1 output -->
   <rect class="box" x="1170" y="132" width="300" height="66"/>
-  <text class="lbl" x="1320" y="158">context string</text>
-  <text class="lbl" x="1320" y="174">→ injected into the LLM's conversation</text>
+  <text class="lbl" x="1320" y="153">context string  ·  &lt;HavenContext&gt; XML prompt</text>
+  <text class="path" x="1242" y="169">/retrieve_context</text>
+  <text class="path" x="1397" y="169">/retrieve_working_context</text>
+  <text class="lbl" x="1320" y="187" style="font-size:11px">→ injected into the LLM's conversation</text>
 
   <!-- read lane arrows (bottom to top) -->
-  <line class="arrow" x1="1320" y1="762" x2="1320" y2="725"/>
-  <text class="edgeLbl" x="1240" y="745">original query</text>
-  <line class="arrowAccent" x1="1320" y1="657" x2="1320" y2="631"/>
-  <text class="edgeLbl" x="1400" y="645">+ up to 2 rewrites</text>
-  <line class="arrow" x1="1320" y1="552" x2="1320" y2="620"/>
-  <line class="arrow" x1="1320" y1="447" x2="1320" y2="550"/>
-  <line class="arrow" x1="1320" y1="408" x2="1320" y2="445"/>
-  <line class="arrow" x1="1320" y1="342" x2="1320" y2="305"/>
-  <text class="edgeLbl" x="1230" y="325">accepted prefix</text>
-  <line class="arrow" x1="1320" y1="237" x2="1320" y2="200"/>
+  <line class="arrow" x1="1320" y1="867" x2="1320" y2="830"/>
+  <text class="edgeLbl" x="1240" y="850">original query</text>
+  <line class="arrowAccent" x1="1320" y1="762" x2="1320" y2="736"/>
+  <text class="edgeLbl" x="1400" y="750">+ up to 2 rewrites</text>
+  <line class="arrow" x1="1320" y1="657" x2="1320" y2="725"/>
+  <line class="arrow" x1="1320" y1="552" x2="1320" y2="655"/>
+  <line class="arrow" x1="1320" y1="513" x2="1320" y2="550"/>
+  <line class="arrow" x1="1320" y1="447" x2="1320" y2="410"/>
+  <text class="edgeLbl" x="1235" y="430">accepted prefix</text>
+  <!-- slot allocator -> fork (two renderers share its output) -->
+  <line class="arrow" x1="1242" y1="342" x2="1242" y2="305"/>
+  <line class="arrow" x1="1397" y1="342" x2="1397" y2="305"/>
+  <!-- fork -> merged output -->
+  <line class="arrow" x1="1242" y1="237" x2="1242" y2="200"/>
+  <line class="arrow" x1="1397" y1="237" x2="1397" y2="200"/>
 
   <!-- middle -> read (dual retrieval paths) -->
-  <line class="arrow" x1="932" y1="693" x2="1168" y2="600"/>
-  <text class="edgeLbl" x="1050" y="630">keyword path</text>
-  <line class="arrow" x1="932" y1="798" x2="1168" y2="600"/>
-  <text class="edgeLbl" x="1050" y="775">ontology path (activation spreading)</text>
+  <line class="arrow" x1="932" y1="693" x2="1168" y2="690"/>
+  <text class="edgeLbl" x="1050" y="675">keyword path</text>
+  <line class="arrow" x1="932" y1="798" x2="1168" y2="690"/>
+  <text class="edgeLbl" x="1050" y="750">ontology path (activation spreading)</text>
 
   <!-- abstain callout -->
-  <rect class="calloutAccent" x="1500" y="345" width="150" height="66"/>
-  <text class="lblSm" x="1575" y="366">Abstain / Reject</text>
-  <text class="note" x="1575" y="381">reason kept in</text>
-  <text class="note" x="1575" y="394">RetrievalTrace</text>
-  <line class="arrowAccent" x1="1442" y1="375" x2="1498" y2="375"/>
+  <rect class="calloutAccent" x="1500" y="447" width="150" height="66"/>
+  <text class="lblSm" x="1575" y="468">Abstain / Reject</text>
+  <text class="note" x="1575" y="483">reason kept in</text>
+  <text class="note" x="1575" y="496">RetrievalTrace</text>
+  <line class="arrowAccent" x1="1442" y1="480" x2="1498" y2="480"/>
 
   <!-- checkpoint callout -->
   <rect class="callout" x="20" y="195" width="112" height="80"/>
@@ -190,8 +210,8 @@
   <line class="arrowDashed" x1="132" y1="235" x2="148" y2="235"/>
 
   <!-- footer: shared core -->
-  <rect class="callout" x="150" y="866" width="1320" height="38"/>
-  <text class="footerTxt" x="810" y="889">obsidian/core/ — Conversation, Event, Role, SourceType, MemoryType, EntityType — shared value objects used by every stage in both lanes</text>
+  <rect class="callout" x="150" y="965" width="1320" height="38"/>
+  <text class="footerTxt" x="810" y="988">obsidian/core/ — Conversation, Event, Role, SourceType, MemoryType, EntityType — shared value objects used by every stage in both lanes</text>
 
   <!-- legend -->
   <rect class="callout" x="1330" y="15" width="330" height="96"/>

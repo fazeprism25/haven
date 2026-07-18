@@ -109,12 +109,26 @@ AcceptanceStage            (abstention / score-gap cut / relative floor / hard c
     ▼
 DeterministicSlotAllocator (context-budget cap; rarely binds after AcceptanceStage)
     │
-    ▼
-ContextBuilder              (flat text renderer — live)
-    │
-    ▼
-context string
+    ├──────────────────────────────┬─────────────────────────────────┐
+    ▼                               ▼                                 
+ContextBuilder                WorkingContextBuilder
+(flat text — legacy)          (groups allocated candidates by anchor concept)
+    │                               │
+    ▼                               ▼
+context string                 StructuredPromptBuilder
+(POST /retrieve_context)      (+ ProjectState, for CONTINUATION-mode queries)
+                                    │
+                                    ▼
+                              <HavenContext> XML prompt
+                              (POST /retrieve_working_context — live: what the
+                               extension's Use Haven button inserts, and what
+                               the dashboard's Working Context preview shows)
 ```
+
+Both branches run the exact same retrieval → rank → accept → allocate prefix
+(`MemoryEngine._run_retrieval` / `_accept_and_allocate`); only the renderer
+at the end differs. `POST /retrieve_context` only ever calls `ContextBuilder`
+and is unaffected by anything below it.
 
 - **HybridCandidateRetriever** resolves query text to seed Concepts via
   `AliasIndex`, spreads activation across `ConceptGraph` with
@@ -133,14 +147,26 @@ context string
   `MemoryEngine.query()`, the benchmark harness (when present), and today's
   `POST /retrieve_context` response.
 
-A second renderer, **`StructuredPromptBuilder`**
-(`obsidian/memory_engine/structured_prompt_builder.py`), assembles a
-richer XML prompt (`<HavenContext>` / `<WorkingContext>` / role buckets) from
-already-built `WorkingContext` objects. It is implemented and tested but not
-yet wired into `/retrieve_context` — that requires a separate
-`RankedCandidate[] → WorkingContext[]` assembly stage that doesn't exist yet.
-See [`obsidian/server/README.md`](../server/README.md#prompt-assembly) for
-the full renderer output shape and design rationale.
+A second, now-live rendering path assembles the same allocated candidates
+into a structured prompt instead of a flat string:
+
+- **WorkingContextBuilder** (`obsidian/memory_engine/working_context_builder.py`)
+  groups them by anchor concept into one or more `WorkingContext` objects —
+  the goal, recent decisions, pending tasks, and open questions per topic
+  (`MemoryEngine.query_working_context()`).
+- **StructuredPromptBuilder** (`obsidian/memory_engine/structured_prompt_builder.py`)
+  renders those `WorkingContext` objects into the `<HavenContext>` XML block
+  (`MemoryEngine.query_structured()`) — a `<Guidance>` preamble, an optional
+  `<ProjectState>` (see "Project State" below), then one `<WorkingContext>`
+  per topic.
+
+Both are wired end to end into `POST /retrieve_working_context`, which is
+what the browser extension's **Use Haven** button and the dashboard's
+Working Context preview actually call — this is live product behavior, not
+a design exercise awaiting integration. `POST /retrieve_context` is
+unaffected either way: it still only calls `ContextBuilder`, unchanged. See
+[`obsidian/server/README.md`](../server/README.md#prompt-assembly) for the
+full renderer output shape and design rationale.
 
 `query_with_trace()` returns the same context string alongside a
 `RetrievalTrace` describing every candidate considered (accepted or

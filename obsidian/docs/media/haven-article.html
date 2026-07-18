@@ -1297,8 +1297,8 @@
       </div>
 
       <figure class="plate wide">
-        <img src="architecture.svg" loading="lazy" width="1680" height="920"
-             alt="Haven architecture schematic: the write pipeline (Manager AI) and read pipeline (Memory Engine) meeting at a Markdown vault and concept graph, with the FastAPI server, dashboard, and browser extension on top">
+        <img src="architecture.svg" loading="lazy" width="1680" height="1040"
+             alt="Haven architecture schematic: the write pipeline (Manager AI) and read pipeline (Memory Engine) meeting at a Markdown vault and concept graph, forking at the end into a legacy flat ContextBuilder renderer and the live WorkingContextBuilder/StructuredPromptBuilder path, with the FastAPI server, dashboard, and browser extension on top">
         <figcaption><b>Engineering plate 01</b> — the full system: both pipelines meeting at a plain-Markdown vault and one concept graph, with the server, dashboard, and extension on top.</figcaption>
       </figure>
 
@@ -2802,8 +2802,8 @@ DEFAULT_BASE_URL = <span class="tk-s">"https://dashscope-intl.aliyuncs.com/compa
       chips: ["ConceptGraph", "alias index", "activation spreading", "single writer"] },
     { key: "Retrieval", icon: "M10 4a6 6 0 1 0 0 12 6 6 0 0 0 0-12zm10 16-5.5-5.5",
       title: "Retrieval — hybrid, ranked, gated",
-      body: "An optional QueryRewriter can expand the query first, via the same Alibaba Cloud DashScope (Qwen Cloud) endpoint as the Extractor — off by default, failing open to the original query if unset or unreachable. The HybridCandidateRetriever then merges two independent evidence paths: IDF-weighted keyword overlap (with a phrase bonus) and concept-graph activation. The DeterministicRanker scores every candidate on seven named factors. Then gate three — the AcceptanceStage's five checks — decides which prefix of the ranking is trustworthy, recording a reason for every rejection and returning nothing when nothing clears the bar.",
-      chips: ["QueryRewriter (Qwen, optional)", "keyword ∪ activation", "7 ranking factors", "gate 3: 5 acceptance checks", "abstention"] },
+      body: "An optional QueryRewriter can expand the query first, via the same Alibaba Cloud DashScope (Qwen Cloud) endpoint as the Extractor — off by default, failing open to the original query if unset or unreachable. The HybridCandidateRetriever then merges two independent evidence paths: IDF-weighted keyword overlap (with a phrase bonus) and concept-graph activation. The DeterministicRanker scores every candidate on seven named factors. Then gate three — the AcceptanceStage's five checks — decides which prefix of the ranking is trustworthy, recording a reason for every rejection and returning nothing when nothing clears the bar. A DeterministicSlotAllocator then trims that accepted prefix to fit the context budget — rarely binding, since acceptance is usually the tighter cut.",
+      chips: ["QueryRewriter (Qwen, optional)", "keyword ∪ activation", "7 ranking factors", "gate 3: 5 acceptance checks", "abstention", "DeterministicSlotAllocator"] },
     { key: "Working Context", icon: "M4 5h16M4 10h16M4 15h10M4 20h7",
       title: "Working Context — memories become resumable work",
       body: "The WorkingContextBuilder — once a roadmap item, now a real stage — groups accepted memories around their anchor concepts into resumable units of work: the goal, recent decisions, pending tasks, and open questions per topic. It powers the dashboard's Current focus panel and the extension's preview cards, and it's the compact background the Extractor receives during incremental ingestion.",

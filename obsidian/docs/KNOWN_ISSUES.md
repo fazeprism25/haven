@@ -52,13 +52,18 @@ today still requires calling `KnowledgeUpdater.supersede_decision()` directly,
 which is what Decision Memory does. See `TECH_DEBT.md` for the remaining
 Stage 3/4 work (contradiction detection + write-time supersession).
 
-## `StructuredPromptBuilder` isn't live
+## `CONTINUATION` queries re-run full retrieval every time
 
-The XML structured-prompt renderer is implemented and tested
-(`obsidian/memory_engine/structured_prompt_builder.py`), but
-`POST /retrieve_context` still uses the older flat `ContextBuilder` output.
-Wiring in the richer renderer needs a `RankedCandidate[] → WorkingContext[]`
-assembly stage that doesn't exist yet.
+`StructuredPromptBuilder`'s XML prompt (including `<ProjectState>` for
+`CONTINUATION`-mode queries) is live via `POST /retrieve_working_context` —
+see `ARCHITECTURE.md`. What's still missing is Step 2 of that integration: a
+freshness check + bounded gap-fill fallback so a `CONTINUATION` query can
+skip full retrieval when nothing has changed since the last one. Every such
+query pays the complete `_allocate` pipeline cost today; see
+[`docs/architecture/PROJECT_STATE_WORKING_CONTEXT_INTEGRATION.md`](../../docs/architecture/PROJECT_STATE_WORKING_CONTEXT_INTEGRATION.md)
+§7 for the design. (`POST /retrieve_context` never renders `<ProjectState>`
+or `<WorkingContext>` at all — it only ever calls the older flat
+`ContextBuilder`, by design, not as a gap.)
 
 ## Only one conversation-export importer, and only ChatGPT/Obsidian sources
 
