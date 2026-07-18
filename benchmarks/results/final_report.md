@@ -7,7 +7,7 @@ Author: Siddhartha Khajuria
 
 # Executive Summary
 
-Haven is a deterministic, explainable AI memory system built on top of mem0.
+Haven is a deterministic, explainable AI memory system that began as a fork of mem0. The write- and read-path pipelines benchmarked below are Haven's own — no stage calls into the mem0 package at runtime. mem0 doesn't reappear as a measured baseline in this report; the comparisons below are against return-everything, most-recent, BM25, and embedding-similarity adapters (see `benchmarks/README.md` for why a canonical mem0-judged run isn't part of this results set yet).
 
 Unlike traditional memory systems that rely primarily on embeddings or opaque retrieval heuristics, Haven focuses on:
 

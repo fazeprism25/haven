@@ -1172,6 +1172,42 @@
       </p>
 
       <p>
+        "Fork" is doing real work in that sentence, and it deserves a precise answer
+        rather than a vague one — the natural next question is whether Haven is just
+        mem0 with a browser extension bolted on. It isn't, and here's exactly what
+        that "fork" does and doesn't mean.
+      </p>
+
+      <div class="callout" id="mem0-boundary">
+        <span class="tag">What carried over, what didn't</span>
+        <p>
+          Haven's repository started as a copy of
+          <a href="https://github.com/mem0ai/mem0">mem0</a>'s codebase, under the same
+          Apache-2.0 license, and one idea survived the trip: an LLM is good at turning
+          a raw conversation into atomic facts, and nothing downstream should have to
+          trust it beyond that. Almost everything downstream is Haven's own.
+          mem0 resolves conflicts with a second LLM call that decides
+          <code>ADD</code>/<code>UPDATE</code>/<code>DELETE</code>/<code>NOOP</code>
+          against a vector-indexed store, automatically, on every write. Haven replaced
+          that decision with a deterministic <code>CanonicalMatcher</code> that reaches
+          <code>NEW</code>/<code>CONFIRM</code>/<code>UPDATE</code>/<code>SUPERSEDE</code>
+          in plain, testable Python (Decision 002, just below). mem0 stores memories as
+          rows in a vector database; Haven stores them as Markdown files with YAML
+          frontmatter, in a vault you can open, edit, and version without Haven running.
+          mem0 retrieves by cosine similarity over embeddings; Haven retrieves through
+          keyword matching and concept-graph activation, a named-factor ranker, and an
+          acceptance stage that can return nothing at all. The ontology, Working Context
+          reconstruction, structured prompt assembly, that deterministic ranker and
+          acceptance gate, the Retrieval Inspector, checkpointed incremental ingestion,
+          the browser extension, and the dashboard — everything the rest of this article
+          covers — were designed and built after the fork, not inherited from it.
+          Concretely: <code>obsidian/</code>, Haven's actual backend, has no runtime
+          import of the mem0 package anywhere in its write or read pipeline. At this
+          point the two projects share a license and an origin, not a call stack.
+        </p>
+      </div>
+
+      <p>
         That idea became a written rule early in the project — Decision 002 in the
         design log — and it shaped everything after it:
       </p>
@@ -2364,7 +2400,12 @@ valid_from   2026-06-12</pre>
         a longer pipeline, not the whole system. This section describes Haven's
         own architecture — it isn't a claim that other systems can't do these
         things, only a plain account of what Haven's pipeline actually does,
-        stage by stage.
+        stage by stage. Per the boundary drawn in
+        <a href="#mem0-boundary">Section 04</a>, everything on this list —
+        ontology, canonicalization, importance scoring, Working Context
+        reconstruction, and explainable retrieval alike — is a Haven-specific
+        component built after the mem0 fork, not an abstraction carried over
+        from it.
       </p>
 
       <ol class="prin wide">
