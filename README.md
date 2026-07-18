@@ -418,8 +418,11 @@ up, evidence chain grows) instead of duplicating it. Finally the VaultWriter
 persists a Markdown file with YAML frontmatter, and the OntologyPipeline — the
 *only* component allowed to mutate the concept graph — attaches it to concepts.
 
-An LLM is used exactly once here, for language understanding in extraction.
-Everything after that is deterministic code.
+The LLM is called at three points here — extraction, classification, and
+importance scoring — each reaching the same Alibaba Cloud DashScope (Qwen
+Cloud) model, each with its own one-shot repair retry on an unusable response.
+Everything from CanonicalMatcher onward, including the ontology and the
+entire read path, is deterministic code.
 
 ![Memory write pipeline: save_memory() through Extractor, Classifier, ImportanceScorer, CanonicalMatcher, KnowledgeUpdater, VaultWriter, and OntologyPipeline, with checkpoint dedup and best-effort tracing](obsidian/docs/media/memory-write-pipeline.svg)
 

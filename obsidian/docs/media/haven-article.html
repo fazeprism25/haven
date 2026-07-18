@@ -1180,28 +1180,31 @@
         <span class="tag">Decision 002</span>
         <p>
           No stage's correctness may depend on an LLM behaving a particular way at
-          runtime. An LLM is used exactly once in the production pipeline — for
-          language understanding during extraction. Everything after that is
-          deterministic, testable Python.
+          runtime. The write pipeline calls an LLM at three points — extraction,
+          classification, and importance scoring — each for language understanding,
+          each with its own one-shot repair retry if a response comes back unusable.
+          Every stage after that — matching, writing, the ontology, and the entire
+          read path — is deterministic, testable Python.
         </p>
       </div>
 
       <p>
-        That call, and the two other AI call sites this article traces later — an
-        optional read-path query rewrite, and an offline benchmark judge — all reach
-        the same place: <strong>Alibaba Cloud's Qwen Cloud</strong>, accessed through
-        <strong>DashScope</strong>, Alibaba Cloud's model-serving endpoint. Haven
-        standardizes on one provider for every AI call site rather than open-coding
-        three; the reasoning behind that specific endpoint is in
+        Those three write-path calls, plus two other AI call sites this article
+        traces later — an optional read-path query rewrite, and an offline benchmark
+        judge — all reach the same place: <strong>Alibaba Cloud's Qwen Cloud</strong>,
+        accessed through <strong>DashScope</strong>, Alibaba Cloud's model-serving
+        endpoint. Haven standardizes on one provider for every AI call site rather
+        than open-coding several; the reasoning behind that specific endpoint is in
         <a href="#install">Installation</a>.
       </p>
 
       <p>
         Language understanding — reading free text and turning it into structured
-        facts, alternate search phrasings, or a pass/fail judgment — is the one job
-        an LLM does that plain code can't. Ranking, acceptance, matching, and
-        everything that decides what a prompt actually receives is ordinary Python
-        on purpose, so none of it depends on a model's mood that day.
+        facts, a memory type and importance score, alternate search phrasings, or a
+        pass/fail judgment — is the one <em>kind</em> of job an LLM does that plain
+        code can't. Ranking, acceptance, matching, and everything that decides what a
+        prompt actually receives is ordinary Python on purpose, so none of it depends
+        on a model's mood that day.
       </p>
 
       <p>Five commitments fall out of taking that seriously:</p>
@@ -1293,7 +1296,7 @@
       <div class="pipeline wide">
         <div class="pipe-track" id="pipeTrack" role="tablist" aria-label="Haven pipeline stages"></div>
         <div class="pipe-detail" id="pipeDetail" role="tabpanel" aria-live="polite"></div>
-        <div class="pipe-hint">↳ 10 stages · one LLM call total (extraction, via Alibaba Cloud DashScope (Qwen Cloud)) · one human gate (Memory Review) · everything else is deterministic</div>
+        <div class="pipe-hint">↳ 10 stages · 3 LLM calls in the write path (extraction, classification, importance — all Alibaba Cloud DashScope (Qwen Cloud)) · one human gate (Memory Review) · retrieval and everything after ingestion is deterministic</div>
       </div>
 
       <figure class="plate wide">
@@ -1331,10 +1334,22 @@
         <strong>Obsidian vault import</strong> — and every door leads to the same
         single pipeline; there is no second code path to drift out of sync. The Manager
         AI runs the input through extraction, classification, and importance scoring,
-        and then <em>stops</em>. Only the first of those three — the Extractor —
-        calls out to an LLM, an <strong>Alibaba Cloud DashScope (Qwen Cloud)</strong> model
-        reached through an OpenAI-compatible client; the Classifier and
-        ImportanceScorer are plain, deterministic Python.
+        and then <em>stops</em>. All three of those stages — Extractor, Classifier,
+        ImportanceScorer — call the same <strong>Alibaba Cloud DashScope (Qwen
+        Cloud)</strong> model through an OpenAI-compatible client, each with its own
+        one-shot repair retry if a response comes back unusable; every stage from
+        there on — <strong>CanonicalMatcher</strong>, <strong>KnowledgeUpdater</strong>,
+        the ontology, and the entire read path — is plain, deterministic Python.
+      </p>
+
+      <p>
+        <strong>Importance</strong> is worth calling out on its own: it's the Manager
+        AI's judgment of how central a fact is — a long-running project or a firmly
+        stated decision scores high, a one-off aside scores low — set once when the
+        memory is written and then reused unchanged every time that memory is
+        considered for retrieval. It never decides acceptance by itself; it's one of
+        seven factors the ranker weighs below, so an important-but-poorly-matched
+        memory still won't outrank a strong, literal match.
       </p>
 
       <p>
@@ -1388,10 +1403,28 @@ relational consistency mattered more than write throughput.
       </div>
 
       <p>
-        The <strong>OntologyPipeline</strong> — the only component allowed to mutate the
-        concept graph — then attaches the memory to concepts through an alias index, so
-        <code>billing-service</code>, "the billing app," and "billing" all resolve to
-        one node.
+        Concepts aren't hand-tagged, and no LLM invents them: a deterministic, purely
+        rule-based detector scans the memory's canonical fact for <em>capitalized
+        spans</em> — runs of consecutive capitalized words such as
+        <code>PostgreSQL</code>, <code>Priya</code>, or <code>billing-service</code> —
+        so the same fact always yields the same candidate labels, every time. From
+        those labels, Haven's ontology layer proposes what should change: a new
+        concept node for any label the graph hasn't seen before, a generic
+        <code>RELATED_TO</code> edge between any two concepts detected together in the
+        same memory, and — for labels a small curated taxonomy already recognizes as
+        an instance of something (a database engine, a model provider) — an
+        <code>IS_A</code> edge to that category. A validation pass filters out
+        duplicates and anything that would violate the graph's own invariants before
+        anything is applied. Every label is resolved through an <strong>alias
+        index</strong> — a flat table mapping each concept's label and known aliases
+        to one canonical node — so <code>billing-service</code>, "the billing app,"
+        and "billing" all collapse onto the same concept instead of splintering into
+        three unconnected ones. The <strong>OntologyPipeline</strong> — the only
+        component allowed to mutate the concept graph — applies what survives and
+        attaches the memory to every concept it touches, so a fact is never an
+        isolated row: it becomes reachable from anything that shares, relates to, or
+        specializes the same concept, which is exactly the structure the read path
+        below spends to find memories a keyword search alone would miss.
       </p>
 
       <h3>The read path: retrieval with receipts</h3>
@@ -1405,14 +1438,29 @@ relational consistency mattered more than write throughput.
         by side, so a rewrite is never a silent change to what got searched.
       </p>
       <p>
-        A query then takes the reverse trip. The <strong>HybridCandidateRetriever</strong>
-        finds candidates two independent ways — IDF-weighted keyword overlap (with a
-        phrase bonus), and activation spreading across the concept graph — and a memory
-        found by both paths keeps evidence from both. The
-        <strong>DeterministicRanker</strong> then scores <em>every</em> candidate on
-        seven named factors: activation, attachment relevance, keyword overlap,
-        importance, confidence, recency, and confirmation count. No filtering happens
-        here; the full breakdown is preserved on the candidate.
+        A query then takes the reverse trip through the same graph the write path
+        just built. The <strong>HybridCandidateRetriever</strong> finds candidates two
+        independent ways: it resolves query terms against the alias index and spreads
+        activation outward across the concept graph from whatever matches, while a
+        separate IDF-weighted keyword search (with a phrase bonus) scans every
+        memory's text directly, concept graph or no. A memory found by both paths
+        keeps evidence from both — the two paths are complementary rather than a
+        fallback for each other, so a gap in the ontology never means a total miss,
+        and a gap in shared wording never means the graph's evidence gets discarded.
+      </p>
+      <p>
+        Every candidate from either path — not just the leading few — is then scored
+        by the <strong>DeterministicRanker</strong> on seven named factors: activation
+        (graph proximity to the query), attachment relevance (how directly a memory
+        is linked to a matched concept), keyword overlap, importance, confidence,
+        recency, and confirmation count. No single factor is trusted alone: activation
+        and attachment relevance can surface a memory the query never names directly,
+        keyword overlap rewards a literal match the graph might miss, and importance,
+        confidence, recency, and confirmation count together keep a stale or
+        once-stated belief from outranking a fresher, better-evidenced one. The seven
+        combine into one composite score with the full per-factor breakdown preserved
+        on every candidate — nothing is filtered out at this stage, so a later "why
+        wasn't this accepted" always has real numbers to point to, not a guess.
       </p>
 
       <p>
@@ -1434,6 +1482,19 @@ relational consistency mattered more than write throughput.
         <div class="check"><span class="i">check 5</span>hard cap</div>
         <div class="out" aria-hidden="true">→ accepted · <em>or nothing</em></div>
       </div>
+
+      <p>
+        Each check guards against a specific way retrieval quietly goes wrong: the
+        minimum-score floor keeps a uniformly weak candidate pool from reaching the
+        prompt at all; abstention refuses to answer when even the <em>best</em>
+        candidate is weak, rather than presenting a shaky top pick as if it were
+        confident; the score-gap cut and the relative threshold both stop a strong
+        match from being padded out with merely-plausible, unrelated ones once
+        quality visibly drops off; and the hard cap keeps an unusually large surviving
+        set from flooding the prompt. Clearing every check is what "trustworthy" means
+        here — and failing the abstention check is why an honest "nothing relevant
+        in the vault" is a real, reachable outcome rather than a hypothetical one.
+      </p>
 
       <p>
         Accepted memories then pass through the <strong>WorkingContextBuilder</strong> —
@@ -2782,8 +2843,8 @@ DEFAULT_BASE_URL = <span class="tk-s">"https://dashscope-intl.aliyuncs.com/compa
       chips: ["Remember button", "Quick Capture", "Obsidian import", "gate 1: checkpoint → short-circuit"] },
     { key: "Manager AI", icon: "M12 3v3m0 12v3M3 12h3m12 0h3M7 7l2 2m6 6 2 2m0-10-2 2M9 15l-2 2M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z",
       title: "Manager AI — extract, classify, score",
-      body: "The only LLM call in the production pipeline happens here, in the Extractor: a request to Alibaba Cloud DashScope (Qwen Cloud), for language understanding — against a compact Working Context background during incremental saves, never the full transcript. Everything after it is deterministic code: the Classifier assigns a memory type with a stated reason, and the ImportanceScorer weighs each fact.",
-      chips: ["Extractor (LLM ×1)", "Alibaba Cloud DashScope (Qwen Cloud)", "Classifier", "ImportanceScorer"] },
+      body: "All three of the write path's LLM calls happen here, each reaching Alibaba Cloud DashScope (Qwen Cloud) through the same OpenAI-compatible client, each with its own one-shot repair retry on an unusable response: the Extractor pulls atomic facts from a compact Working Context background during incremental saves (never the full transcript), the Classifier assigns a memory type with a stated reason, and the ImportanceScorer weighs each fact. Every stage downstream of Manager AI — matching, writing, the ontology, and the whole read path — is deterministic code.",
+      chips: ["Extractor, Classifier, ImportanceScorer (LLM ×3)", "Alibaba Cloud DashScope (Qwen Cloud)", "one repair retry each", "deterministic downstream"] },
     { key: "Memory Review", icon: "M4 5h16v14H4zM8 12l3 3 5-6",
       title: "Memory Review — the human gate",
       body: "Gate two. Extraction stops, and the proposed facts come back to you as editable cards — reword one, change its type, delete it, add one the extractor missed. Nothing touches the vault until you Save; Cancel (or a server restart) discards the pending review cleanly. Crucially, your edits never re-run the LLM — review adds judgment without a second roll of the dice.",
@@ -2798,8 +2859,8 @@ DEFAULT_BASE_URL = <span class="tk-s">"https://dashscope-intl.aliyuncs.com/compa
       chips: ["evidence chain", "confidence nudges up", "Markdown + YAML", "provenance"] },
     { key: "Ontology", icon: "M12 4a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM5 16a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm14 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM12 8v4m0 0-5 4m5-4 5 4",
       title: "Ontology — the concept graph",
-      body: "The OntologyPipeline — the only component allowed to mutate the graph — attaches each memory to concepts through an alias index, so \"billing-service,\" \"the billing app,\" and \"billing\" resolve to one node. At read time, activation spreads across this graph to find memories keywords alone would miss.",
-      chips: ["ConceptGraph", "alias index", "activation spreading", "single writer"] },
+      body: "Nodes are concepts Haven's detector found — projects, people, tools, organizations — never invented by an LLM. Edges carry one of eight fixed relationship types (is_a, part_of, uses, depends_on, created_by, located_in, related_to, supports); related_to comes from concepts detected together in the same memory, is_a from a small curated category taxonomy — both deterministic, no model call. A graph beats a flat tag list because the relationships are themselves information, not just the nodes: at read time, activation spreads outward from a query's matched concepts across these edges, decaying with distance and edge type, so a memory attached to a related-but-unmatched concept still surfaces — something a flat tag or an exact-keyword match can't do. The OntologyPipeline — the only component allowed to mutate the graph — is what keeps that structure consistent no matter which of the three write-path doors a memory arrived through.",
+      chips: ["ConceptGraph", "8 relationship types", "activation spreading", "single writer"] },
     { key: "Retrieval", icon: "M10 4a6 6 0 1 0 0 12 6 6 0 0 0 0-12zm10 16-5.5-5.5",
       title: "Retrieval — hybrid, ranked, gated",
       body: "An optional QueryRewriter can expand the query first, via the same Alibaba Cloud DashScope (Qwen Cloud) endpoint as the Extractor — off by default, failing open to the original query if unset or unreachable. The HybridCandidateRetriever then merges two independent evidence paths: IDF-weighted keyword overlap (with a phrase bonus) and concept-graph activation. The DeterministicRanker scores every candidate on seven named factors. Then gate three — the AcceptanceStage's five checks — decides which prefix of the ranking is trustworthy, recording a reason for every rejection and returning nothing when nothing clears the bar. A DeterministicSlotAllocator then trims that accepted prefix to fit the context budget — rarely binding, since acceptance is usually the tighter cut.",
