@@ -247,6 +247,12 @@
     font-family: var(--mono); font-size: 11px; letter-spacing: 0.14em;
     text-transform: uppercase; color: var(--brass); display: block; margin-bottom: 10px;
   }
+  .callout .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+  .callout .chip {
+    font-family: var(--mono); font-size: 11.5px; color: var(--ink-2);
+    background: var(--raised); border: 1px solid var(--hairline-soft);
+    border-radius: 999px; padding: 4px 12px;
+  }
 
   /* ============ Code blocks ============ */
   .codeblock {
@@ -1262,6 +1268,26 @@
         write path; then the concept graph they share, and the read path).
         <strong>Click any stage to see what it does.</strong>
       </p>
+
+      <div class="callout">
+        <span class="tag">Why Haven is different</span>
+        <p>
+          Traditional memory systems primarily retrieve similar memories. Haven
+          goes further by reconstructing your Working Context before the AI
+          begins reasoning, allowing it to resume work instead of simply
+          recalling information.
+        </p>
+        <div class="chips">
+          <span class="chip">🧠 Working Context Reconstruction</span>
+          <span class="chip">🧩 Structured Memories</span>
+          <span class="chip">🌐 Ontology Graph</span>
+          <span class="chip">📊 Explainable Retrieval</span>
+          <span class="chip">📂 Memory Spaces</span>
+          <span class="chip">📄 Local Markdown Vault</span>
+          <span class="chip">⚡ Incremental Ingestion</span>
+          <span class="chip">🌍 Browser Extension</span>
+        </div>
+      </div>
 
       <div class="pipeline wide">
         <div class="pipe-track" id="pipeTrack" role="tablist" aria-label="Haven pipeline stages"></div>
