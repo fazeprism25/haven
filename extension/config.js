@@ -42,9 +42,42 @@ export const SETTINGS_STORAGE_KEY = "havenSettings";
 
 export const DEFAULT_SETTINGS = {
   serverUrl: HAVEN_BASE_URL,
+  authUser: "",
+  authPassword: "",
   autoPreview: true,
   autoRemember: false,
 };
+
+// Hostnames manifest.json's *required* host_permissions already cover --
+// background.js's fetch() reaches these without ever needing Chrome's
+// runtime permission-request flow (see originPatternFor/optional_host_permissions
+// below), so Save Settings/Test Connection skip that dance entirely for them.
+const ALWAYS_PERMITTED_HOSTNAMES = new Set(["localhost", "127.0.0.1"]);
+
+export function isAlwaysPermittedHost(hostname) {
+  return ALWAYS_PERMITTED_HOSTNAMES.has(hostname);
+}
+
+// Chrome match patterns have no port component -- a pattern matches its host
+// on any port (see https://developer.chrome.com/docs/extensions/develop/concepts/match-patterns).
+// manifest.json's optional_host_permissions ("http://*/*", "https://*/*") is
+// declared broad on purpose so chrome.permissions.request() can ask for just
+// this narrower per-host pattern at runtime -- the user is prompted for the
+// one server they configured, not "all websites", and a brand-new remote
+// deployment works the moment they grant it, no extension rebuild needed.
+export function originPatternFor(serverUrl) {
+  const url = new URL(serverUrl);
+  return `${url.protocol}//${url.hostname}/*`;
+}
+
+// Builds the `Authorization: Basic ...` header value for servers deployed
+// behind HTTP Basic Auth (see deploy/alibaba-cloud/nginx.haven.conf) --
+// undefined when no username is configured, so callers can add the header
+// conditionally rather than always sending an empty-credential one.
+export function buildAuthHeader(authUser, authPassword) {
+  if (!authUser) return undefined;
+  return `Basic ${btoa(`${authUser}:${authPassword ?? ""}`)}`;
+}
 
 // Shared by content/controller.js (dynamic import -- classic content scripts
 // can't use a top-level `import`) and popup/popup.js (static import) so

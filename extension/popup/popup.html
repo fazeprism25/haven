@@ -121,6 +121,20 @@
   }
   .primary-button:hover:not(:disabled) { background: var(--accent-dark); }
 
+  .secondary-button {
+    width: 100%;
+    padding: 6px 14px;
+    margin-top: 6px;
+    border: 1px solid var(--border);
+    background: #ffffff;
+    color: var(--text);
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .secondary-button:hover:not(:disabled) { background: #f5f5f5; }
+
   .inline-message {
     font-size: 12px;
     margin-top: 6px;
@@ -225,6 +239,14 @@
       <label for="server-url">Haven server URL</label>
       <input type="url" id="server-url" placeholder="http://127.0.0.1:8765" />
     </div>
+    <div class="field">
+      <label for="auth-user">Username <span style="font-weight:400">(only if the server requires Basic Auth)</span></label>
+      <input type="text" id="auth-user" autocomplete="off" />
+    </div>
+    <div class="field">
+      <label for="auth-password">Password</label>
+      <input type="password" id="auth-password" autocomplete="off" />
+    </div>
     <div class="checkbox-field">
       <input type="checkbox" id="auto-preview" />
       <label for="auto-preview">Auto-preview context before insert</label>
@@ -234,7 +256,9 @@
       <label for="auto-remember">Auto-remember after insert</label>
     </div>
     <button type="button" class="primary-button" id="save-settings">Save settings</button>
+    <button type="button" class="secondary-button" id="test-connection">Test Connection</button>
     <div class="inline-message success" id="settings-message" hidden>Settings saved.</div>
+    <div class="inline-message" id="test-connection-message" hidden></div>
   </section>
 
   <section id="search">

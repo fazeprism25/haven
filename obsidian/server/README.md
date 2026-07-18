@@ -695,10 +695,20 @@ to load it. Once loaded:
 All three calls are proxied through the extension's background service
 worker (`extension/background.js`), never made directly from a content
 script — so no CORS configuration is needed here: Chrome grants a
-background service worker's `fetch()` calls to origins listed in
-`host_permissions` (already `http://127.0.0.1:*` and `http://localhost:*`
-in `extension/manifest.json`) the same cross-origin access the extension
-itself has, independent of the target server's CORS headers. This server
-is still intended to run locally, for a single user, with no
-authentication — if it's ever exposed beyond localhost, authentication
-would need to be added first.
+background service worker's `fetch()` calls to origins covered by a granted
+host permission the same cross-origin access the extension itself has,
+independent of the target server's CORS headers. `extension/manifest.json`
+declares `http://127.0.0.1:*` and `http://localhost:*` as *required*
+`host_permissions` (granted at install, no prompt) plus `http://*/*` and
+`https://*/*` as `optional_host_permissions`; `extension/popup/popup.js`
+requests the narrower, specific origin the user actually configured (e.g.
+`https://haven.example.com/*`) at runtime via `chrome.permissions.request()`
+from Save Settings/Test Connection — both user-gesture-triggered, so no
+extension rebuild or republish is needed to point at a new remote
+deployment. This server itself is still intended to run with no built-in
+authentication (a single-user, filesystem-backed process) — the Alibaba
+Cloud deployment instead adds HTTP Basic Auth at the nginx layer (see
+`deploy/alibaba-cloud/nginx.haven.conf`), and the extension's popup Settings
+has optional username/password fields (`extension/config.js`'s
+`buildAuthHeader`) that get sent as an `Authorization: Basic ...` header on
+every request once configured.

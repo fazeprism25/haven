@@ -1,13 +1,36 @@
-import { HAVEN_BASE_URL, ENDPOINTS, REQUEST_TIMEOUT_MS, SETTINGS_STORAGE_KEY } from "./config.js";
+import {
+  HAVEN_BASE_URL,
+  ENDPOINTS,
+  REQUEST_TIMEOUT_MS,
+  SETTINGS_STORAGE_KEY,
+  buildAuthHeader,
+  isAlwaysPermittedHost,
+  originPatternFor,
+} from "./config.js";
 
-// The server URL is user-configurable (see popup/popup.js), persisted in
-// chrome.storage.local under SETTINGS_STORAGE_KEY. Read fresh on every
-// request rather than cached, so a setting change takes effect on the very
-// next call with no service-worker restart needed.
-async function resolveBaseUrl() {
+// The server URL (and optional Basic Auth credentials) are user-configurable
+// (see popup/popup.js), persisted in chrome.storage.local under
+// SETTINGS_STORAGE_KEY. Read fresh on every request rather than cached, so a
+// setting change takes effect on the very next call with no service-worker
+// restart needed. `override` (popup.js's Test Connection button) lets a
+// caller probe a serverUrl/credentials pair that hasn't been saved yet,
+// without duplicating the fetch logic below.
+async function resolveConnection(override) {
+  if (override) {
+    return {
+      baseUrl: (override.serverUrl?.trim() ? override.serverUrl.trim() : HAVEN_BASE_URL).replace(/\/+$/, ""),
+      authUser: override.authUser || "",
+      authPassword: override.authPassword || "",
+    };
+  }
   const stored = await chrome.storage.local.get(SETTINGS_STORAGE_KEY);
-  const configured = stored[SETTINGS_STORAGE_KEY]?.serverUrl;
-  return configured && configured.trim() ? configured.trim().replace(/\/+$/, "") : HAVEN_BASE_URL;
+  const settings = stored[SETTINGS_STORAGE_KEY] || {};
+  const configured = settings.serverUrl;
+  return {
+    baseUrl: (configured && configured.trim() ? configured.trim() : HAVEN_BASE_URL).replace(/\/+$/, ""),
+    authUser: settings.authUser || "",
+    authPassword: settings.authPassword || "",
+  };
 }
 
 // The FastAPI server's error responses are JSON bodies shaped like
@@ -45,7 +68,7 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
-    // Everything below -- including resolveBaseUrl()'s chrome.storage read --
+    // Everything below -- including resolveConnection()'s chrome.storage read --
     // must stay inside this try. sendResponse() is the only thing standing
     // between this call and a "message port closed before a response was
     // received" error on the content-script side: an exception thrown before
@@ -53,7 +76,36 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     // MV3 service worker is still waking from termination) would otherwise
     // leave the message channel open with nothing left to ever close it.
     try {
-      const baseUrl = await resolveBaseUrl();
+      const { baseUrl, authUser, authPassword } = await resolveConnection(message.connectionOverride);
+
+      let hostname;
+      try {
+        hostname = new URL(baseUrl).hostname;
+      } catch (_urlError) {
+        sendResponse({ ok: false, error: `"${baseUrl}" isn't a valid server URL.` });
+        return;
+      }
+
+      // Chrome only bypasses CORS -- and lets this fetch() reach a remote
+      // server at all -- for origins covered by host_permissions (see
+      // config.js's originPatternFor). manifest.json's *required*
+      // host_permissions only ever cover localhost/127.0.0.1; any other
+      // host needs a runtime-granted optional permission (popup.js requests
+      // this from Save Settings/Test Connection, both user gestures).
+      // Skipping straight to fetch() without this check would still fail,
+      // but as an opaque browser-level "Failed to fetch" with no indication
+      // of why -- checking first turns that into an actionable message.
+      if (!isAlwaysPermittedHost(hostname)) {
+        const granted = await chrome.permissions.contains({ origins: [originPatternFor(baseUrl)] });
+        if (!granted) {
+          sendResponse({
+            ok: false,
+            error: `Haven doesn't have permission to reach ${hostname} yet. Open the Haven popup and click "Test Connection" to grant access.`,
+          });
+          return;
+        }
+      }
+
       let url = baseUrl + endpoint.path;
       let body;
       if (endpoint.method === "GET") {
@@ -66,9 +118,17 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
         body = message.payload ? JSON.stringify(message.payload) : undefined;
       }
 
+      const headers = {};
+      if (body) headers["Content-Type"] = "application/json";
+      // Only sent when the user configured a username (see
+      // deploy/alibaba-cloud/nginx.haven.conf's Basic Auth) -- a bare
+      // localhost dev server never sees this header.
+      const authHeader = buildAuthHeader(authUser, authPassword);
+      if (authHeader) headers["Authorization"] = authHeader;
+
       const response = await fetch(url, {
         method: endpoint.method,
-        headers: body ? { "Content-Type": "application/json" } : undefined,
+        headers: Object.keys(headers).length ? headers : undefined,
         body,
         signal: controller.signal,
       });
