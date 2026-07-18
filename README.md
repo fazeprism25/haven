@@ -654,8 +654,9 @@ python -m benchmarks.runners.run_benchmarks --adapter haven    # Haven
 > ahead of it is "return every stored memory" (90.3%), a precision-floor
 > strategy with no ranking, no deduplication, and no explainability — included
 > as a lower bound, not a competing retrieval strategy. Haven ties for the top
-> score in 7 of the suite's 11 categories, and the 4 categories where it
-> currently loses to recency are root-caused below, not glossed over.
+> score in 4 of the suite's 11 categories; of the remaining 7, the 4 where it
+> currently loses to Recency are root-caused below, not glossed over, and the
+> other 3 lose narrowly to Return All and/or Embedding, not Recency.
 
 | Category | **Haven Full** | Return All | Recency | BM25 | Embedding |
 |---|---:|---:|---:|---:|---:|
@@ -672,11 +673,14 @@ python -m benchmarks.runners.run_benchmarks --adapter haven    # Haven
 | temporal | 18/25 | 20/25 | **25/25** | 11/25 | 16/25 |
 | **Overall (288 cases)** | **240 (83.3%)** | **260 (90.3%)** | 232 (80.6%) | 201 (69.8%) | 231 (80.2%) |
 
-Bold marks the best score in each row. Haven Full ties for that top score in 7
-of 11 categories; the remaining 4 (`beliefs`, `contradictions`, `supersession`,
-`temporal`) all lose to Recency for the same root-caused reason (below), and
-"Return All" — a strategy that returns literally everything with no filtering
-— isn't a meaningful bar to clear on the overall number. Full per-category
+Bold marks the best score in each row. Haven Full ties for that top score in 4
+of 11 categories (`decisions`, `goals`, `identity`, `preferences`). Of the
+remaining 7, 4 (`beliefs`, `contradictions`, `supersession`, `temporal`) all
+lose to Recency for the same root-caused reason (below), and 3
+(`concept_consolidation`, `decision_reconstruction`, `refinements`) lose
+narrowly to Return All and/or Embedding, not Recency — and "Return All" — a
+strategy that returns literally everything with no filtering — isn't a
+meaningful bar to clear on the overall number. Full per-category
 table with source data:
 [`deepseek_validation_report.md`](benchmarks/reports/archive/deepseek_validation_report.md#2-category-by-category-comparison).
 
@@ -724,8 +728,8 @@ the old and new versions both stay independently retrievable instead of the old
 one being archived — which is exactly the gap "wire `SUPERSEDE` into the
 automatic pipeline" on the [roadmap](#-roadmap) closes. A benchmark suite that
 only ever finds wins is a marketing document; this one found the specific,
-named reason Haven loses on four categories, which is why the win on the other
-seven is worth believing.
+named reason Haven loses on four categories, which is why the outright ties in
+4 of the remaining 7 are worth believing.
 
 **Why this was benchmarked before the fix, not after:** this 288-case run
 deliberately measures Haven's current architecture — `UPDATE` automatic,
