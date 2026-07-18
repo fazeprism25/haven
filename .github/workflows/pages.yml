@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
     paths:
-      - obsidian/docs/media/haven-article.html
+      - obsidian/docs/media/**
       - .github/workflows/pages.yml
   workflow_dispatch:
 
@@ -28,6 +28,10 @@ jobs:
       - name: Prepare site
         run: |
           mkdir -p _site
+          # Copy every asset alongside the article (SVGs, PNGs, etc.) so the
+          # article's relative image paths resolve once deployed, then place
+          # the article itself as the site's index.
+          rsync -a --exclude 'haven-article.html' obsidian/docs/media/ _site/
           cp obsidian/docs/media/haven-article.html _site/index.html
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3

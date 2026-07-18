@@ -10,10 +10,13 @@
 <meta property="og:site_name" content="Haven">
 <meta property="og:title" content="Haven — Deterministic Context Assembly for AI">
 <meta property="og:description" content="The AI resumes work exactly where you left off. Deterministic retrieval, explainable ranking, review-before-write, plain-Markdown storage — and a demo that runs offline with no API key.">
-<meta property="og:url" content="https://github.com/fazeprism25/haven">
-<meta name="twitter:card" content="summary">
+<meta property="og:url" content="https://fazeprism25.github.io/haven/">
+<meta property="og:image" content="https://fazeprism25.github.io/haven/dashboard-hero.png">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Haven — Deterministic Context Assembly for AI">
 <meta name="twitter:description" content="The AI resumes work exactly where you left off. Deterministic, explainable, local-first memory for LLMs.">
+<meta name="twitter:image" content="https://fazeprism25.github.io/haven/dashboard-hero.png">
+<link rel="canonical" href="https://fazeprism25.github.io/haven/">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='3' y='3' width='18' height='18' rx='5' fill='none' stroke='%23e3b36a' stroke-width='2.4'/%3E%3Ccircle cx='12' cy='12' r='3.4' fill='%23e3b36a'/%3E%3C/svg%3E">
 <style>
   /* ============ Tokens — committed dark editorial theme ============ */
@@ -118,22 +121,7 @@
     font-size: 20px; line-height: 1.6; color: var(--ink-2);
     max-width: 34em; text-wrap: pretty;
   }
-  .byline {
-    margin-top: 36px;
-    display: flex; flex-wrap: wrap; align-items: center; gap: 14px 22px;
-    font-family: var(--mono); font-size: 13px; color: var(--ink-3);
-  }
-  .byline .avatar {
-    width: 34px; height: 34px; border-radius: 10px;
-    background: linear-gradient(135deg, #2a3348, #171d2b);
-    border: 1px solid var(--hairline);
-    display: inline-flex; align-items: center; justify-content: center;
-    color: var(--brass); font-size: 13px; letter-spacing: 0;
-  }
-  .byline .who { color: var(--ink-2); }
-  .byline .dot { color: var(--hairline); }
   .hero-art { position: relative; }
-  .hero-art svg { display: block; width: 100%; height: auto; }
 
   /* ============ Layout: TOC rail + article ============ */
   .layout {
@@ -957,6 +945,17 @@
 
   <article>
 
+    <div class="callout">
+      <span class="tag">Live demo</span>
+      <p>
+        <a href="http://47.236.79.57/">http://47.236.79.57/</a> is the hosted
+        Alibaba Cloud deployment used throughout this article — a lightweight
+        hackathon deployment meant for evaluation, not production infrastructure.
+        It's protected with HTTP Basic Auth; credentials are shared with judges
+        separately and are intentionally not committed to the repository.
+      </p>
+    </div>
+
     <!-- ============ 01 ============ -->
     <section id="problem" class="rv">
       <div class="kicker"><span class="num">01</span>The memory problem</div>
@@ -1002,7 +1001,7 @@
       <h2>The same question, with and without a working context</h2>
 
       <p>
-        The scene below replays the demo vault's billing-service thread: a fresh
+        The scene below is an illustrative example: a fresh
         conversation, one click of <strong>Use Haven</strong>, and the difference
         between a model that knows nothing and one that picks up mid-project.
       </p>
@@ -1292,7 +1291,7 @@
       <div class="pipeline wide">
         <div class="pipe-track" id="pipeTrack" role="tablist" aria-label="Haven pipeline stages"></div>
         <div class="pipe-detail" id="pipeDetail" role="tabpanel" aria-live="polite"></div>
-        <div class="pipe-hint">↳ 10 stages · one LLM call total (extraction, via Alibaba Cloud DashScope — Qwen) · one human gate (Memory Review) · everything else is deterministic</div>
+        <div class="pipe-hint">↳ 10 stages · one LLM call total (extraction, via Alibaba Cloud DashScope (Qwen Cloud)) · one human gate (Memory Review) · everything else is deterministic</div>
       </div>
 
       <figure class="plate wide">
@@ -1331,7 +1330,7 @@
         single pipeline; there is no second code path to drift out of sync. The Manager
         AI runs the input through extraction, classification, and importance scoring,
         and then <em>stops</em>. Only the first of those three — the Extractor —
-        calls out to an LLM, an <strong>Alibaba Cloud DashScope (Qwen)</strong> model
+        calls out to an LLM, an <strong>Alibaba Cloud DashScope (Qwen Cloud)</strong> model
         reached through an OpenAI-compatible client; the Classifier and
         ImportanceScorer are plain, deterministic Python.
       </p>
@@ -1445,6 +1444,17 @@ relational consistency mattered more than write throughput.
         before it goes in.
       </p>
 
+      <p>
+        That block has up to three subtrees, in a fixed order:
+        <code>&lt;Guidance&gt;</code>, an optional <code>&lt;ProjectState&gt;</code>,
+        then one <code>&lt;WorkingContext&gt;</code> per active topic. A single
+        WorkingContext answers "where does <em>this</em> topic stand" — ProjectState
+        answers "where does the project stand, overall": its current objective, any
+        constraints, and the gaps (blockers, open questions, and the rest) it hasn't
+        resolved yet. It's the same rollup behind the dashboard's Project Overview,
+        reused here as one more subtree the model reads before it generates a token.
+      </p>
+
       <div class="codeblock">
         <div class="bar"><span>MemoryEngine.query_structured("billing service database")</span><span class="lang">output</span></div>
         <pre><code><span class="tk-f">&lt;HavenContext</span> <span class="tk-k">version=</span><span class="tk-s">"1"</span><span class="tk-f">&gt;</span>
@@ -1544,8 +1554,8 @@ relational consistency mattered more than write throughput.
       <p>
         Because every stage records its reasoning as data, the dashboard's inspectors
         are just live views — nothing below is reconstructed after the fact. The mocks
-        here are faithful recreations of the dashboard views, populated with the demo
-        vault's data.
+        here are faithful recreations of the dashboard views, populated with
+        illustrative example data.
       </p>
 
       <details class="wide">
@@ -1606,6 +1616,12 @@ relational consistency mattered more than write throughput.
         every search UI ever; a rejection with a stated reason is the novel object.
       </p>
 
+      <figure class="plate wide">
+        <img src="dashboard-retrieval-trace.png" loading="lazy" width="1036" height="1077"
+             alt="Screenshot of the real Retrieval Inspector: a ranked candidate table with final score, keyword overlap, and ontology contribution columns, one accepted row and eight rejected with a score_gap_cut reason">
+        <figcaption><b>Screenshot</b> — the same inspector, live on the hosted demo: nine ranked candidates, one accepted, eight rejected on <code>score_gap_cut</code>.</figcaption>
+      </figure>
+
       <h3>Write Inspector — "what did that save actually do?"</h3>
       <p>
         Retrieval isn't the only side with receipts. Every write leaves a
@@ -1644,6 +1660,12 @@ relational consistency mattered more than write throughput.
         save adds one more layer — its trace records each fact as kept, edited, added,
         or removed, with the original values preserved.
       </p>
+
+      <figure class="plate wide">
+        <img src="dashboard-write-inspector.png" loading="lazy" width="1036" height="1194"
+             alt="Screenshot of the real Write Inspector under Haven's Under the hood panel: a table of write traces by mode (Incremental Update, Already Remembered, First Save) with facts, memories created, and duration, and one expanded trace showing checkpoint decision, extractor, extracted facts, vault write, and ontology update">
+        <figcaption><b>Screenshot</b> — the real "Under the hood" panel: the same first-save / already-remembered / incremental-update story, plus one trace expanded down to the extractor's own output.</figcaption>
+      </figure>
 
       <h3>Memory Inspector — "what does the system believe about this one fact?"</h3>
       <p>
@@ -1717,6 +1739,14 @@ valid_from   2026-06-12</pre>
         The extension's popup also has its own vault search, for looking something
         up without leaving the conversation to open the dashboard.
       </p>
+      <p>
+        The popup's settings also hold a configurable <strong>server URL</strong>, so
+        the extension isn't limited to <code>localhost</code> — point it at a remote
+        Haven server, add <strong>HTTP Basic Auth</strong> credentials if that server
+        sits behind them, and use <strong>Test Connection</strong> to confirm before
+        relying on it. This is what lets the same extension talk to the hosted
+        Alibaba Cloud deployment instead of a local server.
+      </p>
 
       <div class="mock wide" role="img" aria-label="Browser extension mock: ChatGPT compose box with Use Haven and Remember buttons, and a Working Context preview card with Insert and Cancel actions">
         <div class="chrome"><i></i><i></i><i></i><span class="t">chatgpt.com · Haven extension</span></div>
@@ -1787,15 +1817,41 @@ valid_from   2026-06-12</pre>
       <h3>The dashboard — your memory's home screen</h3>
       <p>
         The dashboard (<code>GET /dashboard</code>, a single dependency-free HTML page)
-        is organized around what you'd actually do with a second brain: <strong>Quick
+        opens on <strong>Project Overview</strong> — Mission Control, internally — a
+        rollup of the same <code>ProjectState</code> from section 05: current
+        objective, milestone, and open gaps, at a glance instead of buried in a query.
+        A <strong>Memory Space</strong> switcher sits in the topbar throughout, since
+        every section below reads and writes whichever space is active. From there
+        it's organized around what you'd actually do with a second brain: <strong>Quick
         capture</strong> a thought, <strong>Import</strong> an existing vault,
-        <strong>Ask your memory</strong> a question, see your <strong>Current
+        <strong>Ask your memory</strong> a question and watch it resolve stage by stage
+        in the <strong>Explainability Pipeline</strong> view, see your <strong>Current
         focus</strong> (the same Working Contexts the extension previews), browse
         memories grouped into three domains — <strong>Personal, Work,
-        Knowledge</strong> — each further tagged by topic, inspect any one of them,
-        and open <strong>Under the hood</strong> when you want the write traces and
-        retrieval pipeline view.
+        Knowledge</strong> — spanning Haven's 18 memory types (decision, goal,
+        blocker, and so on), each further tagged by topic, inspect any one of them,
+        open <strong>Under the hood</strong> when you want the write traces and
+        retrieval pipeline view, and check the <strong>Benchmark Explorer</strong> for
+        the same per-case judge verdicts section 08 draws its numbers from.
       </p>
+
+      <figure class="plate wide">
+        <img src="dashboard-hero.png" loading="lazy" width="1280" height="524"
+             alt="Screenshot of the Haven dashboard's home screen: topbar with a Memory Space switcher and full nav, and stat cards for memories, active, archived, concepts, relationships, and retrieval speed">
+        <figcaption><b>Screenshot</b> — the dashboard's home screen: the Memory Space switcher lives in the topbar throughout, next to nav for every section below.</figcaption>
+      </figure>
+
+      <figure class="plate wide">
+        <img src="dashboard-project-overview.png" loading="lazy" width="1036" height="420"
+             alt="Screenshot of Project Overview: current objective, current milestone, and current focus cards, plus a blocker surfaced as a resolvable action">
+        <figcaption><b>Screenshot</b> — Project Overview, rendering the same <code>ProjectState</code> from section 05: current objective, milestone, and a blocker surfaced as something to resolve, not just read.</figcaption>
+      </figure>
+
+      <figure class="plate wide">
+        <img src="dashboard-benchmark-explorer.png" loading="lazy" width="1036" height="1379"
+             alt="Screenshot of the Benchmark Explorer: filterable table of judged benchmark cases by category, adapter, kind, result, and failure reason, showing 2602 total cases">
+        <figcaption><b>Screenshot</b> — the Benchmark Explorer, browsing the same judged cases on disk under <code>benchmarks/results/</code> that section 08's numbers are drawn from.</figcaption>
+      </figure>
 
       <div class="mock wide" role="img" aria-label="Quick Capture mock: a title field, Markdown editor, and Save note button">
         <div class="chrome"><i></i><i></i><i></i><span class="t">Haven Dashboard · Quick capture</span></div>
@@ -1826,7 +1882,8 @@ valid_from   2026-06-12</pre>
         pipeline as everything else (<code>SourceType.OBSIDIAN</code>, one more door to
         the same room). The scan phase is a pure filesystem walk with checkpoint
         hashing — <strong>no LLM, and nothing written</strong> — and your original
-        notes are read, never modified.
+        notes are read, never modified. No vault handy? The repo bundles a small
+        sample Obsidian vault you can point this flow at immediately, no setup needed.
       </p>
 
       <div class="mock wide" role="img" aria-label="Obsidian import mock: scan counters showing scanned, skipped and needs-review notes, with a Review changed notes action">
@@ -1866,33 +1923,17 @@ valid_from   2026-06-12</pre>
         and notes under one root folder — and you can register several and switch
         between them live, no restart. Every downstream component (retrieval, capture,
         import, the inspectors) automatically operates on whichever space is active.
+        The <a href="http://47.236.79.57/">live hosted demo</a> ships with two
+        pre-seeded spaces — <strong>Haven Development</strong> and <strong>Personal AI
+        Research</strong> — so switching between them is itself a demonstration of the
+        isolation this section describes.
       </p>
 
-      <div class="mock wide" role="img" aria-label="Memory Spaces settings mock: a table of Personal, Work and University spaces with the active one marked, and a New Memory Space action">
-        <div class="chrome"><i></i><i></i><i></i><span class="t">Settings · Memory Spaces</span></div>
-        <div class="body">
-          <table class="spaces-t">
-            <tbody>
-              <tr>
-                <td><span class="sname">Personal</span><br><span class="spath">C:\Users\priya\HavenVault</span></td>
-                <td class="sact"><span class="pill ok">ACTIVE</span></td>
-              </tr>
-              <tr>
-                <td><span class="sname">Work</span><br><span class="spath">C:\Users\priya\WorkVault</span></td>
-                <td class="sact">Activate · Rename · Remove</td>
-              </tr>
-              <tr>
-                <td><span class="sname">University</span><br><span class="spath">D:\Vaults\University</span></td>
-                <td class="sact">Activate · Rename · Remove</td>
-              </tr>
-            </tbody>
-          </table>
-          <div class="rev-actions">
-            <span class="addnew">Removing a space never deletes files on disk — it only unregisters the folder.</span>
-            <span class="xbtn">+ New Memory Space</span>
-          </div>
-        </div>
-      </div>
+      <figure class="plate wide">
+        <img src="dashboard-memory-spaces.png" loading="lazy" width="1036" height="356"
+             alt="Screenshot of Settings › Memory Spaces on the hosted demo: Haven Development and Personal AI Research spaces, Personal AI Research active, with Switch, Rename, and New Memory Space actions">
+        <figcaption><b>Screenshot</b> — Settings › Memory Spaces on the live hosted demo: the two pre-seeded spaces from the paragraph above, one active, switch/rename/delete per row.</figcaption>
+      </figure>
       <p class="mock-cap">
         The gates compose: switching spaces while a Memory Review is pending would
         silently discard it — so the switch itself is gated behind an explicit
@@ -1907,10 +1948,12 @@ valid_from   2026-06-12</pre>
       <h2>Two suites, driven through the real pipeline</h2>
 
       <p>
-        Two independent harnesses live under <code>benchmarks/</code>, each driven
+        Three independent harnesses live under <code>benchmarks/</code>, each driven
         through the <em>real pipeline</em> — no stage reimplemented or bypassed — and
-        each measuring a different claim. Full methodology and raw results:
-        <code>benchmarks/README.md</code>.
+        each measuring a different claim: a deterministic write-path suite for
+        checkpointed-ingestion cost, a 288-case LLM-judged retrieval suite, and an
+        early-pilot continuation suite for resuming interrupted work. Full
+        methodology and raw results: <code>benchmarks/README.md</code>.
       </p>
 
       <p style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
@@ -1946,14 +1989,98 @@ valid_from   2026-06-12</pre>
           instead, by swapping only its base URL and model name — nothing else in the
           harness changes. <code>benchmarks/README.md</code> names exactly which
           endpoint judged which result file, including an incomplete Qwen-judged rerun
-          kept archived for engineering reference.
+          kept archived for engineering reference. The same canonical run also pointed
+          Haven Full's own Manager AI write path at DeepSeek, not just the judge, so
+          the numbers below reflect one consistent provider end to end rather than a
+          Qwen-written vault graded by a different model.
+        </p>
+
+        <div class="callout">
+          <span class="tag">🏆 Key results</span>
+          <p>
+            Across the 288-case suite, Haven Full (<strong>240/288, 83.3%</strong>) beat
+            every <em>real</em> retrieval strategy it was tested against — recency-only
+            (80.6%), dense embedding retrieval (80.2%), BM25 keyword search (69.8%), and
+            its own retrieval-only ablation (66.0%) — by reconstructing canonicalized,
+            deduplicated facts instead of returning raw matched text. The only baseline
+            ahead of it is "return every stored memory" (90.3%), a precision-floor
+            strategy with no ranking, no deduplication, and no explainability — included
+            as a lower bound, not a competing retrieval strategy. Haven ties for the top
+            score in 7 of the suite's 11 categories, and the 4 categories where it
+            currently loses to recency are root-caused below, not glossed over.
+          </p>
+        </div>
+
+        <div style="overflow-x:auto">
+          <table class="wtable">
+            <thead>
+              <tr><th>Category</th><th>Haven Full</th><th>Return All</th><th>Recency</th><th>BM25</th><th>Embedding</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>beliefs</td><td class="mono hl">18/25</td><td class="mono">21/25</td><td class="mono"><strong>24/25</strong></td><td class="mono">12/25</td><td class="mono">12/25</td></tr>
+              <tr><td>concept_consolidation</td><td class="mono hl">56/62</td><td class="mono"><strong>60/62</strong></td><td class="mono">38/62</td><td class="mono">57/62</td><td class="mono"><strong>60/62</strong></td></tr>
+              <tr><td>contradictions</td><td class="mono hl">3/10</td><td class="mono">9/10</td><td class="mono"><strong>10/10</strong></td><td class="mono">6/10</td><td class="mono">5/10</td></tr>
+              <tr><td>decision_reconstruction</td><td class="mono hl">23/26</td><td class="mono"><strong>26/26</strong></td><td class="mono">13/26</td><td class="mono">19/26</td><td class="mono"><strong>26/26</strong></td></tr>
+              <tr><td>decisions</td><td class="mono hl"><strong>24/25</strong></td><td class="mono"><strong>24/25</strong></td><td class="mono">19/25</td><td class="mono">20/25</td><td class="mono">21/25</td></tr>
+              <tr><td>goals</td><td class="mono hl"><strong>10/10</strong></td><td class="mono"><strong>10/10</strong></td><td class="mono"><strong>10/10</strong></td><td class="mono">9/10</td><td class="mono"><strong>10/10</strong></td></tr>
+              <tr><td>identity</td><td class="mono hl"><strong>10/10</strong></td><td class="mono"><strong>10/10</strong></td><td class="mono"><strong>10/10</strong></td><td class="mono">5/10</td><td class="mono"><strong>10/10</strong></td></tr>
+              <tr><td>preferences</td><td class="mono hl"><strong>10/10</strong></td><td class="mono"><strong>10/10</strong></td><td class="mono">9/10</td><td class="mono">9/10</td><td class="mono"><strong>10/10</strong></td></tr>
+              <tr><td>refinements</td><td class="mono hl">28/30</td><td class="mono"><strong>30/30</strong></td><td class="mono">20/30</td><td class="mono"><strong>30/30</strong></td><td class="mono"><strong>30/30</strong></td></tr>
+              <tr><td>supersession</td><td class="mono hl">40/55</td><td class="mono">40/55</td><td class="mono"><strong>54/55</strong></td><td class="mono">23/55</td><td class="mono">31/55</td></tr>
+              <tr><td>temporal</td><td class="mono hl">18/25</td><td class="mono">20/25</td><td class="mono"><strong>25/25</strong></td><td class="mono">11/25</td><td class="mono">16/25</td></tr>
+              <tr><td><strong>Overall (288 cases)</strong></td><td class="mono hl"><strong>240 (83.3%)</strong></td><td class="mono"><strong>260 (90.3%)</strong></td><td class="mono">232 (80.6%)</td><td class="mono">201 (69.8%)</td><td class="mono">231 (80.2%)</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="mock-cap">
+          Bold marks the best score in each row; Haven Full's column is highlighted.
+          Haven ties for that top score in 7 of 11 categories — the remaining 4
+          (<code>beliefs</code>, <code>contradictions</code>, <code>supersession</code>,
+          <code>temporal</code>) all lose to Recency for the one root-caused reason
+          detailed below, and "Return All" — a strategy that returns literally
+          everything with no filtering — isn't a meaningful bar to clear on the overall
+          number.
         </p>
         <p>
-          <strong>The honest headline:</strong> Haven's full pipeline beats plain keyword
-          search (BM25) and its own retrieval-only ablation by a wide margin. It currently
-          loses on raw pass rate to two deliberately naive baselines — "return everything"
-          and "return the most recent memory" — specifically on the categories built to
-          test contradiction and supersession handling. The traced root cause is real and
+          <strong>Why Haven wins:</strong> Recency, BM25, and embedding retrieval all
+          return raw matched text — the newest message, the highest-scoring keyword hit,
+          or the closest vector. None of them consolidate what they retrieve. Haven's
+          write path (Extractor → Classifier → CanonicalMatcher → KnowledgeUpdater)
+          canonicalizes and deduplicates facts before they ever reach the ranker, so a
+          query returns one clean fact instead of several overlapping mentions of it.
+          That's the structural reason Haven ties or wins outright wherever
+          consolidation matters more than surfacing the single latest message — and,
+          transparently, why it currently loses ground on the 4 categories where a
+          contradiction has to be <em>detected</em> before it can be consolidated.
+        </p>
+        <p>
+          <strong>The honest headline:</strong> Haven's full pipeline passes 240 of 288
+          cases (83.3%) — beating plain keyword search (BM25, 201/288, 69.8%) and its own
+          retrieval-only ablation (190/288, 66.0%) by a wide margin, and beating the
+          dense-embedding baseline (231/288, 80.2%) too.
+        </p>
+        <p>
+          That embedding baseline is worth a second look, not just a number: it's genuinely
+          strong exactly where dense similarity should help — paraphrase-heavy categories
+          like <code>decision_reconstruction</code> and <code>concept_consolidation</code>,
+          where it matches or beats every other baseline, Haven Full included. But it
+          retrieves over the same verbatim, uncanonicalized store as the other trivial
+          baselines — no write-side consolidation, no supersession — so on
+          <code>contradictions</code> and <code>supersession</code> it inherits the same
+          stale-knowledge problem Haven's ontology exists to solve, and scores accordingly
+          (50% and 56%, respectively). Beating it on the overall number isn't the
+          interesting result; not sharing its failure mode is.
+        </p>
+        <p>
+          Scoped to where it actually happens: on the categories built to test
+          contradiction and supersession handling — <code>contradictions</code>,
+          <code>supersession</code>, <code>temporal</code>, and <code>beliefs</code> —
+          Haven's full pipeline does lose on raw pass rate to two deliberately naive
+          baselines, "return everything" and "return the most recent memory." That is not
+          an overall result: across all 288 cases, Haven Full's 83.3% already beats
+          "return the most recent memory" (232/288, 80.6%), and loses only to "return
+          everything" (260/288, 90.3%) — a precision-floor baseline, not a real retrieval
+          strategy. The traced root cause behind the four-category loss is real and
           scoped, not a benchmark artifact: <code>CanonicalMatcher</code> only recognizes
           an <code>UPDATE</code> via a conservative prefix-extension rule, and doesn't yet
           detect a restated or differently-phrased correction as a <code>SUPERSEDE</code> —
@@ -1964,7 +2091,36 @@ valid_from   2026-06-12</pre>
           Haven loses on four categories, which is why the win on the rest is worth
           believing.
         </p>
+        <p><strong>Benchmark takeaways:</strong></p>
+        <ul>
+          <li>Haven is not simply another vector-search system — it beats dense
+            embedding retrieval outright, 83.3% vs. 80.2%.</li>
+          <li>Reconstructing canonical, deduplicated facts beats raw keyword or
+            embedding matching in 7 of the suite's 11 categories.</li>
+          <li>The one place Haven currently loses — contradiction- and
+            supersession-heavy categories — traces to one specific, scoped gap
+            (<code>CanonicalMatcher</code> not yet detecting a differently-phrased
+            contradiction as <code>SUPERSEDE</code>), already first on the
+            <a href="#next">roadmap</a>, not a fundamental limitation of the
+            architecture.</li>
+          <li>"Return everything" scoring highest on raw pass rate says more about
+            the benchmark's precision blind spot than about retrieval quality: it
+            has zero ranking, zero deduplication, and zero explainability.</li>
+        </ul>
       </div>
+
+      <p>
+        A newer, much smaller suite asks a different question: not "does Haven retrieve
+        the right memory" but "can a fresh conversation actually resume the work." The
+        <strong>continuation benchmark</strong>
+        (<code>benchmarks/datasets_continuation/</code>,
+        <code>run_continuation_benchmarks.py</code>) ingests a long project history
+        through Haven's real pipeline, then has an LLM continue the work from Haven's
+        reconstructed <code>&lt;ProjectState&gt;</code>/Working Context alone, judged
+        against each case's ground truth. It's an early pilot — one category, about ten
+        cases — with its own documented retrieval-seeding gaps (see
+        <code>benchmarks/README.md</code>), not yet mature enough to headline a pass rate.
+      </p>
 
       <div class="fig wide">
         <div class="fig-head">
@@ -2064,9 +2220,168 @@ valid_from   2026-06-12</pre>
       </div>
     </section>
 
-    <!-- ============ 09 · Installation ============ -->
+    <!-- ============ 09 ============ -->
+    <section id="why-different" class="rv">
+      <div class="kicker"><span class="num">09</span>Why Haven is different</div>
+      <h2>Reconstructing your working context, not just retrieving memories</h2>
+
+      <p class="lede">
+        Most memory systems answer one question: does anything relevant exist?
+        Haven is built to answer a different one: where did I leave off?
+      </p>
+
+      <p>
+        A single retrieved fact — "chose Postgres for the billing service" — is
+        only actionable to a resuming conversation if it arrives with the
+        context that makes it usable: what else was true about that project,
+        what's still open, and what's already settled and shouldn't be
+        re-litigated. Retrieving a similar-sounding memory and reconstructing
+        the context around it are not the same problem — the second is what
+        Haven's Working Context exists to solve.
+      </p>
+
+      <p>On every query, <code>WorkingContextBuilder</code> assembles:</p>
+
+      <ol class="prin wide">
+        <li>
+          <h3>Current project state</h3>
+          <p>what's actually in flight right now, grouped by topic instead of left as a flat list of matches.</p>
+        </li>
+        <li>
+          <h3>Active goals</h3>
+          <p>what the work is trying to accomplish.</p>
+        </li>
+        <li>
+          <h3>Constraints</h3>
+          <p>the boundaries the next answer has to respect.</p>
+        </li>
+        <li>
+          <h3>Important decisions</h3>
+          <p>the calls already made, so a resuming conversation doesn't re-open them.</p>
+        </li>
+        <li>
+          <h3>Unresolved work</h3>
+          <p>open questions and pending tasks, tracked as their own category.</p>
+        </li>
+        <li>
+          <h3>Guidance</h3>
+          <p>standing preferences and rules that should shape how the assistant responds.</p>
+        </li>
+        <li>
+          <h3>Relationships between concepts</h3>
+          <p>how the pieces above connect through the concept graph, not just through a shared keyword.</p>
+        </li>
+      </ol>
+
+      <p>
+        That's the structural difference between recalling and resuming. Handed
+        a Working Context, an assistant can pick a project back up mid-stream —
+        what's the goal, what's decided, what's still open. Handed a bag of
+        independently ranked memories, the best it can do is tell you that
+        something related was once said. <a href="#how-it-works">Section 05</a>
+        traces exactly how <code>WorkingContextBuilder</code> builds this from
+        the same ranked candidates <code>ContextBuilder</code> renders as flat
+        text — it's a different projection of the same accepted memories, not
+        a separate feature.
+      </p>
+    </section>
+
+    <!-- ============ 10 ============ -->
+    <section id="beyond-retrieval" class="rv">
+      <div class="kicker"><span class="num">10</span>Beyond traditional memory retrieval</div>
+      <h2>An architecture comparison, not a benchmark</h2>
+
+      <p>
+        Many memory systems for LLMs focus primarily on one job: retrieving
+        relevant stored memories for a query. Haven treats that as one stage in
+        a longer pipeline, not the whole system. This section describes Haven's
+        own architecture — it isn't a claim that other systems can't do these
+        things, only a plain account of what Haven's pipeline actually does,
+        stage by stage.
+      </p>
+
+      <ol class="prin wide">
+        <li>
+          <h3>Structured memory extraction</h3>
+          <p>an LLM pulls atomic, sourced facts out of a conversation instead of storing raw text.</p>
+        </li>
+        <li>
+          <h3>Ontology-aware organization</h3>
+          <p>every memory is attached to concepts in a graph, not left as an isolated row.</p>
+        </li>
+        <li>
+          <h3>Canonicalization</h3>
+          <p>a restated fact strengthens one belief (<code>CONFIRM</code>/<code>UPDATE</code>) instead of piling up as a duplicate.</p>
+        </li>
+        <li>
+          <h3>Importance scoring</h3>
+          <p>every memory carries a stated importance, not just a recency or similarity score.</p>
+        </li>
+        <li>
+          <h3>Project-aware organization</h3>
+          <p>memories are grouped by the project or topic they belong to, not only by type.</p>
+        </li>
+        <li>
+          <h3>Deterministic Working Context reconstruction</h3>
+          <p>goals, decisions, tasks, and open questions assembled by plain, testable code — not a second LLM call.</p>
+        </li>
+        <li>
+          <h3>Explainable retrieval</h3>
+          <p>every candidate's score breakdown, and every rejection's reason, is recorded rather than discarded after ranking.</p>
+        </li>
+        <li>
+          <h3>Local-first Markdown knowledge storage</h3>
+          <p>the vault is the database — one you can read, edit, and version without Haven running.</p>
+        </li>
+      </ol>
+
+      <h3>Explainability: the Retrieval Inspector</h3>
+      <p>
+        Every one of the properties above is inspectable, not just asserted —
+        concretely, through the Retrieval Inspector covered in
+        <a href="#explainable">section 06</a>: for any query, why each
+        candidate matched, why it ranked where it did, why it was accepted,
+        and why every other candidate was rejected, with a stated reason.
+        That's valuable for debugging a retrieval miss and for trusting a
+        retrieval hit — the same trace either way.
+      </p>
+
+      <h3>Local-first: your memories are files</h3>
+      <p>
+        Every memory Haven writes is a Markdown file with YAML frontmatter, in
+        a folder you choose — openable as an
+        <a href="https://obsidian.md">Obsidian</a> vault (more in
+        <a href="#product">section 07</a>). That gets you transparency,
+        editability, version control, portability, and ownership that doesn't
+        depend on Haven staying installed.
+      </p>
+
+      <h3>Feature summary</h3>
+      <div style="overflow-x:auto">
+        <table class="wtable">
+          <thead><tr><th>Capability</th><th style="text-align:center">Haven</th></tr></thead>
+          <tbody>
+            <tr><td>Working Context reconstruction</td><td class="mono hl" style="text-align:center">✓</td></tr>
+            <tr><td>Structured memories</td><td class="mono hl" style="text-align:center">✓</td></tr>
+            <tr><td>Ontology graph</td><td class="mono hl" style="text-align:center">✓</td></tr>
+            <tr><td>Explainable retrieval</td><td class="mono hl" style="text-align:center">✓</td></tr>
+            <tr><td>Retrieval Inspector</td><td class="mono hl" style="text-align:center">✓</td></tr>
+            <tr><td>Local Markdown vault</td><td class="mono hl" style="text-align:center">✓</td></tr>
+            <tr><td>Browser extension</td><td class="mono hl" style="text-align:center">✓</td></tr>
+            <tr><td>Dashboard</td><td class="mono hl" style="text-align:center">✓</td></tr>
+            <tr><td>Memory Spaces</td><td class="mono hl" style="text-align:center">✓</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="mock-cap">
+        A product capability table, not a competitive matrix — it states what
+        Haven does, not what anything else doesn't.
+      </p>
+    </section>
+
+    <!-- ============ 11 · Installation ============ -->
     <section id="install" class="rv">
-      <div class="kicker"><span class="num">09</span>Installation</div>
+      <div class="kicker"><span class="num">11</span>Installation</div>
       <h2>Running in five minutes — no API key</h2>
 
       <p>
@@ -2088,21 +2403,21 @@ uvicorn obsidian.server.main:app --reload --port 8765</code></pre>
 
       <ol class="install-steps">
         <li>
-          <b>Pick a vault.</b> Open <code>http://127.0.0.1:8765/dashboard</code> —
-          first run shows a <em>Select your vault</em> prompt. Any folder path works;
-          pointing at an existing Obsidian vault is safe (Haven only adds its own
-          subfolders, non-destructively).
+          <b>Set up a Memory Space.</b> Open <code>http://127.0.0.1:8765/dashboard</code>
+          — first run shows a <em>Set up a Memory Space</em> prompt. Any folder path
+          works; pointing at an existing Obsidian vault is safe (Haven only adds its
+          own subfolders, non-destructively).
         </li>
         <li>
-          <b>Click "Import Demo Data."</b> Two seconds later you have 47 memories,
-          47 concepts, and 57 relationships from three fictional people — every one
-          written through the production write path.
+          <b>Click "Import demo data."</b> Two seconds later you have 82 memories,
+          62 concepts, and 136 relationships telling Haven's own development story —
+          every one written through the production write path.
         </li>
         <li>
-          <b>Explore.</b> Query the Retrieval Inspector (<code>billing-service</code>,
-          <code>capstone</code>), click any memory card to open the Memory Inspector,
-          and open the Write Inspector's three <code>priya-standup</code> traces to
-          watch write cost collapse as checkpointing kicks in.
+          <b>Explore.</b> Query the Retrieval Inspector (<code>SUPERSEDE</code>,
+          <code>Alibaba Cloud</code>), click any memory card to open the Memory Inspector,
+          and open the Write Inspector's three <code>haven-benchmark-honesty</code> traces
+          to watch write cost collapse as checkpointing kicks in.
         </li>
       </ol>
 
@@ -2175,8 +2490,11 @@ DEFAULT_BASE_URL = <span class="tk-s">"https://dashscope-intl.aliyuncs.com/compa
         <div class="dbody">
           <p>
             The same <code>obsidian.server.main:app</code> process above also runs as
-            a live deployment on <b>Alibaba Cloud ECS</b> (a Simple Application Server
-            instance, 1 vCPU / 2 GB, Ubuntu 22.04) — unmodified application code, with
+            the live deployment at
+            <a href="http://47.236.79.57/">http://47.236.79.57/</a> (see the Live
+            Demo callout near the top of this article) on <b>Alibaba Cloud ECS</b>
+            (a Simple Application Server instance, 1 vCPU / 2 GB, Ubuntu 22.04) —
+            unmodified application code, with
             production process management layered in front of it: <b>systemd</b> runs
             the uvicorn process as <code>haven.service</code>, bound to
             <code>127.0.0.1:8765</code> only, and <b>nginx</b> reverse-proxies it,
@@ -2206,7 +2524,7 @@ DEFAULT_BASE_URL = <span class="tk-s">"https://dashscope-intl.aliyuncs.com/compa
 
     <!-- ============ 10 ============ -->
     <section id="lessons" class="rv">
-      <div class="kicker"><span class="num">10</span>Engineering notes</div>
+      <div class="kicker"><span class="num">12</span>Engineering notes</div>
       <h2>What a fully inspectable pipeline teaches you</h2>
 
       <p class="lede">
@@ -2326,7 +2644,7 @@ DEFAULT_BASE_URL = <span class="tk-s">"https://dashscope-intl.aliyuncs.com/compa
 
     <!-- ============ 11 ============ -->
     <section id="next" class="rv">
-      <div class="kicker"><span class="num">11</span>Roadmap</div>
+      <div class="kicker"><span class="num">13</span>Roadmap</div>
       <h2>The roadmap, in priority order</h2>
 
       <p>
@@ -2342,14 +2660,14 @@ DEFAULT_BASE_URL = <span class="tk-s">"https://dashscope-intl.aliyuncs.com/compa
           <div>
             <div class="rt">Next</div>
             <p>
-              Wire <code>UPDATE</code>/<code>SUPERSEDE</code> into the automatic pipeline —
-              the decisions are implemented and tested in the KnowledgeUpdater, but the
-              orchestrator still only drives <code>NEW</code> and <code>CONFIRM</code>
-              end-to-end, so conversations can't yet refine and contradict existing
-              knowledge without review. Fix the Working Context memory-type gap the
-              benchmarks surfaced (plain facts still don't reach the incremental
-              extractor's background). Extend the benchmark dataset into the
-              remaining planned categories.
+              Wire <code>SUPERSEDE</code> into the automatic pipeline —
+              <code>UPDATE</code> already lands automatically, via a conservative
+              prefix-extension rule in the CanonicalMatcher, but a differently-phrased
+              correction still leaves both the old and new fact independently
+              retrievable instead of archiving the old one. Fix the Working Context
+              memory-type gap the benchmarks surfaced (plain facts still don't reach
+              the incremental extractor's background). Extend the benchmark dataset
+              into the remaining planned categories.
             </p>
           </div>
         </div>
@@ -2458,8 +2776,8 @@ DEFAULT_BASE_URL = <span class="tk-s">"https://dashscope-intl.aliyuncs.com/compa
       chips: ["Remember button", "Quick Capture", "Obsidian import", "gate 1: checkpoint → short-circuit"] },
     { key: "Manager AI", icon: "M12 3v3m0 12v3M3 12h3m12 0h3M7 7l2 2m6 6 2 2m0-10-2 2M9 15l-2 2M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z",
       title: "Manager AI — extract, classify, score",
-      body: "The only LLM call in the production pipeline happens here, in the Extractor: a request to Alibaba Cloud DashScope (Qwen), for language understanding — against a compact Working Context background during incremental saves, never the full transcript. Everything after it is deterministic code: the Classifier assigns a memory type with a stated reason, and the ImportanceScorer weighs each fact.",
-      chips: ["Extractor (LLM ×1)", "Alibaba Cloud DashScope (Qwen)", "Classifier", "ImportanceScorer"] },
+      body: "The only LLM call in the production pipeline happens here, in the Extractor: a request to Alibaba Cloud DashScope (Qwen Cloud), for language understanding — against a compact Working Context background during incremental saves, never the full transcript. Everything after it is deterministic code: the Classifier assigns a memory type with a stated reason, and the ImportanceScorer weighs each fact.",
+      chips: ["Extractor (LLM ×1)", "Alibaba Cloud DashScope (Qwen Cloud)", "Classifier", "ImportanceScorer"] },
     { key: "Memory Review", icon: "M4 5h16v14H4zM8 12l3 3 5-6",
       title: "Memory Review — the human gate",
       body: "Gate two. Extraction stops, and the proposed facts come back to you as editable cards — reword one, change its type, delete it, add one the extractor missed. Nothing touches the vault until you Save; Cancel (or a server restart) discards the pending review cleanly. Crucially, your edits never re-run the LLM — review adds judgment without a second roll of the dice.",
@@ -2478,7 +2796,7 @@ DEFAULT_BASE_URL = <span class="tk-s">"https://dashscope-intl.aliyuncs.com/compa
       chips: ["ConceptGraph", "alias index", "activation spreading", "single writer"] },
     { key: "Retrieval", icon: "M10 4a6 6 0 1 0 0 12 6 6 0 0 0 0-12zm10 16-5.5-5.5",
       title: "Retrieval — hybrid, ranked, gated",
-      body: "An optional QueryRewriter can expand the query first, via the same Alibaba Cloud DashScope (Qwen) endpoint as the Extractor — off by default, failing open to the original query if unset or unreachable. The HybridCandidateRetriever then merges two independent evidence paths: IDF-weighted keyword overlap (with a phrase bonus) and concept-graph activation. The DeterministicRanker scores every candidate on seven named factors. Then gate three — the AcceptanceStage's five checks — decides which prefix of the ranking is trustworthy, recording a reason for every rejection and returning nothing when nothing clears the bar.",
+      body: "An optional QueryRewriter can expand the query first, via the same Alibaba Cloud DashScope (Qwen Cloud) endpoint as the Extractor — off by default, failing open to the original query if unset or unreachable. The HybridCandidateRetriever then merges two independent evidence paths: IDF-weighted keyword overlap (with a phrase bonus) and concept-graph activation. The DeterministicRanker scores every candidate on seven named factors. Then gate three — the AcceptanceStage's five checks — decides which prefix of the ranking is trustworthy, recording a reason for every rejection and returning nothing when nothing clears the bar.",
       chips: ["QueryRewriter (Qwen, optional)", "keyword ∪ activation", "7 ranking factors", "gate 3: 5 acceptance checks", "abstention"] },
     { key: "Working Context", icon: "M4 5h16M4 10h16M4 15h10M4 20h7",
       title: "Working Context — memories become resumable work",

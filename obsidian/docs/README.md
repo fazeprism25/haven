@@ -22,6 +22,8 @@ Haven is documented at three levels:
 - **[KNOWN_ISSUES.md](KNOWN_ISSUES.md)** — real gaps and rough edges in the
   current repository.
 - **[ROADMAP.md](ROADMAP.md)** — what's next, in priority order.
+- **[DEMO_SCRIPT.md](DEMO_SCRIPT.md)** — the live, judge-facing
+  presentation script and demo flow order.
 
 ## Deep dives
 

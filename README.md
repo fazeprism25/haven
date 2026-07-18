@@ -12,10 +12,12 @@
 
 ### Memory for AI that can show its work.
 
-Haven is a local-first memory system for LLMs that can explain — for every single
-memory it retrieves — **why it matched, why it ranked where it did, and why it was
-accepted or rejected.** No hidden scoring. No embedding roulette. Every answer comes
-with a receipt.
+Haven is a local-first context-assembly engine for LLMs. Its job isn't just to
+retrieve memories — it's to **reconstruct your working context** (the goal, the
+decisions, the open questions) before the model reasons at all, and to explain —
+for every single memory it retrieves — **why it matched, why it ranked where it
+did, and why it was accepted or rejected.** No hidden scoring. No embedding
+roulette. Every answer comes with a receipt.
 
 [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 ![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-3776AB?logo=python&logoColor=white)
@@ -25,69 +27,114 @@ with a receipt.
 ![No API key needed for demo](https://img.shields.io/badge/demo-no%20API%20key-success)
 
 **[Interactive site](https://fazeprism25.github.io/haven/)** ·
-**[Repository layout](#-repository-layout)** ·
+**[Live demo](#-live-demo)** ·
+**[See it in action](#-see-haven-in-action)** ·
 **[Quick start](#-quick-start-5-minutes-no-api-key)** ·
 **[How it works](#-how-it-works)** ·
 **[Benchmarks](#-benchmarks)** ·
+**[Why Haven is different](#-why-haven-is-different)** ·
 **[Inspection suite](#-the-inspection-suite)** ·
+**[Repository layout](#-repository-layout)** ·
 **[Roadmap](#-roadmap)**
 
 </div>
+
+## 🟢 Live demo
+
+Haven is deployed and running on a public Alibaba Cloud instance, seeded with
+the same demo dataset shown in every screenshot below:
+
+**➡️ http://47.236.79.57/**
+
+This is a lightweight hackathon evaluation deployment, not production
+infrastructure — plain HTTP on the instance's public IP, no domain or TLS yet
+(see [Live deployment](#-live-deployment) for the full setup). The dashboard
+is protected by HTTP Basic Auth (only `GET /api/v1/health` is open); **login
+credentials are shared with hackathon judges separately and are intentionally
+not committed to this repository.** If you're not a judge, the fastest way to
+see the same thing is the 5-minute [Quick start](#-quick-start-5-minutes-no-api-key)
+below — it reproduces the identical experience locally, no key needed.
 
 ## 🌐 Interactive project website
 
 Experience Haven as an interactive product page — the architecture, the demo
 walkthrough, and the benchmark story, rendered and scrollable, no clone required:
 
-### **➡️ https://fazeprism25.github.io/haven/**
+**➡️ https://fazeprism25.github.io/haven/**
 
 This is the same material this README covers, built as a standalone article
 ([source](obsidian/docs/media/haven-article.html)) — start there for the fastest
 tour, come back here for the runnable quickstart and the repo tour.
 
-## 🧭 Repository layout
+## 📸 See Haven in action
 
-Haven began as a fork of [mem0](https://github.com/mem0ai/mem0) and grew into its
-own project. The upstream mem0 code (SDKs, integrations, the mem0 docs site) is
-still in this repository for reference and as the benchmark baseline — but if
-you're evaluating **Haven specifically**, you only need these directories:
+Every screenshot below is real, taken from Haven's own
+[hosted demo](#-live-deployment) — the same live, judge-facing
+Alibaba Cloud deployment, running the seeded *Personal AI Research* Memory
+Space. Nothing here is mocked: every card, score, and trace is the actual
+pipeline output for the query shown.
 
-| Path | What you'll find there |
-|---|---|
-| `obsidian/` | Haven's backend: write/read pipelines, ontology, Manager AI, the FastAPI server, and the dashboard. (Why it's called `obsidian/` — [see below](#why-the-backend-lives-in-a-folder-called-obsidian).) |
-| `extension/` | The Chromium browser extension that adds Haven to ChatGPT. |
-| `benchmarks/` | The mem0-vs-Haven benchmark harness, results, and the final engineering report. |
-| `config/` | Environment-variable templates for the LLM-backed pieces (Manager AI, query rewriter, benchmark judge). |
-| `demo/` | The deterministic demo dataset used by the no-API-key quickstart. |
-| `obsidian/docs/` | Haven's own design docs, decision log, roadmap, and known issues — start here for anything beyond the README. |
+This tour covers six things you'll actually see demonstrated: the **browser
+extension**, the **dashboard**, **Working Context reconstruction** (Project
+Overview, Ask Your Memory), the **Retrieval Inspector**, the **Memory
+Browser**, and the **Obsidian** vault underneath all of it. From capturing a
+memory in ChatGPT to explaining exactly why it was retrieved, browsing it,
+and benchmarking the system behind it — one continuous workflow, nine real
+screens.
 
-Everything else at the repo root (`mem0/`, `docs/`, `tests/`, etc.) is upstream
-mem0 and isn't part of Haven's evaluation surface.
+**1. Browser Extension** — Capture and recall memory without ever leaving
+ChatGPT: **Use Haven** pulls matching context into your reply, **Remember**
+saves new facts back to the vault.
 
-### Why the backend lives in a folder called `obsidian/`
+<p align="center"><img src="obsidian/docs/media/extension-use-haven-button-chatgpt.png" alt="The Use Haven button in the ChatGPT compose area" width="820" /></p>
 
-Early on, Haven used [Obsidian](https://obsidian.md) itself as its persistence
-layer, so the code that talked to a vault lived under `obsidian/`. The name
-stuck even as scope grew: today `obsidian/` holds Haven's actual backend — the
-Memory Engine (read pipeline), Manager AI (write pipeline), the ontology /
-concept graph, the FastAPI server, and the dashboard. It's an accident of
-history, not a description of what's inside — think of it as Haven's `src/`.
+**2. Project Overview** — Pick up complex work exactly where you left off:
+objective, milestone, current focus, and any active blocker, reconstructed
+from memory before you ask.
 
-### Documentation map
+<p align="center"><img src="obsidian/docs/media/dashboard-project-overview.png" alt="Project Overview: current objective, milestone, focus, and active blocker cards, reconstructed live from memory" width="820" /></p>
 
-```
-README.md              ← you are here: quickstart, results, how it works
-   ↓
-obsidian/docs/          ← start here for anything deeper: ARCHITECTURE.md,
-                          ROADMAP.md, KNOWN_ISSUES.md, decision log
-   ↓
-docs/architecture/      ← original deep-dive design specs (ontology,
-                          acceptance stage, ranking investigations) —
-                          historical/detailed, referenced from obsidian/docs/
-```
+**3. Ask Your Memory** — Query months of context in plain English and get
+back one trustworthy answer, not a wall of maybe-relevant results.
 
-`obsidian/docs/README.md` indexes the middle layer and points into
-`docs/architecture/` for deeper specs.
+<p align="center"><img src="obsidian/docs/media/dashboard-ask-your-memory.png" alt="Ask Your Memory: a live query returning one accepted memory out of nine candidates considered" width="820" /></p>
+
+**4. Retrieval Trace** — Inspect exactly why every candidate memory was
+accepted or rejected, down to the score and the exact rule that decided it.
+
+<p align="center"><img src="obsidian/docs/media/dashboard-retrieval-trace.png" alt="The expanded retrieval trace: all nine candidates ranked with their score breakdown and a rejection reason for each one not accepted" width="820" /></p>
+
+**5. Explainability Pipeline** — Follow one query through every stage of
+Haven's reasoning, from raw text to the structured prompt an LLM actually
+receives.
+
+<p align="center"><img src="obsidian/docs/media/dashboard-explainability-stages.png" alt="The Explainability Pipeline: eight numbered stages from User Query to Structured Prompt, each annotated with its own result" width="820" /></p>
+
+**6. Project State** — Keep tasks, blockers, decisions, constraints, and
+implementation status synchronized automatically, with zero manual
+note-taking.
+
+<p align="center"><img src="obsidian/docs/media/dashboard-project-state.png" alt="Project State: counted and itemized active tasks, blockers, open questions, decisions, constraints, implementation state, and code areas" width="820" /></p>
+
+**7. Memory Browser** — Explore everything Haven knows about you, organized
+by type and domain instead of buried in a flat list.
+
+<p align="center"><img src="obsidian/docs/media/dashboard-memory-browser.png" alt="Memory Browser: memories grouped by type (Preference, Interest, Trait, Habit, Skill, Goal) with confidence and importance bars" width="820" /></p>
+
+**8. Memory Spaces** — A Memory Space is just a registered vault folder (its own
+`vault/`, `concepts/`, and checkpoint data). Register one per domain — work,
+personal, side projects — and switch the dashboard's active space in one click,
+with zero data bleed between them.
+
+<p align="center"><img src="obsidian/docs/media/dashboard-memory-spaces.png" alt="Memory Spaces: two registered spaces, Haven Development and Personal AI Research, with the latter marked Active" width="820" /></p>
+
+**9. Benchmark Explorer** — Compare Haven against baselines and mem0 case by
+case, with every judge verdict browsable instead of hidden behind a summary
+number.
+
+<p align="center"><img src="obsidian/docs/media/dashboard-benchmark-explorer.png" alt="Benchmark Explorer: the filterable case table across categories, adapters, and pass/fail results" width="820" /></p>
+
+---
 
 <!-- VISUAL — hero.gif · obsidian/docs/media/hero.gif · ~25s loop, 1280px wide, placed here,
      immediately after the fold. This is the single most important asset in the README.
@@ -114,9 +161,13 @@ docs/architecture/      ← original deep-dive design specs (ontology,
      TODO: uncomment once obsidian/docs/media/hero.gif exists —
      ![Haven in 25 seconds: remember from ChatGPT, retrieve into ChatGPT, inspect why](obsidian/docs/media/hero.gif) -->
 
----
-
 ## 💡 Why this exists
+
+Haven's job sits one layer upstream of retrieval: reconstructing your working
+context — project state, goals, constraints, decisions, open questions —
+before the model reasons at all, not just handing back memories that happen to
+sound similar to the question. ([Why Haven is different](#-why-haven-is-different)
+unpacks what that means concretely.)
 
 Every AI memory system makes the same promise: *your assistant will remember you.*
 Then you ask it something, it injects three irrelevant memories and misses the one
@@ -155,9 +206,11 @@ full methodology in [Benchmarks](#-benchmarks):
 ## ✨ What makes Haven different
 
 **🎯 Deterministic retrieval.** The read path is plain, testable Python: keyword
-matching with IDF-weighted overlap, activation spreading across a concept graph,
-and a ranker that scores every candidate on named, inspectable factors. Same vault,
-same query → same answer, every time. No temperature, no vibes.
+matching with IDF-weighted overlap, and **activation spreading** — a match on one
+concept propagates a decaying signal to its neighbors in the concept graph, so
+related-but-unqueried memories can still surface. A ranker then scores every
+candidate on named, inspectable factors. Same vault, same query → same answer,
+every time. No temperature, no vibes.
 
 **🔍 Explainable by construction — not as a feature.** Explanation isn't a log
 bolted on afterward; the pipeline's own data structures carry a score breakdown and
@@ -202,35 +255,35 @@ replays real conversations through Haven's real, unmodified pipeline, so
 everything below works on a plane.
 
 ```bash
-# 1 · Install the server's dependencies (isolated from the repo's root package)
+# 1 · Clone the repo
+git clone https://github.com/fazeprism25/haven.git
+cd haven
+
+# 2 · Install the server's dependencies (isolated from the repo's root package)
 pip install -r obsidian/server/requirements.txt
 
-# 2 · Run the server from the repo root
+# 3 · Run the server from the repo root
 uvicorn obsidian.server.main:app --reload --port 8765
 ```
 
 Then, in your browser:
 
-3. **Pick a vault.** Open `http://127.0.0.1:8765/dashboard` — first run shows a
+4. **Pick a vault.** Open `http://127.0.0.1:8765/dashboard` — first run shows a
    *Select your vault* prompt. Paste any folder path (pointing at an existing
    Obsidian vault is safe; Haven only adds its own subfolders, non-destructively).
-4. **Click "Import Demo Data."** Two seconds later you have 47 memories, 47
+5. **Click "Import Demo Data."** Two seconds later you have 47 memories, 47
    concepts, and 57 relationships from three fictional people — every one written
    through the production write path, producing the exact same on-disk artifacts a
    real save would.
-5. **Explore.** Query the Retrieval Inspector (`"billing-service"`, `"capstone"`),
+6. **Explore.** Query the Retrieval Inspector (`"billing-service"`, `"capstone"`),
    click any memory card to open the Memory Inspector, and open the Write
    Inspector's three `priya-standup` traces to watch write cost collapse as
    checkpointing kicks in.
 
-<!-- VISUAL — quickstart-dashboard.png · obsidian/docs/media/quickstart-dashboard.png
-     Screenshot of the dashboard immediately after demo import: the Overview stat
-     row (47 memories / 47 concepts / 57 relationships), populated category cards,
-     and the Resume Work panel. First thing the viewer should notice: everything
-     is already full — this is the "it actually works out of the box" proof shot.
-     Placed here so a skimming judge sees the payoff adjacent to the 5 commands.
-     TODO: uncomment once obsidian/docs/media/quickstart-dashboard.png exists —
-     ![Dashboard after one-click demo import](obsidian/docs/media/quickstart-dashboard.png) -->
+<p align="center"><img src="obsidian/docs/media/dashboard-hero.png" alt="Haven's dashboard header and stat row: memories, active, archived, concepts, relationships, and retrieval speed, populated immediately after demo import" width="820" /></p>
+
+*This is the hosted demo pictured throughout this README — a fresh local
+`Import Demo Data` click lands you on the same view with your own numbers.*
 
 <details>
 <summary><strong>Connect it to ChatGPT (the browser extension)</strong></summary>
@@ -248,6 +301,15 @@ Chromium browsers (Chrome, Edge, Brave — not Firefox/Safari):
 
 `Ctrl+C` stops the server; your Markdown vault on disk is untouched, and the
 extension shows "Offline" until it's back.
+
+**Pointing it at a remote server (e.g. the Alibaba Cloud deployment below):**
+paste the server's URL into the popup's **Haven server URL** field (add the
+**Username**/**Password** fields too if that deployment is behind Basic
+Auth — see the Live deployment section) and click **Save settings**.
+Chrome will prompt once to allow the extension to reach that host — approve
+it, since that's what actually lets the extension's requests bypass CORS for
+a non-localhost server. Click **Test Connection** any time to re-check
+reachability and auth and get a specific reason if either fails.
 
 </details>
 
@@ -287,7 +349,7 @@ Expected state after seeding is documented step-by-step in
 
 ---
 
-## ☁️ Production deployment
+## ☁️ Live deployment
 
 Haven's FastAPI server also runs as a live, unmodified deployment on **Alibaba
 Cloud** — the same `uvicorn obsidian.server.main:app` process from Quick Start,
@@ -298,7 +360,7 @@ just fronted by production process management instead of a dev terminal:
 | Backend | Alibaba Cloud ECS (Simple Application Server), 1 vCPU / 2 GB, Ubuntu 22.04 |
 | Process manager | systemd (`haven.service`) — single uvicorn worker, no `--reload`, bound to `127.0.0.1:8765` only |
 | Reverse proxy | nginx — the only thing reachable from outside; proxies to the systemd-managed uvicorn process |
-| Access control | HTTP Basic Auth in front of the whole app at the nginx layer (added here, not in `obsidian/server/main.py` — see [why](deploy/alibaba-cloud/README.md#5-why-basic-auth-is-here-even-though-the-app-code-wasnt-touched)), except `GET /api/v1/health`, which stays open |
+| Access control | HTTP Basic Auth in front of the whole app at the nginx layer (added here, not in `obsidian/server/main.py` — see [why](deploy/alibaba-cloud/README.md#5-why-basic-auth-is-here-even-though-the-app-code-wasnt-touched)), except `GET /api/v1/health`, which stays open. The extension's popup Settings has optional username/password fields for exactly this. |
 | AI provider | Alibaba Cloud DashScope (Qwen Cloud) — the same `DEFAULT_BASE_URL` Manager AI, the Query Rewriter, and the benchmark judge already point at for every LLM call |
 | Documentation | GitHub Pages, from `obsidian/docs/media/haven-article.html` |
 | Repository | GitHub (this repo) |
@@ -325,10 +387,10 @@ is configured yet (`deploy/alibaba-cloud/README.md` §7 covers adding both via
 
 ## 🧠 How it works
 
-Haven is three pipelines and a surface:
+Haven is two pipelines, an ontology layer, and a surface:
 
-- a **write pipeline** (Manager AI) that turns raw conversations into canonical
-  knowledge,
+- a **write pipeline** — Haven calls it **Manager AI** — that turns raw
+  conversations into canonical knowledge,
 - an **ontology layer** that indexes that knowledge into a concept graph,
 - a **read pipeline** (Memory Engine) that turns a query into an LLM-ready
   context string,
@@ -350,9 +412,8 @@ The Extractor pulls atomic facts (with source event and evidence). The Classifie
 assigns a `MemoryType` — 18 types across three domains (personal, work,
 knowledge), from fact and preference to decision, goal, project, and task — plus
 a canonicalized topic tag, each with a confidence and a stated reason. The
-CanonicalMatcher compares each fact
-against existing knowledge and returns a decision: `NEW`, `CONFIRM`, `UPDATE`, or
-`SUPERSEDE` — so repeated confirmations *strengthen* a memory (confidence nudges
+CanonicalMatcher compares each fact against existing knowledge and returns a
+decision: `NEW`, `CONFIRM`, `UPDATE`, or `SUPERSEDE` — so repeated confirmations *strengthen* a memory (confidence nudges
 up, evidence chain grows) instead of duplicating it. Finally the VaultWriter
 persists a Markdown file with YAML frontmatter, and the OntologyPipeline — the
 *only* component allowed to mutate the concept graph — attaches it to concepts.
@@ -435,15 +496,8 @@ Type any query, get the ranked candidates with per-factor score bars, and — th
 part nothing else gives you — the candidates that were **rejected, with the
 acceptance stage's stated reason**.
 
-<!-- VISUAL — retrieval-inspector.png · obsidian/docs/media/retrieval-inspector.png
-     Screenshot of the Retrieval Inspector for the query "what did Priya decide
-     for the billing-service": 3–4 accepted candidates with visible score-breakdown
-     bars (activation / keyword overlap / confidence / recency), and at least one
-     grayed-out REJECTED candidate with its reason string visible.
-     First thing the viewer should notice: the rejected row. Accepted results look
-     like every search UI ever; a rejection with a reason is the novel object.
-     TODO: uncomment once obsidian/docs/media/retrieval-inspector.png exists —
-     ![Retrieval Inspector: ranked candidates with score breakdowns and a rejected candidate with its reason](obsidian/docs/media/retrieval-inspector.png) -->
+See it live in the [screenshot tour above](#-see-haven-in-action) — the same
+`RetrievalTrace` data, with the same rejection reasons described here.
 
 ### Memory Inspector — *"what does the system believe about this one fact?"*
 
@@ -462,14 +516,11 @@ in order and the incremental-ingestion story tells itself:
 | Same transcript re-sent | `duplicate` | 0 | **none — short-circuited, near-zero duration** |
 | One new turn appended | `incremental` | 1 | only for the new turn |
 
-<!-- VISUAL — write-inspector.gif · obsidian/docs/media/write-inspector.gif · ~10s
-     Screen recording clicking through the three priya-standup traces in order.
-     Hold ~3s on each; the duration and facts-extracted fields must be legible.
-     First thing the viewer should notice: the duration collapsing to ~0 on the
-     duplicate trace. This GIF is the checkpoint benchmark, experienced instead
-     of read.
-     TODO: uncomment once obsidian/docs/media/write-inspector.gif exists —
-     ![Write Inspector: the same conversation sent three times — full run, free duplicate, one-turn incremental](obsidian/docs/media/write-inspector.gif) -->
+<p align="center"><img src="obsidian/docs/media/dashboard-write-inspector.png" alt="Write Inspector: three write traces (First Save, Already Remembered, Incremental Update) and one expanded trace showing the checkpoint decision, extracted facts, and per-stage timing down to 0.1ms" width="820" /></p>
+
+*A different vault, the same behavior: `Already Remembered` short-circuits at
+0 facts extracted, `Incremental Update` extracts only the new turn — matching
+the checkpointing story above.*
 
 ---
 
@@ -518,16 +569,6 @@ All five failure/edge cases in the benchmark suite behaved as designed.
      TODO: uncomment once obsidian/docs/media/prompt-growth-chart.svg exists —
      ![Extractor prompt size vs conversation length: linear growth vs Haven's constant ~769 tokens](obsidian/docs/media/prompt-growth-chart.svg) -->
 
-### What actually gets injected
-
-When you click **Use Haven** in ChatGPT, the context block your LLM receives is
-the read pipeline's final output: only acceptance-surviving memories, rendered by
-the ContextBuilder with their canonical facts. Because the acceptance stage can
-abstain, the honest answer to "nothing relevant is in the vault" is an *empty*
-injection — not three paragraphs of plausible-looking noise silently steering your
-conversation. What you inject is exactly what the Retrieval Inspector shows you,
-because it's the same pipeline output.
-
 ---
 
 ## 📊 Benchmarks
@@ -558,6 +599,11 @@ Raw per-request data lands in
 [`benchmarks/incremental_ingestion/results/results.json`](benchmarks/incremental_ingestion/results/results.json)
 (re-plottable without rerunning) plus a generated Markdown digest. Token counts
 are estimates (`chars / 4`) — directionally correct, not exact.
+
+**Headline result:** checkpointing works as designed — 0 LLM calls on an
+unchanged resend, a constant ~769-token extraction prompt at 500 turns instead
+of a linearly growing one. The same suite also caught a real, traced accuracy
+gap in Haven's own incremental path (below), reported rather than hidden.
 
 <details>
 <summary><strong>Findings we reported instead of hiding — including one against ourselves</strong></summary>
@@ -591,23 +637,86 @@ baselines — return-everything, most-recent, BM25 keyword search, embedding
 similarity — and a retrieval-only ablation of Haven itself. Full results,
 per-category breakdown, and a root-cause analysis of every failure are in
 [`benchmarks/reports/archive/deepseek_validation_report.md`](benchmarks/reports/archive/deepseek_validation_report.md);
-raw per-case data is in `benchmarks/results/results_*.json`.
+raw per-case data is in `benchmarks/results/results_*.json`, and the same
+data is browsable case by case in the dashboard's
+[Benchmark Explorer](#-see-haven-in-action).
 
 ```bash
 python -m benchmarks.runners.run_benchmarks --adapter mem0     # baseline
 python -m benchmarks.runners.run_benchmarks --adapter haven    # Haven
 ```
 
+> 🏆 **Key results:** Across the 288-case suite, Haven Full (**240/288, 83.3%**)
+> beat every *real* retrieval strategy it was tested against — recency-only
+> (80.6%), dense embedding retrieval (80.2%), BM25 keyword search (69.8%), and
+> its own retrieval-only ablation (66.0%) — by reconstructing canonicalized,
+> deduplicated facts instead of returning raw matched text. The only baseline
+> ahead of it is "return every stored memory" (90.3%), a precision-floor
+> strategy with no ranking, no deduplication, and no explainability — included
+> as a lower bound, not a competing retrieval strategy. Haven ties for the top
+> score in 7 of the suite's 11 categories, and the 4 categories where it
+> currently loses to recency are root-caused below, not glossed over.
+
+| Category | **Haven Full** | Return All | Recency | BM25 | Embedding |
+|---|---:|---:|---:|---:|---:|
+| beliefs | 18/25 | 21/25 | **24/25** | 12/25 | 12/25 |
+| concept_consolidation | 56/62 | **60/62** | 38/62 | 57/62 | **60/62** |
+| contradictions | 3/10 | 9/10 | **10/10** | 6/10 | 5/10 |
+| decision_reconstruction | 23/26 | **26/26** | 13/26 | 19/26 | **26/26** |
+| decisions | **24/25** | **24/25** | 19/25 | 20/25 | 21/25 |
+| goals | **10/10** | **10/10** | **10/10** | 9/10 | **10/10** |
+| identity | **10/10** | **10/10** | **10/10** | 5/10 | **10/10** |
+| preferences | **10/10** | **10/10** | 9/10 | 9/10 | **10/10** |
+| refinements | 28/30 | **30/30** | 20/30 | **30/30** | **30/30** |
+| supersession | 40/55 | 40/55 | **54/55** | 23/55 | 31/55 |
+| temporal | 18/25 | 20/25 | **25/25** | 11/25 | 16/25 |
+| **Overall (288 cases)** | **240 (83.3%)** | **260 (90.3%)** | 232 (80.6%) | 201 (69.8%) | 231 (80.2%) |
+
+Bold marks the best score in each row. Haven Full ties for that top score in 7
+of 11 categories; the remaining 4 (`beliefs`, `contradictions`, `supersession`,
+`temporal`) all lose to Recency for the same root-caused reason (below), and
+"Return All" — a strategy that returns literally everything with no filtering
+— isn't a meaningful bar to clear on the overall number. Full per-category
+table with source data:
+[`deepseek_validation_report.md`](benchmarks/reports/archive/deepseek_validation_report.md#2-category-by-category-comparison).
+
+**Why Haven wins:** Recency, BM25, and embedding retrieval all return raw
+matched text — the newest message, the highest-scoring keyword hit, or the
+closest vector. None of them consolidate what they retrieve. Haven's write
+path (Extractor → Classifier → CanonicalMatcher → KnowledgeUpdater)
+canonicalizes and deduplicates facts before they ever reach the ranker, so a
+query returns one clean fact instead of several overlapping mentions of it.
+That's the structural reason Haven ties or wins outright wherever
+consolidation matters more than surfacing the single latest message — and,
+transparently, why it currently loses ground on the 4 categories where a
+contradiction has to be *detected* before it can be consolidated.
+
+**Headline result:** Haven's full pipeline beats plain keyword search (BM25)
+and its own retrieval-only ablation by a wide margin. It currently loses on
+raw pass rate to two deliberately naive baselines — "return everything" and
+"return the most recent memory" — specifically on the categories built to test
+contradiction and supersession handling, for one specific, root-caused reason
+(below), not a benchmark artifact.
+
+**Against embeddings specifically:** the embedding baseline (`bge-small`
+similarity search) isn't just present in the table for completeness — here's
+how it actually did. It scored **231/288 (80.2%)**, roughly level with the
+naive Recency baseline and clearly ahead of BM25, but **3.1 points behind
+Haven Full's 240/288 (83.3%)**. It wins where you'd expect a semantic method
+to win: paraphrase-heavy categories with no shared vocabulary between query
+and fact, like `decision_reconstruction` (26/26 vs. Haven Full's 23/26) and
+`concept_consolidation` (60/62 vs. 56/62) — the same class of gap traced in
+`contradictions_basic_004` below. It does **not** win on `supersession`
+(31/55) — barely above Haven Full's own 40/55, and far behind Recency's
+54/55 — because coexisting stale-and-current facts is a write-side archiving
+gap (below), and semantic similarity retrieves the stale fact just as
+confidently as the current one. Full category table:
+[`deepseek_validation_report.md`](benchmarks/reports/archive/deepseek_validation_report.md#2-category-by-category-comparison).
+
 <details>
 <summary><strong>The honest headline — including a category where Haven currently loses</strong></summary>
 
-Haven's full pipeline beats plain keyword search (BM25) and its own
-retrieval-only ablation by a wide margin. It currently loses on raw pass rate
-to two deliberately naive baselines — "return everything" and "return the most
-recent memory" — specifically on the categories built to test contradiction
-and supersession handling.
-
-The traced root cause is real and scoped, not a benchmark artifact:
+The traced root cause behind the loss above is real and scoped, not a benchmark artifact:
 `CanonicalMatcher` only recognizes an `UPDATE` via a conservative
 prefix-extension rule, and doesn't yet detect a restated or differently-phrased
 correction as a `SUPERSEDE`. So when a fact is contradicted in different words,
@@ -618,7 +727,134 @@ only ever finds wins is a marketing document; this one found the specific,
 named reason Haven loses on four categories, which is why the win on the other
 seven is worth believing.
 
+**Why this was benchmarked before the fix, not after:** this 288-case run
+deliberately measures Haven's current architecture — `UPDATE` automatic,
+`SUPERSEDE` implemented in `KnowledgeUpdater` but not yet wired into the
+production matching decision — so it establishes a real, reproducible
+baseline rather than an anecdote. Supersession is the next architectural
+milestone ([roadmap](#-roadmap), item 1); the next benchmark run against the
+same 288 cases will quantify the improvement directly against this number,
+not describe it in prose.
+
 </details>
+
+**Benchmark takeaways:**
+
+- Haven is not simply another vector-search system — it beats dense embedding
+  retrieval outright, 83.3% vs. 80.2%.
+- Reconstructing canonical, deduplicated facts beats raw keyword or embedding
+  matching in 7 of the suite's 11 categories.
+- The one place Haven currently loses — contradiction- and
+  supersession-heavy categories — traces to one specific, scoped gap
+  (`CanonicalMatcher` not yet detecting a differently-phrased contradiction as
+  `SUPERSEDE`), already first on the [roadmap](#-roadmap), not a fundamental
+  limitation of the architecture.
+- "Return everything" scoring highest on raw pass rate says more about the
+  benchmark's precision blind spot than about retrieval quality: it has zero
+  ranking, zero deduplication, and zero explainability.
+
+---
+
+## 🧩 Why Haven is different
+
+Most memory systems answer one question: *does anything relevant exist?* Haven
+is built to answer a different one: ***where did I leave off?***
+
+Retrieving a similar-sounding memory and reconstructing the context around it
+are not the same problem. A single fact — "chose Postgres for the billing
+service" — is only actionable to a resuming conversation if it arrives with
+what makes it usable: what else was true about that project, what's still
+open, and what's already settled and shouldn't be re-litigated.
+
+That's what Haven's **Working Context** is built to reconstruct on every query:
+
+- **Current project state** — what's actually in flight right now
+- **Active goals** — what the work is trying to accomplish
+- **Constraints** — the boundaries the next answer has to respect
+- **Important decisions** — the calls already made, so they aren't re-opened
+- **Unresolved work** — open questions and pending tasks
+- **Guidance** — standing preferences and rules that should shape the next answer
+- **Relationships between concepts** — how the pieces above connect, via the
+  concept graph, not just a shared keyword
+
+`WorkingContextBuilder` (`obsidian/memory_engine/working_context_builder.py`)
+groups every accepted memory into exactly this shape — goals, decisions,
+tasks, open questions — with a deterministic status summary, instead of
+handing back a flat list of matched text. The difference shows up concretely
+in what an assistant can do with the result: handed a Working Context, it can
+pick a project back up mid-stream; handed a bag of independently ranked
+memories, the best it can do is tell you that something related was once said.
+
+This is why clicking **Use Haven** in the browser extension doesn't insert
+search results — it inserts a Working Context, previewed card-by-card (goal /
+focus / decisions / tasks) before it ever reaches the prompt. See it in the
+[screenshot tour above](#-see-haven-in-action) and in [How it works](#-how-it-works).
+
+---
+
+## 🏛️ Beyond traditional memory retrieval
+
+*This is an architecture comparison, not a benchmark.*
+
+Many memory systems for LLMs focus primarily on one job: retrieving relevant
+stored memories for a query. Haven does that too, but treats it as one stage
+in a longer pipeline rather than the whole system. This section describes
+Haven's own architecture — it isn't a claim that other systems can't do these
+things, only a plain account of what Haven's pipeline actually does, stage by
+stage, every one of them traceable to real code under `obsidian/`:
+
+- **Structured memory extraction** — an LLM pulls atomic, sourced facts out of
+  a conversation instead of storing raw text
+- **Ontology-aware organization** — every memory attaches to concepts in a
+  graph, not left as an isolated row
+- **Canonicalization** — a restated fact strengthens one belief
+  (`CONFIRM`/`UPDATE`) instead of piling up as a duplicate
+- **Importance scoring** — every memory carries a stated importance, not just
+  a recency or similarity score
+- **Project-aware organization** — memories are grouped by the project or
+  topic they belong to, not only by type
+- **Deterministic Working Context reconstruction** — goals, decisions, tasks,
+  and open questions assembled by plain, testable code, not a second LLM call
+- **Explainable retrieval** — every candidate's score breakdown, and every
+  rejection's reason, is recorded rather than discarded after ranking
+- **Local-first Markdown knowledge storage** — the vault is the database, and
+  it's a database you can read without Haven
+
+### 🔍 Explainability: the Retrieval Inspector
+
+Every one of the properties above is inspectable, not just asserted. The
+Retrieval Inspector (part of the [inspection suite](#-the-inspection-suite))
+shows, for the exact query you ran: why each candidate matched, why it ranked
+where it did, why it was accepted, and — the part a bare similarity score
+can't give you — why every other candidate was rejected, with a stated
+reason. That's valuable for debugging a retrieval miss and for trusting a
+retrieval hit, off the same trace either way.
+
+### 📁 Local-first: your memories are files
+
+Every memory Haven writes is a Markdown file with YAML frontmatter, in a
+folder you choose — openable as an [Obsidian](https://obsidian.md) vault. That
+gets you transparency (read what's stored without asking Haven), editability
+(fix a memory in a text editor), version control (`git diff` your own second
+brain), portability (copy the folder, it's still yours), and ownership that
+doesn't depend on Haven staying installed.
+
+### ✅ Feature summary
+
+| Capability | Haven |
+|---|:---:|
+| Working Context reconstruction | ✓ |
+| Structured memories | ✓ |
+| Ontology graph | ✓ |
+| Explainable retrieval | ✓ |
+| Retrieval Inspector | ✓ |
+| Local Markdown vault | ✓ |
+| Browser extension | ✓ |
+| Dashboard | ✓ |
+| Memory Spaces | ✓ |
+
+This is a product capability table, not a competitive matrix — it says what
+Haven does, not what anything else doesn't.
 
 ---
 
@@ -653,10 +889,19 @@ documents its own blind spots.
 **Remember** (save this conversation) and **Use Haven** (inject relevant context
 into the compose box) directly on chatgpt.com, plus vault search from the popup.
 
-<!-- VISUAL — this one already exists in the repo. -->
-![The "Use Haven" button in the ChatGPT compose area](obsidian/docs/media/extension-use-haven-button-chatgpt.png)
+<p align="center"><img src="obsidian/docs/media/extension-use-haven-button-chatgpt.png" alt="The Use Haven button in the ChatGPT compose area" width="820" /></p>
 
 ![Extension to Haven to Obsidian flow: content script and popup message-passing through background.js to the FastAPI server for Use Haven, Remember, and search, plus the separate Obsidian vault importer converging on the same /memory/commit route](obsidian/docs/media/extension-obsidian-flow.svg)
+
+### What actually gets injected
+
+When you click **Use Haven** in ChatGPT, the context block your LLM receives is
+the read pipeline's final output: only acceptance-surviving memories, rendered by
+the ContextBuilder with their canonical facts. Because the acceptance stage can
+abstain, the honest answer to "nothing relevant is in the vault" is an *empty*
+injection — not three paragraphs of plausible-looking noise silently steering your
+conversation. What you inject is exactly what the Retrieval Inspector shows you,
+because it's the same pipeline output.
 
 **Quick Capture** — not everything arrives as a conversation. The dashboard's
 Quick Capture panel takes a free-form Markdown note (`POST /api/v1/capture`),
@@ -682,6 +927,52 @@ existing vault.
 **API** — everything above is a thin client over a local FastAPI server
 (`POST /api/v1/memory`, `POST /api/v1/capture`, retrieval and inspection routes).
 Full reference: [`obsidian/server/README.md`](obsidian/server/README.md).
+
+---
+
+## 🧭 Repository layout
+
+Haven began as a fork of [mem0](https://github.com/mem0ai/mem0) and grew into its
+own project. The upstream mem0 code (SDKs, integrations, the mem0 docs site) is
+still in this repository for reference and as the benchmark baseline — but if
+you're evaluating **Haven specifically**, you only need these directories:
+
+| Path | What you'll find there |
+|---|---|
+| `obsidian/` | Haven's backend: write/read pipelines, ontology, Manager AI, the FastAPI server, and the dashboard. (Why it's called `obsidian/` — [see below](#why-the-backend-lives-in-a-folder-called-obsidian).) |
+| `extension/` | The Chromium browser extension that adds Haven to ChatGPT. |
+| `benchmarks/` | The mem0-vs-Haven benchmark harness, results, and the final engineering report. |
+| `config/` | Environment-variable templates for the LLM-backed pieces (Manager AI, query rewriter, benchmark judge). |
+| `demo/` | The deterministic demo dataset used by the no-API-key quickstart. |
+| `obsidian/docs/` | Haven's own design docs, decision log, roadmap, and known issues — start here for anything beyond the README. |
+
+Everything else at the repo root (`mem0/`, `docs/`, `tests/`, etc.) is upstream
+mem0 and isn't part of Haven's evaluation surface.
+
+### Why the backend lives in a folder called `obsidian/`
+
+Early on, Haven used [Obsidian](https://obsidian.md) itself as its persistence
+layer, so the code that talked to a vault lived under `obsidian/`. The name
+stuck even as scope grew: today `obsidian/` holds Haven's actual backend — the
+Memory Engine (read pipeline), Manager AI (write pipeline), the ontology /
+concept graph, the FastAPI server, and the dashboard. It's an accident of
+history, not a description of what's inside — think of it as Haven's `src/`.
+
+### Documentation map
+
+```
+README.md              ← you are here: quickstart, results, how it works
+   ↓
+obsidian/docs/          ← start here for anything deeper: ARCHITECTURE.md,
+                          ROADMAP.md, KNOWN_ISSUES.md, decision log
+   ↓
+docs/architecture/      ← original deep-dive design specs (ontology,
+                          acceptance stage, ranking investigations) —
+                          historical/detailed, referenced from obsidian/docs/
+```
+
+`obsidian/docs/README.md` indexes the middle layer and points into
+`docs/architecture/` for deeper specs.
 
 ---
 
@@ -755,6 +1046,8 @@ five empty benchmark dataset categories, or the concept-graph visualizer. For th
 surrounding mem0 monorepo's conventions (linting, CI, PR template), see
 [`AGENTS.md`](AGENTS.md) and [`CONTRIBUTING.md`](CONTRIBUTING.md).
 
+---
+
 ## 🙏 Acknowledgements
 
 - **[mem0](https://github.com/mem0ai/mem0)** — the foundation this fork builds
@@ -769,6 +1062,6 @@ surrounding mem0 monorepo's conventions (linting, CI, PR template), see
 
 **Haven** — because a second brain you can't question isn't a brain, it's a liability.
 
-*Built by [Siddhartha Khajuria](https://github.com/siddharthakhajuria) · Apache-2.0*
+*Built by [Siddhartha Khajuria](https://github.com/fazeprism25) · Apache-2.0*
 
 </div>

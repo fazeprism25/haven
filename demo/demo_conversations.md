@@ -89,3 +89,26 @@ want them to land in the matching Dashboard category.
 - assistant: Got it -- noted the deployment project, the Alibaba Cloud decision, your pre-deploy review preference, and the hardening task.
 - user: FACT[team-blocker]: The Alibaba Cloud deployment is blocked on a pending security review of the provisioning script before the demo link can go live.
 - assistant: Understood -- flagging that as a blocker until the security review clears.
+
+## Me, wiring up Working Context and Memory Review [external_key=haven-context-and-review]
+
+### Call 1 -- first run: project, two decisions, task, preference
+
+- user: FACT[ctx-project]: I'm building Working Context and Structured Prompt assembly into Haven's Memory Engine, so a downstream LLM gets a fully reconstructed project state instead of a flat list of facts.
+- user: FACT[ctx-decision-rewriter]: I decided to wire Haven's Query Rewriter to Qwen Cloud using an OpenAI-compatible client -- Haven's first cloud-LLM decision.
+- user: FACT[ctx-decision-review]: I decided to add a Memory Review step between extraction and persistence, so editing or deleting a suggested fact never re-runs the Extractor, Classifier, or ImportanceScorer a second time.
+- user: FACT[ctx-task]: I need to wire Working Context and the XML-delimited Structured Prompt into both the dashboard's Resume Work panel and the browser extension's preview dialog.
+- user: FACT[ctx-preference]: I prefer separating retrieved memory from the user's own request with explicit XML tags, so a model never mistakes a memory for an instruction.
+- assistant: Got it -- noted the Working Context project, the Query Rewriter and Memory Review decisions, the wiring task, and your XML-separation preference.
+
+### Call 2 -- follow-up: shipped, new open question (incremental)
+
+- user: FACT[ctx-project]: I'm building Working Context and Structured Prompt assembly into Haven's Memory Engine, so a downstream LLM gets a fully reconstructed project state instead of a flat list of facts.
+- user: FACT[ctx-decision-rewriter]: I decided to wire Haven's Query Rewriter to Qwen Cloud using an OpenAI-compatible client -- Haven's first cloud-LLM decision.
+- user: FACT[ctx-decision-review]: I decided to add a Memory Review step between extraction and persistence, so editing or deleting a suggested fact never re-runs the Extractor, Classifier, or ImportanceScorer a second time.
+- user: FACT[ctx-task]: I need to wire Working Context and the XML-delimited Structured Prompt into both the dashboard's Resume Work panel and the browser extension's preview dialog.
+- user: FACT[ctx-preference]: I prefer separating retrieved memory from the user's own request with explicit XML tags, so a model never mistakes a memory for an instruction.
+- assistant: Got it -- noted the Working Context project, the Query Rewriter and Memory Review decisions, the wiring task, and your XML-separation preference.
+- user: FACT[ctx-followup]: Working Context, Structured Prompt, and the Memory Review preview/commit workflow are now completed and wired into both the dashboard and the browser extension.
+- user: FACT[ctx-question]: I'm still not sure whether the Context Planner's 5-mode task table should ship now, or whether a per-category Acceptance Stage is the better investment first.
+- assistant: Nice -- I've marked Working Context, Structured Prompt, and Memory Review as completed, and logged the Context Planner open question.
