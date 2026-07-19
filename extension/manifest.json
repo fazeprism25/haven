@@ -42,7 +42,7 @@
   ],
   "web_accessible_resources": [
     {
-      "resources": ["content/adapters/*.js", "content/resolve-query.js", "content/remember-visibility.js", "config.js"],
+      "resources": ["content/adapters/*.js", "content/resolve-query.js", "content/remember-visibility.js", "content/rewrite-suggestion.js", "config.js"],
       "matches": ["https://chatgpt.com/*", "https://chat.openai.com/*"]
     }
   ]

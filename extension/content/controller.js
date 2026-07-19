@@ -43,6 +43,15 @@
     chrome.runtime.getURL("content/remember-visibility.js")
   );
   const rememberVisibility = createRememberVisibility();
+  const { isEligibleForRewrite, isSuggestionStillRelevant } = await import(
+    chrome.runtime.getURL("content/rewrite-suggestion.js")
+  );
+
+  // Debounce window between the user's last keystroke and the rewrite
+  // request firing -- long enough that a normal typing cadence never fires
+  // one mid-word, short enough that the suggestion still feels responsive
+  // once they pause.
+  const REWRITE_DEBOUNCE_MS = 700;
 
   // Bounds the full content-script -> background -> server round trip.
   // Strictly larger than background.js's own REQUEST_TIMEOUT_MS (which
@@ -97,6 +106,9 @@
     cancelMemory(reviewId) {
       return this.send("HAVEN_MEMORY_CANCEL", { review_id: reviewId });
     },
+    rewriteQuery(query) {
+      return this.send("HAVEN_QUERY_REWRITE", { query });
+    },
   };
 
   // Auto-preview/auto-remember, set from popup/popup.js via
@@ -121,6 +133,10 @@
     errorTimer: null,
     statusTimer: null,
     connected: null, // null = unknown/checking, true = connected, false = offline
+    rewriteCard: null,
+    rewriteTextEl: null,
+    rewriteDebounceTimer: null,
+    pendingRewrite: null, // the suggested text "Use Rewrite" would insert, or null when no suggestion is showing
   };
 
   function buildUI() {
@@ -164,6 +180,102 @@
     state.button = button;
     state.rememberButton = rememberButton;
     state.errorEl = errorEl;
+  }
+
+  // Query Rewrite Assistant's suggestion card -- a separate floating
+  // element from state.container (which sits above the compose box) since
+  // this one is anchored below it (see positionRewriteCard). Built lazily,
+  // the first time a suggestion actually has something to show, rather
+  // than unconditionally in buildUI() above.
+  function buildRewriteSuggestionUI() {
+    const card = document.createElement("div");
+    card.className = "haven-rewrite-card";
+    card.hidden = true;
+
+    const heading = document.createElement("div");
+    heading.className = "haven-rewrite-heading";
+    heading.textContent = "✨ Haven suggests a better retrieval query";
+
+    const textEl = document.createElement("p");
+    textEl.className = "haven-rewrite-text";
+
+    const useButton = document.createElement("button");
+    useButton.type = "button";
+    useButton.className = "haven-rewrite-use";
+    useButton.textContent = "Use Rewrite";
+    useButton.addEventListener("click", onUseRewriteClick);
+
+    const dismissButton = document.createElement("button");
+    dismissButton.type = "button";
+    dismissButton.className = "haven-rewrite-dismiss";
+    dismissButton.textContent = "Dismiss";
+    dismissButton.addEventListener("click", hideRewriteSuggestion);
+
+    const actions = document.createElement("div");
+    actions.className = "haven-rewrite-actions";
+    actions.append(useButton, dismissButton);
+
+    card.append(heading, textEl, actions);
+    document.body.append(card);
+
+    state.rewriteCard = card;
+    state.rewriteTextEl = textEl;
+  }
+
+  function positionRewriteCard() {
+    if (!state.composeBox || !state.rewriteCard) return;
+    const rect = adapter.getAnchorForButton(state.composeBox).getBoundingClientRect();
+    state.rewriteCard.style.top = `${window.scrollY + rect.bottom + 8}px`;
+    state.rewriteCard.style.left = `${window.scrollX + rect.left}px`;
+  }
+
+  function showRewriteSuggestion(original, rewritten) {
+    if (!state.rewriteCard) buildRewriteSuggestionUI();
+    state.pendingRewrite = rewritten;
+    state.rewriteTextEl.textContent = rewritten;
+    state.rewriteCard.hidden = false;
+    positionRewriteCard();
+  }
+
+  function hideRewriteSuggestion() {
+    clearTimeout(state.rewriteDebounceTimer);
+    state.pendingRewrite = null;
+    if (state.rewriteCard) state.rewriteCard.hidden = true;
+  }
+
+  function onUseRewriteClick() {
+    const composeBox = state.composeBox;
+    const rewritten = state.pendingRewrite;
+    hideRewriteSuggestion();
+    if (!composeBox || !rewritten) return;
+    adapter.setComposeText(composeBox, rewritten);
+  }
+
+  async function requestRewriteSuggestion(query) {
+    const response = await HavenClient.rewriteQuery(query);
+    const currentText = state.composeBox ? adapter.getComposeText(state.composeBox) : "";
+    if (!isSuggestionStillRelevant(response, currentText)) return;
+    showRewriteSuggestion(response.data.original, response.data.rewritten);
+  }
+
+  // Fires on every native `input` event from the compose box (see mount()'s
+  // listener wiring below). Debounced here -- rather than relying on the
+  // MutationObserver/sync() debounce elsewhere in this file, which is
+  // shared by unrelated DOM churn and can be starved for long stretches
+  // (see updateRememberVisibility's comment) -- so a rewrite request only
+  // ever fires after the user actually pauses typing.
+  function onComposeInput() {
+    clearTimeout(state.rewriteDebounceTimer);
+    const composeBox = state.composeBox;
+    if (!composeBox) return;
+    const text = adapter.getComposeText(composeBox);
+    if (!isEligibleForRewrite(text)) {
+      hideRewriteSuggestion();
+      return;
+    }
+    state.rewriteDebounceTimer = setTimeout(() => {
+      requestRewriteSuggestion(text.trim());
+    }, REWRITE_DEBOUNCE_MS);
   }
 
   // Six states: idle (resting/connected -- labeled "Connected" below, same
@@ -836,6 +948,7 @@
     // overlap between the two independent async flows this widget drives.
     if (state.button.disabled) return;
     clearError();
+    hideRewriteSuggestion();
     rememberVisibility.retrievalStarted();
     syncRememberButtonVisibility();
 
@@ -1071,7 +1184,17 @@
   }
 
   function mount(composeBox) {
+    const previousComposeBox = state.composeBox;
     state.composeBox = composeBox;
+    // ChatGPT's own re-renders can swap the compose box's underlying DOM
+    // node (see chatgpt.js's insertContextAbove comment) -- sync() calls
+    // mount() again whenever that happens, so the "input" listener that
+    // drives the Query Rewrite Assistant has to move with it rather than
+    // being attached once.
+    if (previousComposeBox !== composeBox) {
+      previousComposeBox?.removeEventListener("input", onComposeInput);
+      composeBox.addEventListener("input", onComposeInput);
+    }
     if (!state.container) buildUI();
     if (!state.container.isConnected) document.body.append(state.container);
     requestAnimationFrame(positionContainer);
@@ -1079,8 +1202,10 @@
   }
 
   function unmount() {
+    state.composeBox?.removeEventListener("input", onComposeInput);
     state.composeBox = null;
     state.container?.remove();
+    hideRewriteSuggestion();
   }
 
   function sync() {
@@ -1091,6 +1216,7 @@
       unmount();
     } else if (composeBox) {
       positionContainer();
+      positionRewriteCard();
     }
   }
 
@@ -1144,8 +1270,12 @@
   });
   observer.observe(document.body, { childList: true, subtree: true });
 
-  window.addEventListener("resize", positionContainer);
-  window.addEventListener("scroll", positionContainer, true);
+  function repositionAll() {
+    positionContainer();
+    positionRewriteCard();
+  }
+  window.addEventListener("resize", repositionAll);
+  window.addEventListener("scroll", repositionAll, true);
 
   settings = await loadSettings();
   sync();

@@ -130,6 +130,8 @@ from obsidian.server.schemas import (
     ImportScanRequest,
     ImportScanResponse,
     PreviewMemoryResponse,
+    QueryRewriteSuggestionRequest,
+    QueryRewriteSuggestionResponse,
     QueryRewritingSettingResponse,
     RetrieveContextRequest,
     RetrieveContextResponse,
@@ -1487,6 +1489,34 @@ def update_query_rewriting_setting(
     app.state.query_rewriting_enabled = request.enabled
     _save_query_rewriting_enabled(request.enabled)
     return QueryRewritingSettingResponse(enabled=request.enabled)
+
+
+@router.post("/query/rewrite", response_model=QueryRewriteSuggestionResponse)
+def suggest_query_rewrite(
+    request: QueryRewriteSuggestionRequest,
+) -> QueryRewriteSuggestionResponse:
+    """One user-facing rewrite suggestion for a compose-box draft.
+
+    Always uses the shared ``app.state.query_rewriter`` -- unlike
+    retrieval's internal multi-query expansion (``_active_query_rewriter``),
+    this is not gated by the "Query Rewriting" dashboard setting, since
+    it's an independent, explicit feature the browser extension calls
+    directly. Touches no vault state, so unlike ``retrieve_context`` this
+    needs no ``_write_lock``/``memory_store.load()``.
+
+    ``changed=False`` (with ``rewritten`` equal to ``request.query``)
+    whenever there's nothing worth showing the user: a blank query, or
+    every :class:`QueryRewriter` fail-open case (missing API key, timeout,
+    malformed response) -- see that module's "Fail-open contract". Callers
+    should render no suggestion UI in that case.
+    """
+    result = app.state.query_rewriter.rewrite(request.query)
+    rewritten = result.rewrites[0] if result.rewrites else result.original
+    return QueryRewriteSuggestionResponse(
+        original=result.original,
+        rewritten=rewritten,
+        changed=bool(result.rewrites),
+    )
 
 
 @router.get("/vault", response_model=VaultInfo)

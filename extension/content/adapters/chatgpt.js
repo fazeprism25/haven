@@ -40,6 +40,25 @@ function insertContextAbove(el, contextText) {
   document.execCommand("insertText", false, `${contextText}\n\n`);
 }
 
+// Replaces the compose box's entire contents with `text`, used by the Query
+// Rewrite Assistant's "Use Rewrite" action. Same React-controlled-
+// contenteditable concern as insertContextAbove above -- selecting the
+// existing content and going through execCommand("insertText", ...) (rather
+// than writing el.textContent directly) is what keeps React's internal
+// state in sync, since that's the native beforeinput/input event pipeline
+// React listens to. Unlike insertContextAbove, the selection spans the
+// *whole* node (not collapsed to its start) so the insert replaces
+// everything instead of prepending.
+function setComposeText(el, text) {
+  el.focus();
+  const selection = window.getSelection();
+  const range = document.createRange();
+  range.selectNodeContents(el);
+  selection.removeAllRanges();
+  selection.addRange(range);
+  document.execCommand("insertText", false, text);
+}
+
 function getAnchorForButton(el) {
   return el.closest("form") ?? el.parentElement ?? el;
 }
@@ -393,6 +412,7 @@ export const adapter = {
   findComposeBox,
   getComposeText,
   insertContextAbove,
+  setComposeText,
   getAnchorForButton,
   getConversationTurns,
   getLastAssistantMessage,

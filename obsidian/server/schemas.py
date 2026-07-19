@@ -40,6 +40,34 @@ class UpdateQueryRewritingSettingRequest(BaseModel):
     enabled: bool
 
 
+class QueryRewriteSuggestionRequest(BaseModel):
+    """A raw, in-progress compose-box draft to suggest a clearer retrieval
+    phrasing for.
+
+    Distinct from the "Query Rewriting" server setting above
+    (:class:`QueryRewritingSettingResponse`) -- that setting silently
+    expands a query with extra phrasings *during* retrieval. This endpoint
+    is a separate, always-on, user-facing feature: it asks
+    :class:`~obsidian.memory_engine.query_rewriter.QueryRewriter` for one
+    suggestion the browser extension can show and let the user accept or
+    dismiss *before* retrieval ever runs, regardless of whether the
+    retrieval-time setting is on.
+    """
+
+    query: str
+
+
+class QueryRewriteSuggestionResponse(BaseModel):
+    original: str
+    rewritten: str
+    # False whenever `rewritten` wouldn't actually change anything the user
+    # sees -- a blank query, no rewriter API key configured, the LLM call
+    # failing, or the model's own rewrite matching `original` -- so callers
+    # know to show no suggestion UI rather than one that echoes the input.
+    changed: bool
+
+
+
 class ConversationTurnRequest(BaseModel):
     """One turn of a full-conversation ``POST /memory`` payload.
 

@@ -22,6 +22,11 @@ export const ENDPOINTS = {
   HAVEN_MEMORY_COMMIT: { method: "POST", path: `${API_PREFIX}/memory/commit` },
   HAVEN_MEMORY_CANCEL: { method: "POST", path: `${API_PREFIX}/memory/cancel` },
   HAVEN_SEARCH_MEMORIES: { method: "GET", path: `${API_PREFIX}/dashboard/inspect` },
+  // Query Rewrite Assistant: one suggestion for the current compose-box
+  // draft, shown/dismissed by content/rewrite-suggestion.js. Independent of
+  // the dashboard's "Query Rewriting" retrieval-time setting -- see
+  // obsidian/server/schemas.py's QueryRewriteSuggestionRequest docstring.
+  HAVEN_QUERY_REWRITE: { method: "POST", path: `${API_PREFIX}/query/rewrite` },
 };
 
 // Every request background.js makes is aborted if the Haven server hasn't
