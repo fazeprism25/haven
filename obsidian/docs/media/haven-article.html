@@ -160,7 +160,8 @@
   article > section > details > * { max-width: var(--prose); }
   article .wide { max-width: var(--wide); }
   article > section > details.wide > * { max-width: none; }
-  article > section > details.wide .dbody > p { max-width: var(--prose); }
+  article > section > details.wide .dbody > p,
+  article > section > details.wide .dbody > ul { max-width: var(--prose); }
 
   section { padding: 8px 0 40px; }
   section + section { border-top: 1px solid var(--hairline-soft); padding-top: 56px; }
@@ -973,10 +974,14 @@
       <p>
         The obvious fix is to keep feeding the transcript back in. It works, briefly, and
         then it doesn't: context windows are finite, attention degrades over long
-        contexts, and cost scales with every token you re-send. In our own measurements,
-        naively re-processing a conversation's full history meant that by turn 500 the
-        extraction prompt had grown to roughly <strong><span data-bench="prompt-full-end">6,800</span> tokens</strong> — and it
-        grows linearly, forever. You pay for turns 1 through 499 again every time you
+        contexts, and cost scales with every token you re-send.
+      </p>
+
+      <p>
+        In our own measurements, naively re-processing a conversation's full history meant
+        that by turn 500 the extraction prompt had grown to roughly
+        <strong><span data-bench="prompt-full-end">6,800</span> tokens</strong> — and it keeps
+        growing linearly, forever. You pay for turns 1 through 499 again every time you
         save turn 500.
       </p>
 
@@ -1186,6 +1191,8 @@
           Apache-2.0 license, and one idea survived the trip: an LLM is good at turning
           a raw conversation into atomic facts, and nothing downstream should have to
           trust it beyond that. Almost everything downstream is Haven's own.
+        </p>
+        <p>
           mem0 resolves conflicts with a second LLM call that decides
           <code>ADD</code>/<code>UPDATE</code>/<code>DELETE</code>/<code>NOOP</code>
           against a vector-indexed store, automatically, on every write. Haven replaced
@@ -1196,11 +1203,16 @@
           frontmatter, in a vault you can open, edit, and version without Haven running.
           mem0 retrieves by cosine similarity over embeddings; Haven retrieves through
           keyword matching and concept-graph activation, a named-factor ranker, and an
-          acceptance stage that can return nothing at all. The ontology, Working Context
-          reconstruction, structured prompt assembly, that deterministic ranker and
-          acceptance gate, the Retrieval Inspector, checkpointed incremental ingestion,
-          the browser extension, and the dashboard — everything the rest of this article
-          covers — were designed and built after the fork, not inherited from it.
+          acceptance stage that can return nothing at all.
+        </p>
+        <p>
+          The ontology, Working Context reconstruction, structured prompt assembly, that
+          deterministic ranker and acceptance gate, the Retrieval Inspector, checkpointed
+          incremental ingestion, the browser extension, and the dashboard — everything the
+          rest of this article covers — were designed and built after the fork, not
+          inherited from it.
+        </p>
+        <p>
           Concretely: <code>obsidian/</code>, Haven's actual backend, has no runtime
           import of the mem0 package anywhere in its write or read pipeline. At this
           point the two projects share a license and an origin, not a call stack.
@@ -1335,6 +1347,8 @@
         <div class="pipe-hint">↳ 10 stages · 3 LLM calls in the write path (extraction, classification, importance — all Alibaba Cloud DashScope (Qwen Cloud)) · one human gate (Memory Review) · retrieval and everything after ingestion is deterministic</div>
       </div>
 
+      <p>Those same ten stages, laid out as one system diagram:</p>
+
       <figure class="plate wide">
         <img src="architecture.svg" loading="lazy" width="1680" height="1040"
              alt="Haven architecture schematic: the write pipeline (Manager AI) and read pipeline (Memory Engine) meeting at a Markdown vault and concept graph, forking at the end into a legacy flat ContextBuilder renderer and the live WorkingContextBuilder/StructuredPromptBuilder path, with the FastAPI server, dashboard, and browser extension on top">
@@ -1443,24 +1457,31 @@ relational consistency mattered more than write throughput.
         rule-based detector scans the memory's canonical fact for <em>capitalized
         spans</em> — runs of consecutive capitalized words such as
         <code>PostgreSQL</code>, <code>Priya</code>, or <code>billing-service</code> —
-        so the same fact always yields the same candidate labels, every time. From
-        those labels, Haven's ontology layer proposes what should change: a new
+        so the same fact always yields the same candidate labels, every time.
+      </p>
+
+      <p>
+        From those labels, Haven's ontology layer proposes what should change: a new
         concept node for any label the graph hasn't seen before, a generic
         <code>RELATED_TO</code> edge between any two concepts detected together in the
         same memory, and — for labels a small curated taxonomy already recognizes as
         an instance of something (a database engine, a model provider) — an
         <code>IS_A</code> edge to that category. A validation pass filters out
         duplicates and anything that would violate the graph's own invariants before
-        anything is applied. Every label is resolved through an <strong>alias
-        index</strong> — a flat table mapping each concept's label and known aliases
-        to one canonical node — so <code>billing-service</code>, "the billing app,"
-        and "billing" all collapse onto the same concept instead of splintering into
-        three unconnected ones. The <strong>OntologyPipeline</strong> — the only
-        component allowed to mutate the concept graph — applies what survives and
-        attaches the memory to every concept it touches, so a fact is never an
-        isolated row: it becomes reachable from anything that shares, relates to, or
-        specializes the same concept, which is exactly the structure the read path
-        below spends to find memories a keyword search alone would miss.
+        anything is applied.
+      </p>
+
+      <p>
+        Every label is resolved through an <strong>alias index</strong> — a flat table
+        mapping each concept's label and known aliases to one canonical node — so
+        <code>billing-service</code>, "the billing app," and "billing" all collapse
+        onto the same concept instead of splintering into three unconnected ones. The
+        <strong>OntologyPipeline</strong> — the only component allowed to mutate the
+        concept graph — applies what survives and attaches the memory to every concept
+        it touches, so a fact is never an isolated row: it becomes reachable from
+        anything that shares, relates to, or specializes the same concept, which is
+        exactly the structure the read path below spends to find memories a keyword
+        search alone would miss.
       </p>
 
       <h3>The read path: retrieval with receipts</h3>
@@ -1479,24 +1500,32 @@ relational consistency mattered more than write throughput.
         independent ways: it resolves query terms against the alias index and spreads
         activation outward across the concept graph from whatever matches, while a
         separate IDF-weighted keyword search (with a phrase bonus) scans every
-        memory's text directly, concept graph or no. A memory found by both paths
-        keeps evidence from both — the two paths are complementary rather than a
-        fallback for each other, so a gap in the ontology never means a total miss,
-        and a gap in shared wording never means the graph's evidence gets discarded.
+        memory's text directly, concept graph or no.
+      </p>
+
+      <p>
+        A memory found by both paths keeps evidence from both — the two paths are
+        complementary rather than a fallback for each other, so a gap in the ontology
+        never means a total miss, and a gap in shared wording never means the graph's
+        evidence gets discarded.
       </p>
       <p>
         Every candidate from either path — not just the leading few — is then scored
         by the <strong>DeterministicRanker</strong> on seven named factors: activation
         (graph proximity to the query), attachment relevance (how directly a memory
         is linked to a matched concept), keyword overlap, importance, confidence,
-        recency, and confirmation count. No single factor is trusted alone: activation
-        and attachment relevance can surface a memory the query never names directly,
-        keyword overlap rewards a literal match the graph might miss, and importance,
-        confidence, recency, and confirmation count together keep a stale or
-        once-stated belief from outranking a fresher, better-evidenced one. The seven
-        combine into one composite score with the full per-factor breakdown preserved
-        on every candidate — nothing is filtered out at this stage, so a later "why
-        wasn't this accepted" always has real numbers to point to, not a guess.
+        recency, and confirmation count.
+      </p>
+
+      <p>
+        No single factor is trusted alone: activation and attachment relevance can
+        surface a memory the query never names directly, keyword overlap rewards a
+        literal match the graph might miss, and importance, confidence, recency, and
+        confirmation count together keep a stale or once-stated belief from
+        outranking a fresher, better-evidenced one. The seven combine into one
+        composite score with the full per-factor breakdown preserved on every
+        candidate — nothing is filtered out at this stage, so a later "why wasn't
+        this accepted" always has real numbers to point to, not a guess.
       </p>
 
       <p>
@@ -1519,17 +1548,25 @@ relational consistency mattered more than write throughput.
         <div class="out" aria-hidden="true">→ accepted · <em>or nothing</em></div>
       </div>
 
+      <p>Each check guards against a specific way retrieval quietly goes wrong:</p>
+
+      <ul>
+        <li><strong>Minimum score</strong> keeps a uniformly weak candidate pool from
+          reaching the prompt at all.</li>
+        <li><strong>Abstention</strong> refuses to answer when even the <em>best</em>
+          candidate is weak, rather than presenting a shaky top pick as if it were
+          confident.</li>
+        <li><strong>The score-gap cut and the relative threshold</strong> both stop a
+          strong match from being padded out with merely-plausible, unrelated ones
+          once quality visibly drops off.</li>
+        <li><strong>The hard cap</strong> keeps an unusually large surviving set from
+          flooding the prompt.</li>
+      </ul>
+
       <p>
-        Each check guards against a specific way retrieval quietly goes wrong: the
-        minimum-score floor keeps a uniformly weak candidate pool from reaching the
-        prompt at all; abstention refuses to answer when even the <em>best</em>
-        candidate is weak, rather than presenting a shaky top pick as if it were
-        confident; the score-gap cut and the relative threshold both stop a strong
-        match from being padded out with merely-plausible, unrelated ones once
-        quality visibly drops off; and the hard cap keeps an unusually large surviving
-        set from flooding the prompt. Clearing every check is what "trustworthy" means
-        here — and failing the abstention check is why an honest "nothing relevant
-        in the vault" is a real, reachable outcome rather than a hypothetical one.
+        Clearing every check is what "trustworthy" means here — and failing the
+        abstention check is why an honest "nothing relevant in the vault" is a real,
+        reachable outcome rather than a hypothetical one.
       </p>
 
       <p>
@@ -1628,9 +1665,12 @@ relational consistency mattered more than write throughput.
         short-circuits <em>before any pipeline stage runs</em>: zero LLM calls, zero
         duplicates. Append one turn, and only that turn is extracted — against a
         compact, retrieval-built Working Context background instead of the full
-        transcript, so cross-turn references still resolve. Edited or reordered history
-        is detected and falls back to a full reprocess. Never a crash, never silent
-        corruption.
+        transcript, so cross-turn references still resolve.
+      </p>
+
+      <p>
+        Edited or reordered history is detected and falls back to a full reprocess.
+        Never a crash, never silent corruption.
       </p>
 
       <p>
@@ -1768,15 +1808,21 @@ relational consistency mattered more than write throughput.
 
       <h3>Memory Inspector — "what does the system believe about this one fact?"</h3>
       <p>
-        Click any memory card in the dashboard and you get its full biography, in
-        sections: <strong>General</strong> (fact, type, confidence, importance),
-        <strong>Provenance</strong> (source, source file, import time, Memory Space —
-        for anything that arrived via import), <strong>Ontology</strong> (attached
-        concepts and their relationships), <strong>Retrieval</strong> and
-        <strong>Acceptance</strong> (this memory's live scores and accept/reject
-        verdict), and <strong>Pipeline</strong> (its actual path through the stages).
-        Plus the evidence chain that made its confidence what it is:
+        Click any memory card in the dashboard and you get its full biography, broken
+        into sections:
       </p>
+
+      <ul>
+        <li><strong>General</strong> — fact, type, confidence, importance.</li>
+        <li><strong>Provenance</strong> — source, source file, import time, Memory
+          Space, for anything that arrived via import.</li>
+        <li><strong>Ontology</strong> — attached concepts and their relationships.</li>
+        <li><strong>Retrieval and Acceptance</strong> — this memory's live scores and
+          accept/reject verdict.</li>
+        <li><strong>Pipeline</strong> — its actual path through the stages.</li>
+      </ul>
+
+      <p>Plus the evidence chain that made its confidence what it is:</p>
 
       <div class="mock wide" role="img" aria-label="Memory Inspector mock: a memory's frontmatter beside its evidence chain">
         <div class="chrome"><i></i><i></i><i></i><span class="t">Memory Inspector · mem_7f3a91c2</span></div>
@@ -1920,19 +1966,26 @@ valid_from   2026-06-12</pre>
         rollup of the same <code>ProjectState</code> from section 05: current
         objective, milestone, and open gaps, at a glance instead of buried in a query.
         A <strong>Memory Space</strong> switcher sits in the topbar throughout, since
-        every section below reads and writes whichever space is active. From there
-        it's organized around what you'd actually do with a second brain: <strong>Quick
-        capture</strong> a thought, <strong>Import</strong> an existing vault,
-        <strong>Ask your memory</strong> a question and watch it resolve stage by stage
-        in the <strong>Explainability Pipeline</strong> view, see your <strong>Current
-        focus</strong> (the same Working Contexts the extension previews), browse
-        memories grouped into three domains — <strong>Personal, Work,
-        Knowledge</strong> — spanning Haven's 18 memory types (decision, goal,
-        blocker, and so on), each further tagged by topic, inspect any one of them,
-        open <strong>Under the hood</strong> when you want the write traces and
-        retrieval pipeline view, and check the <strong>Benchmark Explorer</strong> for
-        the same per-case judge verdicts section 08 draws its numbers from.
+        every section below reads and writes whichever space is active.
       </p>
+
+      <p>From there it's organized around what you'd actually do with a second brain:</p>
+
+      <ul>
+        <li><strong>Quick capture</strong> a thought.</li>
+        <li><strong>Import</strong> an existing vault.</li>
+        <li><strong>Ask your memory</strong> a question and watch it resolve stage by
+          stage in the <strong>Explainability Pipeline</strong> view.</li>
+        <li>See your <strong>Current focus</strong> — the same Working Contexts the
+          extension previews.</li>
+        <li><strong>Browse memories</strong> grouped into three domains — Personal,
+          Work, Knowledge — spanning Haven's 18 memory types (decision, goal, blocker,
+          and so on), each further tagged by topic, and inspect any one of them.</li>
+        <li>Open <strong>Under the hood</strong> for the write traces and retrieval
+          pipeline view.</li>
+        <li>Check the <strong>Benchmark Explorer</strong> for the same per-case judge
+          verdicts section 08 draws its numbers from.</li>
+      </ul>
 
       <figure class="plate wide">
         <img src="dashboard-hero.png" loading="lazy" width="1280" height="524"
@@ -2183,16 +2236,21 @@ valid_from   2026-06-12</pre>
           an overall result: across all 288 cases, Haven Full's 83.3% already beats
           "return the most recent memory" (232/288, 80.6%), and loses only to "return
           everything" (260/288, 90.3%) — a precision-floor baseline, not a real retrieval
-          strategy. The traced root cause behind the four-category loss is real and
-          scoped, not a benchmark artifact: <code>CanonicalMatcher</code> only recognizes
-          an <code>UPDATE</code> via a conservative prefix-extension rule, and doesn't yet
+          strategy.
+        </p>
+        <p>
+          The traced root cause behind the four-category loss is real and scoped, not a
+          benchmark artifact: <code>CanonicalMatcher</code> only recognizes an
+          <code>UPDATE</code> via a conservative prefix-extension rule, and doesn't yet
           detect a restated or differently-phrased correction as a <code>SUPERSEDE</code> —
           so the old and new facts both stay independently retrievable instead of the old
           one being archived. Wiring that detection into the automatic pipeline is the
-          first item on the <a href="#next">roadmap</a>. A benchmark suite that only ever
-          finds wins is a marketing document; this one found the specific, named reason
-          Haven loses on four categories, which is why the outright ties in 4 of the
-          remaining 7 are worth believing.
+          first item on the <a href="#next">roadmap</a>.
+        </p>
+        <p>
+          A benchmark suite that only ever finds wins is a marketing document; this one
+          found the specific, named reason Haven loses on four categories, which is why
+          the outright ties in 4 of the remaining 7 are worth believing.
         </p>
         <p><strong>Benchmark takeaways:</strong></p>
         <ul>
@@ -2274,17 +2332,19 @@ valid_from   2026-06-12</pre>
       <details class="wide">
         <summary>Methodology fine print — it's load-bearing</summary>
         <div class="dbody">
-          <p>
-            Three things are specific to the benchmark suite, not to Haven. First, a
-            scripted, marker-based fake LLM stands in for the cloud model — a real
-            LLM's comprehension varies run to run and isn't reproducible evidence; the
-            fake isolates exactly the variable that changed (how much of the
-            conversation, and which background facts, reach the extractor at all).
-            Second, wall-clock time isn't the headline claim — with an instant fake LLM
-            it's dominated by retrieval overhead, so LLM-call counts and prompt sizes
-            are the trustworthy proxies. Third, token counts are estimates
-            (<code>chars / 4</code>) — directionally correct, not exact.
-          </p>
+          <p>Three things are specific to the benchmark suite, not to Haven:</p>
+          <ul>
+            <li>A scripted, marker-based fake LLM stands in for the cloud model — a
+              real LLM's comprehension varies run to run and isn't reproducible
+              evidence; the fake isolates exactly the variable that changed (how much
+              of the conversation, and which background facts, reach the extractor at
+              all).</li>
+            <li>Wall-clock time isn't the headline claim — with an instant fake LLM
+              it's dominated by retrieval overhead, so LLM-call counts and prompt sizes
+              are the trustworthy proxies.</li>
+            <li>Token counts are estimates (<code>chars / 4</code>) — directionally
+              correct, not exact.</li>
+          </ul>
           <p>
             The read path's ranking and acceptance logic is built from named,
             individually testable engineering changes — stop-word filtering, IDF
