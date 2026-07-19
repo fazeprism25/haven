@@ -2813,13 +2813,34 @@ DEFAULT_BASE_URL = <span class="tk-s">"https://dashscope-intl.aliyuncs.com/compa
     <!-- ============ 11 ============ -->
     <section id="next" class="rv">
       <div class="kicker"><span class="num">13</span>Roadmap</div>
-      <h2>The roadmap, in priority order</h2>
+      <h2>The roadmap: future directions, in priority order</h2>
 
       <p>
-        Since v1.0, Haven has grown Memory Review, Memory Spaces, Obsidian vault
-        import with provenance, Quick Capture, the Write Inspector, and a live
-        Working-Context-backed structured prompt — the roadmap items that used to sit
-        in this section. What's ahead now:
+        Everything described above is running today, not sketched for later: Working
+        Context reconstruction, structured memory extraction under a human review gate,
+        ontology-driven retrieval, deterministic ranking, explainable retrieval end to
+        end, the browser extension, the dashboard, a local-first architecture, a
+        benchmarked evaluation suite, and a live production deployment.
+      </p>
+      <ul>
+        <li>Working Context reconstruction</li>
+        <li>Structured memory extraction</li>
+        <li>Ontology-driven retrieval</li>
+        <li>Deterministic ranking</li>
+        <li>Explainable retrieval</li>
+        <li>Browser extension</li>
+        <li>Dashboard</li>
+        <li>Local-first architecture</li>
+        <li>Benchmarked evaluation</li>
+        <li>Production deployment</li>
+      </ul>
+      <p>
+        Memory Review, Memory Spaces, Obsidian vault import with provenance, Quick
+        Capture, the Write Inspector, and the live Working-Context-backed structured
+        prompt all started as entries in this section and are now part of the system
+        above. The rest of this section follows the same pattern: each item is a
+        direction the architecture is built to grow into, not a piece it's currently
+        missing.
       </p>
 
       <div class="road wide">
@@ -2828,14 +2849,14 @@ DEFAULT_BASE_URL = <span class="tk-s">"https://dashscope-intl.aliyuncs.com/compa
           <div>
             <div class="rt">Next</div>
             <p>
-              Wire <code>SUPERSEDE</code> into the automatic pipeline —
-              <code>UPDATE</code> already lands automatically, via a conservative
-              prefix-extension rule in the CanonicalMatcher, but a differently-phrased
-              correction still leaves both the old and new fact independently
-              retrievable instead of archiving the old one. Fix the Working Context
-              memory-type gap the benchmarks surfaced (plain facts still don't reach
-              the incremental extractor's background). Extend the benchmark dataset
-              into the remaining planned categories.
+              Extend automatic <code>SUPERSEDE</code> detection in the
+              CanonicalMatcher — <code>UPDATE</code> already lands automatically today
+              via a conservative prefix-extension rule, and the next step teaches the
+              matcher to recognize a differently-phrased correction as a contradiction
+              to archive, rather than a second independently retrievable fact. Carry
+              plain facts into the Working Context background the incremental
+              extractor already uses for its other memory types. Grow the benchmark
+              suite into the remaining planned categories.
             </p>
           </div>
         </div>
@@ -2844,10 +2865,11 @@ DEFAULT_BASE_URL = <span class="tk-s">"https://dashscope-intl.aliyuncs.com/compa
           <div>
             <div class="rt">Later</div>
             <p>
-              Claude and Gemini conversation importers (ChatGPT is implemented today;
-              Obsidian notes already import). Memory decay and adaptive forgetting. A
-              visual concept-graph explorer — the data already exists on the inspection
-              API. Live dashboard push updates.
+              Claude and Gemini conversation importers, extending the ChatGPT and
+              Obsidian import paths already in production. Memory decay and adaptive
+              forgetting, building on the confidence and evidence-chain model already
+              tracked per memory. A visual concept-graph explorer, surfacing the graph
+              data the inspection API already exposes. Live dashboard push updates.
             </p>
           </div>
         </div>
@@ -2856,14 +2878,24 @@ DEFAULT_BASE_URL = <span class="tk-s">"https://dashscope-intl.aliyuncs.com/compa
           <div>
             <div class="rt">Further out</div>
             <p>
-              Multi-user vaults and cross-device sync. Automatic remembering — no manual
-              click. Broader agent-ecosystem integration. Deliberately out of scope for
-              now: autonomous graph evolution, graph embeddings, RL — inspectability
-              before autonomy, always.
+              Multi-user vaults and cross-device sync. Automatic remembering, removing
+              the manual click as trust in the pipeline grows. Broader
+              agent-ecosystem integration beyond the current browser extension.
+              Deliberately kept out of scope: autonomous graph evolution, graph
+              embeddings, and reinforcement learning — inspectability comes before
+              autonomy, by design.
             </p>
           </div>
         </div>
       </div>
+
+      <p>
+        None of this is scaffolding for a future version — it's extension of an
+        architecture that already works end to end, today, against a real vault. The
+        pipeline, the ontology, the ranking, the explainability, the review gate: all
+        live, all measured, all in production. What's above is where that architecture
+        goes next, not what it's waiting on to become real.
+      </p>
 
       <p>
         If the thesis resonates — that a second brain you can't question isn't a brain,
