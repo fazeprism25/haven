@@ -166,14 +166,16 @@
     state.errorEl = errorEl;
   }
 
-  // Six states: idle (resting/connected), loading (a request is in
-  // flight), retrieved (context fetch just succeeded), saved (a memory was
-  // just remembered), error (the last action failed), offline (server
-  // unreachable). retrieved/saved/error are transient — they auto-revert to
-  // idle (or offline, if connectivity dropped) after a few seconds, the
-  // same pattern showMessage() already uses for its own timer.
+  // Six states: idle (resting/connected -- labeled "Connected" below, same
+  // as popup.html's #status-text, since this is a connectivity state, not
+  // an activity state), loading (a request is in flight), retrieved
+  // (context fetch just succeeded), saved (a memory was just remembered),
+  // error (the last action failed), offline (server unreachable).
+  // retrieved/saved/error are transient — they auto-revert to idle (or
+  // offline, if connectivity dropped) after a few seconds, the same pattern
+  // showMessage() already uses for its own timer.
   const STATUS_LABELS = {
-    idle: "Haven: idle",
+    idle: "Haven: connected",
     loading: "Haven: loading…",
     retrieved: "Haven: context retrieved",
     saved: "Haven: memory saved",
@@ -183,10 +185,11 @@
   const TRANSIENT_STATUSES = new Set(["retrieved", "saved", "error"]);
 
   // Short always-visible text next to the dot -- the idle/offline dot colors
-  // are both desaturated greys that are hard to tell apart at a glance, so
-  // the dot alone isn't a reliable signal (mirrors popup.html's #status-text).
+  // used to both be desaturated greys that were hard to tell apart at a
+  // glance (see haven-status-idle in haven.css, now green to match
+  // popup.html's "connected" dot), so the text label is the primary signal.
   const STATUS_TEXT_LABELS = {
-    idle: "Idle",
+    idle: "Connected",
     loading: "Loading…",
     retrieved: "Retrieved",
     saved: "Saved",

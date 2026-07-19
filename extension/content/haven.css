@@ -35,7 +35,7 @@
   flex-shrink: 0;
 }
 
-/* Six action states: idle (resting), loading (request in flight),
+/* Six action states: idle (resting/connected), loading (request in flight),
    retrieved (context fetch just succeeded), saved (memory just
    remembered), error (last action failed), offline (server unreachable).
    retrieved/saved/error are transient and revert automatically — see
@@ -44,8 +44,12 @@
   transition: background 0.2s ease, box-shadow 0.2s ease;
 }
 
+/* Matches popup.html's .status-dot.connected -- idle is a connectivity
+   state (server reachable, nothing in flight), not an inactive one, so it
+   gets the same green as the popup's "Connected" dot rather than a grey
+   that reads as indistinguishable from offline. */
 .haven-status-idle {
-  background: #b0b0b0;
+  background: #2ea043;
 }
 
 .haven-status-loading {
