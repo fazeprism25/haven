@@ -227,6 +227,79 @@ def _build_working_context_query(
     return "\n".join(f"[{role.value}] {content}" for role, content in query_turns)
 
 
+#: Matches a turn whose *entire* content is the structured prompt "Use Haven"
+#: itself injects (extension/content/controller.js's onButtonClick ->
+#: adapter.setComposeText, which replaces the compose box outright -- see
+#: that call site's comment for why). See
+#: obsidian/memory_engine/structured_prompt_builder.py's
+#: StructuredPromptBuilder.render() for the exact shape being matched here.
+#: Tag boundaries are matched loosely (``\s*``/``DOTALL``) rather than that
+#: renderer's exact indentation, since scraping the turn back out of the host
+#: page's DOM (extension/content/adapters/chatgpt.js's getConversationTurns)
+#: does not reliably preserve it -- HTML collapses interior whitespace by
+#: default.
+_INJECTED_HAVEN_CONTEXT_RE = re.compile(
+    r"\A\s*<System>\s*<HavenContext\b.*?</HavenContext>\s*"
+    r"<UserRequest>\s*(?P<request>.*?)\s*</UserRequest>\s*"
+    r"</System>\s*\Z",
+    re.DOTALL,
+)
+
+
+def _strip_injected_haven_context(content: str) -> str:
+    """Reduce a Haven-injected structured prompt to just its ``<UserRequest>`` text.
+
+    "Use Haven" replaces the compose box outright with a structured prompt
+    that embeds every retrieved memory under ``<HavenContext>`` before the
+    user sends it (see ``_INJECTED_HAVEN_CONTEXT_RE``'s comment) -- so once
+    sent, that entire structured prompt becomes one literal turn in the
+    visible conversation, and "Remember" scrapes it back out verbatim as
+    evidence. Left unstripped, those already-known memories reach the
+    Extractor phrased in the exact canonical templates it's told to
+    produce (e.g. "The user decided to ..."), so it re-extracts them as if
+    the user had just typed them -- proposing memories that already exist.
+
+    Only a turn whose *entire* content matches Haven's own injected shape is
+    rewritten (to just its unescaped ``<UserRequest>`` text); anything else
+    -- including a partially edited or manually-typed lookalike -- is
+    returned unchanged, since we can't be confident it's still exactly what
+    Haven injected.
+    """
+    match = _INJECTED_HAVEN_CONTEXT_RE.match(content)
+    if not match:
+        return content
+    unescaped = (
+        match.group("request")
+        .replace("&lt;", "<")
+        .replace("&gt;", ">")
+        .replace("&amp;", "&")
+    )
+    # StructuredPromptBuilder._request_lines() indents every request line by
+    # 4 spaces; undo that so the recovered text matches what the user
+    # actually typed rather than carrying the XML indentation as part of a
+    # "fact".
+    return "\n".join(
+        line[4:] if line.startswith("    ") else line for line in unescaped.split("\n")
+    )
+
+
+def _turns_from_request(request: SaveMemoryRequest) -> List[Tuple[Role, str]]:
+    """Build the turn list ``save_memory``/``preview_memory`` both start from.
+
+    Applies :func:`_strip_injected_haven_context` to every turn (and to the
+    single synthetic turn built from ``canonical_fact``) so a Haven-injected
+    Working Context prompt is reduced to just the user's actual request
+    before it ever reaches checkpoint hashing, Working Context lookup, or
+    the Extractor -- see that function's docstring for why.
+    """
+    if request.conversation:
+        return [
+            (turn.role, _strip_injected_haven_context(turn.content))
+            for turn in request.conversation
+        ]
+    return [(Role.USER, _strip_injected_haven_context(request.canonical_fact))]
+
+
 def _elapsed_ms(start: float) -> float:
     """Return milliseconds elapsed since *start* (a ``time.perf_counter()`` value)."""
     return (time.perf_counter() - start) * 1000.0
@@ -2191,12 +2264,7 @@ def save_memory(request: SaveMemoryRequest) -> SaveMemoryResponse:
 
         app.state.memory_store.load()
 
-        if request.conversation:
-            turns: List[Tuple[Role, str]] = [
-                (turn.role, turn.content) for turn in request.conversation
-            ]
-        else:
-            turns = [(Role.USER, request.canonical_fact)]
+        turns: List[Tuple[Role, str]] = _turns_from_request(request)
 
         checkpoint_lookup_start = time.perf_counter()
         lookup = _checkpoint_lookup(request, turns)
@@ -2443,12 +2511,7 @@ def preview_memory(request: SaveMemoryRequest) -> PreviewMemoryResponse:
 
     app.state.memory_store.load()
 
-    if request.conversation:
-        turns: List[Tuple[Role, str]] = [
-            (turn.role, turn.content) for turn in request.conversation
-        ]
-    else:
-        turns = [(Role.USER, request.canonical_fact)]
+    turns: List[Tuple[Role, str]] = _turns_from_request(request)
 
     checkpoint_lookup_start = time.perf_counter()
     lookup = _checkpoint_lookup(request, turns)
