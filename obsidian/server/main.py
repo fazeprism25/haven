@@ -93,7 +93,7 @@ from obsidian.manager_ai.models import (
 from obsidian.manager_ai.pipeline import PIPELINE_VERSION, ManagerPipeline
 from obsidian.memory_engine.engine import MemoryEngine
 from obsidian.memory_engine.memory_store import MemoryStore
-from obsidian.memory_engine.query_rewriter import QueryRewriter
+from obsidian.memory_engine.query_rewriter import QueryRewriter, RewriteSuggester
 from obsidian.memory_engine.vault_writer import VaultWriter
 from obsidian.ontology.alias_index import AliasIndex
 from obsidian.ontology.concept_graph_loader import ConceptGraphLoader
@@ -1378,6 +1378,13 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     app.state.query_rewriter = QueryRewriter()
     app.state.query_rewriting_enabled = _load_query_rewriting_enabled()
 
+    # Backs POST /query/rewrite (suggest_query_rewrite below) -- distinct
+    # from app.state.query_rewriter above (see RewriteSuggester's module
+    # docstring for why "always expand" and "only suggest when it helps"
+    # need separate classes/prompts despite sharing an LLM backend).
+    # Server-level and always-on for the same reasons as query_rewriter.
+    app.state.rewrite_suggester = RewriteSuggester()
+
     # Single shared LLM instance for every Manager AI stage (see
     # obsidian/manager_ai/llm.py's module docstring) -- Extractor,
     # Classifier, and ImportanceScorer only ever call llm.generate(prompt),
@@ -1497,7 +1504,7 @@ def suggest_query_rewrite(
 ) -> QueryRewriteSuggestionResponse:
     """One user-facing rewrite suggestion for a compose-box draft.
 
-    Always uses the shared ``app.state.query_rewriter`` -- unlike
+    Always uses the shared ``app.state.rewrite_suggester`` -- unlike
     retrieval's internal multi-query expansion (``_active_query_rewriter``),
     this is not gated by the "Query Rewriting" dashboard setting, since
     it's an independent, explicit feature the browser extension calls
@@ -1505,17 +1512,17 @@ def suggest_query_rewrite(
     needs no ``_write_lock``/``memory_store.load()``.
 
     ``changed=False`` (with ``rewritten`` equal to ``request.query``)
-    whenever there's nothing worth showing the user: a blank query, or
-    every :class:`QueryRewriter` fail-open case (missing API key, timeout,
-    malformed response) -- see that module's "Fail-open contract". Callers
+    whenever there's nothing worth showing the user: a blank query, the
+    query was already judged clear enough as-is, or any
+    :class:`RewriteSuggester` fail-open case (missing API key, timeout,
+    malformed response) -- see that class's "Fail-open contract". Callers
     should render no suggestion UI in that case.
     """
-    result = app.state.query_rewriter.rewrite(request.query)
-    rewritten = result.rewrites[0] if result.rewrites else result.original
+    result = app.state.rewrite_suggester.suggest(request.query)
     return QueryRewriteSuggestionResponse(
         original=result.original,
-        rewritten=rewritten,
-        changed=bool(result.rewrites),
+        rewritten=result.rewritten,
+        changed=result.changed,
     )
 
 

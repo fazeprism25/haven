@@ -336,3 +336,197 @@ class QueryRewriter:
             return _parse_rewrites(raw_text, query)
         except Exception:
             return ()
+
+
+# ---------------------------------------------------------------------------
+# RewriteSuggester -- the browser extension's typing-time suggestion
+# ---------------------------------------------------------------------------
+#
+# A different question from QueryRewriter's above: QueryRewriter always
+# tries to produce alternate phrasings, because more differently-worded
+# queries only ever help retrieval recall -- there's no such thing as a
+# query "too clear to benefit" from extra search variants under the hood.
+# The extension's UI has the opposite requirement (see
+# ``obsidian.server.schemas.QueryRewriteSuggestionResponse`` and
+# ``content/rewrite-suggestion.js``): show a suggestion only when it would
+# *meaningfully change what the user should search for*, never as a
+# paraphrase-everything nag. "Is this draft ambiguous enough to be worth
+# rewriting" is a judgement call that depends on meaning, not on any
+# surface property (length, punctuation, keyword match) of the text, so it
+# is delegated to the same LLM in a single call, asked directly for a
+# yes/no decision alongside its rewrite -- one round trip, same latency and
+# cost profile as QueryRewriter.rewrite(), just a different prompt/parse.
+SUGGESTION_SYSTEM_PROMPT = """
+You are a retrieval-suggestion assistant for a personal memory search system.
+
+The user is typing a query into a personal memory assistant that retrieves
+their own earlier notes, decisions, and conversations. Some queries are
+already specific and self-contained -- searching with them as-is works
+fine. Others are vague, depend on conversational context, or reference
+"it"/"that"/"the project" without saying what they mean -- these would
+retrieve much better results if rewritten into an explicit, self-contained
+search query first.
+
+Decide whether THIS query would meaningfully benefit from being rewritten
+before being used to search. Say yes only when a rewrite would change what
+gets retrieved for the better -- not for every query that could in theory
+be phrased differently.
+
+Say yes for queries like:
+- vague continuations ("continue", "keep going", "where did we leave off")
+- pronouns/references with no antecedent in the query itself ("go back to
+  that thing we discussed", "catch me up on the project")
+- asking to recall a past decision or state without naming what it was
+  ("what did we finally decide", "what's the latest architecture we
+  settled on")
+
+Say no for queries like:
+- already-specific, self-contained questions, even short ones ("what is
+  python?", "explain recursion", "how does quicksort work", "what is
+  oauth?")
+- requests with no dependency on retrieving anything from memory ("convert
+  5 km to miles", "summarize this paragraph", "write a haiku")
+
+Rules:
+
+1. Do not invent facts or guess at unstated details when writing a
+   rewrite -- only make the existing intent explicit.
+2. A rewrite must be a short search phrase, not a full sentence or an
+   answer to the query.
+3. Return ONLY valid JSON, no markdown fences, no commentary.
+
+Return JSON in exactly this shape:
+
+{
+    "needs_rewrite": true or false,
+    "rewrite": "explicit, retrieval-oriented phrasing" or null
+}
+
+"rewrite" must be null when "needs_rewrite" is false, and a non-empty
+string when it is true.
+"""
+
+
+@dataclass(frozen=True)
+class SuggestionResult:
+    """The outcome of deciding whether to suggest a rewrite for one query.
+
+    Parameters
+    ----------
+    original : str
+        The caller's exact input string, unchanged.
+    suggestion : str, optional
+        The suggested rewrite, or ``None`` when no suggestion is worth
+        showing (query already clear, or rewriting was skipped/failed --
+        see the module's "Fail-open contract").
+    """
+
+    original: str
+    suggestion: Optional[str] = None
+
+    @property
+    def changed(self) -> bool:
+        """Whether there is a suggestion worth showing the user."""
+        return self.suggestion is not None
+
+    @property
+    def rewritten(self) -> str:
+        """The suggestion if there is one, else *original* unchanged."""
+        return self.suggestion if self.suggestion is not None else self.original
+
+
+def _parse_suggestion(raw_text: str, original: str) -> Optional[str]:
+    """Parse the model's JSON response into an optional suggestion string.
+
+    Raises on any malformed or unexpected shape; callers are expected to
+    treat *any* exception from this function as "no suggestion" per the
+    fail-open contract. Returns ``None`` whenever ``needs_rewrite`` is
+    false, or the model's ``rewrite`` is blank or identical to *original*
+    (case-/whitespace-insensitively) -- a model that says "yes, rewrite"
+    but then echoes the input back has not actually proposed anything.
+    """
+    data = json.loads(raw_text)
+    needs_rewrite = data["needs_rewrite"]
+    if not isinstance(needs_rewrite, bool):
+        raise TypeError("'needs_rewrite' must be a JSON boolean")
+    if not needs_rewrite:
+        return None
+
+    rewrite = data.get("rewrite")
+    if not isinstance(rewrite, str):
+        raise TypeError("'rewrite' must be a string when needs_rewrite is true")
+    phrase = rewrite.strip()
+    if not phrase or _normalize_query(phrase) == _normalize_query(original):
+        return None
+    return phrase
+
+
+class RewriteSuggester:
+    """Decides whether a compose-box draft is worth suggesting a rewrite for.
+
+    Reusable across multiple calls to :meth:`suggest`; maintains an
+    internal cache keyed by normalised query text, same contract as
+    :class:`QueryRewriter` (see that class's docstring).
+
+    Parameters
+    ----------
+    model : str, optional
+        Overrides ``QUERY_REWRITER_MODEL``/:data:`DEFAULT_MODEL` for every
+        call made through this instance. Shares :class:`QueryRewriter`'s
+        environment configuration (``QUERY_REWRITER_API_KEY``/
+        ``_BASE_URL``/``_MODEL``/``_TIMEOUT_SECONDS``) -- same LLM backend,
+        just a different prompt for a different decision.
+    """
+
+    def __init__(self, model: Optional[str] = None) -> None:
+        self._model = model
+        self._cache: Dict[str, Optional[str]] = {}
+
+    def suggest(self, query: str) -> SuggestionResult:
+        """Return *query* plus an optional suggested rewrite.
+
+        Parameters
+        ----------
+        query : str
+            The raw compose-box draft. Returned verbatim as
+            :attr:`SuggestionResult.original` regardless of outcome.
+
+        Returns
+        -------
+        SuggestionResult
+            ``suggestion`` is set only when the model judged the query
+            worth rewriting; ``None`` whenever *query* is blank/
+            whitespace-only, the model judged it already clear, or
+            anything about the call failed (see the module's "Fail-open
+            contract").
+        """
+        key = _normalize_query(query)
+
+        if not key:
+            return SuggestionResult(original=query, suggestion=None)
+
+        if key not in self._cache:
+            self._cache[key] = self._fetch_suggestion(query)
+
+        return SuggestionResult(original=query, suggestion=self._cache[key])
+
+    def _fetch_suggestion(self, query: str) -> Optional[str]:
+        """Call the LLM for a suggestion, failing open on any error.
+
+        Single broad ``except Exception``, same reasoning as
+        :meth:`QueryRewriter._fetch_rewrites`.
+        """
+        try:
+            client = _get_client()
+            response = client.chat.completions.create(
+                model=_resolve_model(self._model),
+                timeout=_resolve_timeout(),
+                messages=[
+                    {"role": "system", "content": SUGGESTION_SYSTEM_PROMPT},
+                    {"role": "user", "content": query},
+                ],
+            )
+            raw_text = response.choices[0].message.content
+            return _parse_suggestion(raw_text, query)
+        except Exception:
+            return None

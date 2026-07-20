@@ -12,31 +12,29 @@ extension to show the user before retrieval ever happens.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import List, Sequence
+from typing import List, Optional
 
 import pytest
 from fastapi.testclient import TestClient
 
-from obsidian.memory_engine.query_rewriter import RewriteResult
+from obsidian.memory_engine.query_rewriter import SuggestionResult
 
 
-class _FixedRewriter:
-    """Test double for QueryRewriter: returns a pre-set RewriteResult.
+class _FixedSuggester:
+    """Test double for RewriteSuggester: returns a pre-set SuggestionResult.
 
     Duck-typed to the only contract this endpoint relies on -- a
-    ``rewrite(query: str) -> RewriteResult`` method -- without any real LLM
-    call. Duplicated from ``test_query_rewriting_setting.py`` rather than
-    imported -- see ``feedback-minimal-scaffolding``: reuse patterns
-    verbatim, don't add a new shared module for two files' benefit.
+    ``suggest(query: str) -> SuggestionResult`` method -- without any real
+    LLM call.
     """
 
-    def __init__(self, rewrites: Sequence[str] = ()) -> None:
-        self._rewrites = tuple(rewrites)
+    def __init__(self, suggestion: Optional[str] = None) -> None:
+        self._suggestion = suggestion
         self.queries_seen: List[str] = []
 
-    def rewrite(self, query: str) -> RewriteResult:
+    def suggest(self, query: str) -> SuggestionResult:
         self.queries_seen.append(query)
-        return RewriteResult(original=query, rewrites=self._rewrites)
+        return SuggestionResult(original=query, suggestion=self._suggestion)
 
 
 def _unconfigured_client(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> TestClient:
@@ -55,11 +53,13 @@ def test_returns_the_rewrite_when_the_rewriter_produced_one(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     with _unconfigured_client(tmp_path, monkeypatch) as client:
-        fake = _FixedRewriter(rewrites=(
-            "Retrieve the latest Haven architecture, implementation decisions, "
-            "current blockers, and recommended next development tasks.",
-        ))
-        client.app.state.query_rewriter = fake
+        fake = _FixedSuggester(
+            suggestion=(
+                "Retrieve the latest Haven architecture, implementation decisions, "
+                "current blockers, and recommended next development tasks."
+            )
+        )
+        client.app.state.rewrite_suggester = fake
 
         response = client.post(
             "/api/v1/query/rewrite",
@@ -82,12 +82,11 @@ def test_no_suggestion_when_the_rewriter_produced_none(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     with _unconfigured_client(tmp_path, monkeypatch) as client:
-        # Mirrors QueryRewriter's own fail-open contract (blank/failed/
-        # no-op call) and its _parse_rewrites dedup, which already drops any
-        # rewrite identical to the original -- either way this endpoint
-        # must tell the caller "nothing to show", not echo the input as if
-        # it were a real suggestion.
-        client.app.state.query_rewriter = _FixedRewriter(rewrites=())
+        # Mirrors RewriteSuggester's own fail-open contract (blank/failed/
+        # already-clear query) -- this endpoint must tell the caller
+        # "nothing to show", not echo the input as if it were a real
+        # suggestion.
+        client.app.state.rewrite_suggester = _FixedSuggester(suggestion=None)
 
         response = client.post(
             "/api/v1/query/rewrite",
@@ -110,8 +109,8 @@ def test_runs_regardless_of_the_query_rewriting_dashboard_setting(
     with _unconfigured_client(tmp_path, monkeypatch) as client:
         assert client.get("/api/v1/settings/query-rewriting").json() == {"enabled": False}
 
-        fake = _FixedRewriter(rewrites=("clearer phrasing",))
-        client.app.state.query_rewriter = fake
+        fake = _FixedSuggester(suggestion="clearer phrasing")
+        client.app.state.rewrite_suggester = fake
 
         response = client.post("/api/v1/query/rewrite", json={"query": "vague draft"})
         assert response.json()["changed"] is True
