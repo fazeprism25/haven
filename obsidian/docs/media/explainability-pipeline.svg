@@ -46,12 +46,12 @@
   <!-- routes -->
   <rect class="box" x="60" y="216" width="420" height="60"/>
   <text class="lblSm" x="270" y="240">GET /api/v1/dashboard/inspect?query=</text>
-  <text class="path" x="270" y="256">dashboard.py:590</text>
+  <text class="path" x="270" y="256">dashboard.py:690</text>
   <line class="arrow" x1="270" y1="156" x2="270" y2="214"/>
 
   <rect class="box" x="510" y="216" width="420" height="60"/>
   <text class="lblSm" x="720" y="240">GET /dashboard/inspect/memory/{memory_id}</text>
-  <text class="path" x="720" y="256">dashboard.py:615</text>
+  <text class="path" x="720" y="256">dashboard.py:715</text>
   <line class="arrow" x1="720" y1="156" x2="720" y2="214"/>
 
   <rect class="box" x="960" y="216" width="330" height="60"/>
@@ -71,7 +71,7 @@
   <!-- ontology + provenance for memory route -->
   <rect class="callout" x="960" y="320" width="330" height="90"/>
   <text class="lblSm" x="1125" y="342">memory route only</text>
-  <text class="noteG" x="1125" y="358">_ontology_for_memory() — dashboard.py:213</text>
+  <text class="noteG" x="1125" y="358">_ontology_for_memory() — dashboard.py:245</text>
   <text class="noteG" x="1125" y="371">Concepts/Relationships reachable via</text>
   <text class="noteG" x="1125" y="384">ConceptGraph, plus import provenance</text>
   <line class="arrowDashed" x1="900" y1="358" x2="958" y2="358"/>
@@ -79,7 +79,7 @@
   <!-- RetrievalTrace -->
   <rect class="box" x="200" y="426" width="700" height="132"/>
   <text class="lbl" x="550" y="450">RetrievalTrace</text>
-  <text class="path" x="550" y="466">retrieval_models.py:1341 — immutable, JSON-serializable "why" record</text>
+  <text class="path" x="550" y="466">retrieval_models.py:1342 — immutable, JSON-serializable "why" record</text>
   <text class="noteG" x="550" y="484">every candidate seen, accepted or rejected — rejection_reason, threshold_used,</text>
   <text class="noteG" x="550" y="497">score_gap, relative_score, abstained, full score_breakdown, base_score,</text>
   <text class="noteG" x="550" y="510">category_preference_bonus, plus context_plan / coverage / gap_recovery /</text>
@@ -130,7 +130,7 @@
   <rect class="box" x="1010" y="790" width="250" height="70"/>
   <text class="lblSm" x="1135" y="812">GET /dashboard/</text>
   <text class="lblSm" x="1135" y="826">write-traces/{id}</text>
-  <text class="path" x="1135" y="842">dashboard.py:658</text>
+  <text class="path" x="1135" y="842">dashboard.py:805</text>
 
   <line class="arrow" x1="560" y1="825" x2="618" y2="825"/>
   <line class="arrow" x1="950" y1="825" x2="1008" y2="825"/>

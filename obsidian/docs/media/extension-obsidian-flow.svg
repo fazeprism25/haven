@@ -38,12 +38,12 @@
 
   <!-- ===== column 1: Use Haven ===== -->
   <rect class="box" x="50" y="176" width="480" height="56"/>
-  <text class="lblSm" x="290" y="196">onButtonClick() — controller.js:820</text>
+  <text class="lblSm" x="290" y="196">onButtonClick() — controller.js:1024</text>
   <text class="path" x="290" y="212">"Use Haven" button in the ChatGPT compose area</text>
 
   <rect class="box" x="50" y="256" width="480" height="56"/>
   <text class="lblSm" x="290" y="276">HavenClient.send(HAVEN_RETRIEVE_WORKING_CONTEXT)</text>
-  <text class="path" x="290" y="292">controller.js:59 → chrome.runtime.sendMessage</text>
+  <text class="path" x="290" y="292">controller.js:93 → chrome.runtime.sendMessage</text>
   <line class="arrow" x1="290" y1="232" x2="290" y2="254"/>
 
   <rect class="box" x="50" y="336" width="480" height="56"/>
@@ -66,7 +66,7 @@
 
   <!-- ===== column 2: Remember ===== -->
   <rect class="box" x="600" y="176" width="520" height="56"/>
-  <text class="lblSm" x="860" y="196">onRememberClick() — controller.js:935</text>
+  <text class="lblSm" x="860" y="196">onRememberClick() — controller.js:1176</text>
   <text class="path" x="860" y="212">"Remember" button — scrapes adapter.getConversationTurns()</text>
 
   <rect class="box" x="600" y="256" width="520" height="56"/>
@@ -75,7 +75,7 @@
 
   <rect class="box" x="600" y="336" width="520" height="66"/>
   <text class="lblSm" x="860" y="358">background.js fetch → POST /memory/preview</text>
-  <text class="path" x="860" y="374">main.py:2033 — ManagerPipeline.extract_classify_score() only</text>
+  <text class="path" x="860" y="374">main.py:2477 — ManagerPipeline.extract_classify_score() only</text>
   <text class="noteG" x="860" y="388">LLM stages run; nothing is written yet</text>
   <line class="arrow" x1="860" y1="312" x2="860" y2="334"/>
 
@@ -86,7 +86,7 @@
 
   <rect class="box" x="600" y="516" width="520" height="66"/>
   <text class="lblSm" x="860" y="538">send HAVEN_MEMORY_COMMIT → POST /memory/commit</text>
-  <text class="path" x="860" y="554">main.py:2169 — CanonicalMatcher/KnowledgeUpdater only</text>
+  <text class="path" x="860" y="554">main.py:2608 — CanonicalMatcher/KnowledgeUpdater only</text>
   <text class="noteG" x="860" y="568">deterministic re-run on edited items — never re-calls the LLM</text>
   <line class="arrow" x1="860" y1="492" x2="860" y2="514"/>
 
@@ -143,13 +143,13 @@
 
   <rect class="box" x="480" y="862" width="360" height="70"/>
   <text class="lblSm" x="660" y="886">POST /import/obsidian/scan</text>
-  <text class="path" x="660" y="902">main.py:2619 — filesystem + checkpoint-hash diff, no LLM</text>
+  <text class="path" x="660" y="902">main.py:3066 — filesystem + checkpoint-hash diff, no LLM</text>
   <text class="noteG" x="660" y="918">classifies notes: skipped vs needs_review</text>
   <line class="arrow" x1="440" y1="907" x2="478" y2="898"/>
 
   <rect class="box" x="880" y="862" width="360" height="70"/>
   <text class="lblSm" x="1060" y="886">POST /import/obsidian/preview</text>
-  <text class="path" x="1060" y="902">main.py:2706 — calls the same preview_memory()</text>
+  <text class="path" x="1060" y="902">main.py:3157 — calls the same preview_memory()</text>
   <text class="noteG" x="1060" y="918">function the "Remember" flow uses, in-process</text>
   <line class="arrow" x1="840" y1="897" x2="878" y2="897"/>
 

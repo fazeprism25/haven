@@ -30,7 +30,7 @@
 
   <rect class="bg" x="0" y="0" width="1700" height="1460"/>
   <text class="title" x="850" y="34">Memory Write Pipeline</text>
-  <text class="subtitle" x="850" y="53">POST /api/v1/memory → save_memory() — obsidian/server/main.py:1811, driving obsidian/manager_ai/pipeline.py</text>
+  <text class="subtitle" x="850" y="53">POST /api/v1/memory → save_memory() — obsidian/server/main.py:2146, driving obsidian/manager_ai/pipeline.py</text>
 
   <!-- row1: request -->
   <rect class="box" x="380" y="80" width="460" height="56"/>
@@ -46,7 +46,7 @@
   <!-- row3: checkpoint lookup gate -->
   <polygon class="gate" points="400,254 820,254 800,326 420,326"/>
   <text class="lbl" x="610" y="280">Checkpoint lookup</text>
-  <text class="path" x="610" y="298">_checkpoint_lookup() — main.py:429</text>
+  <text class="path" x="610" y="298">_checkpoint_lookup() — main.py:504</text>
   <text class="noteG" x="610" y="313">transcript_hash matches an existing ConversationCheckpoint?</text>
   <line class="arrow" x1="610" y1="222" x2="610" y2="252"/>
 
@@ -141,7 +141,7 @@
   <!-- persist knowledge objects -->
   <rect class="box" x="380" y="990" width="460" height="106"/>
   <text class="lbl" x="610" y="1013">_persist_knowledge_objects()</text>
-  <text class="path" x="610" y="1029">main.py:545 — per KnowledgeObject, in order:</text>
+  <text class="path" x="610" y="1029">main.py:620 — per KnowledgeObject, in order:</text>
   <text class="noteG" x="610" y="1045">1. VaultWriter.write(knowledge) → Markdown file, vault_dir</text>
   <text class="noteG" x="610" y="1059">2. OntologyPipeline.process_with_trace(knowledge):</text>
   <text class="noteG" x="610" y="1073">   propose → validate → apply to ConceptGraph → ConceptWriter.write()</text>

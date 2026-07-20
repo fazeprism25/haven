@@ -31,7 +31,7 @@
 
   <rect class="bg" x="0" y="0" width="1700" height="1520"/>
   <text class="title" x="850" y="34">Memory Retrieval Pipeline</text>
-  <text class="subtitle" x="850" y="53">MemoryEngine.query() / query_with_trace() — obsidian/memory_engine/engine.py:718 (_run_retrieval shared prefix)</text>
+  <text class="subtitle" x="850" y="53">MemoryEngine.query() / query_with_trace() — obsidian/memory_engine/engine.py:721 (_run_retrieval shared prefix)</text>
 
   <!-- entry -->
   <rect class="box" x="360" y="80" width="500" height="56"/>
@@ -80,18 +80,28 @@
   <line class="arrow" x1="610" y1="572" x2="610" y2="600"/>
 
   <!-- Ranker -->
-  <rect class="box" x="360" y="700" width="500" height="80"/>
+  <rect class="box" x="360" y="700" width="500" height="96"/>
   <text class="lbl" x="610" y="724">DeterministicRanker.score_all()</text>
   <text class="path" x="610" y="740">deterministic_ranker.py → RankedCandidate[]</text>
-  <text class="noteG" x="610" y="754">7 weighted, normalized components:</text>
-  <text class="noteG" x="610" y="768">activation · attachment_relevance · keyword_overlap · importance · confidence · recency · confirmation_count</text>
+  <text class="noteG" x="610" y="754">7 weighted, normalized components: activation · attachment_relevance ·</text>
+  <text class="noteG" x="610" y="768">keyword_overlap · importance · confidence · recency · confirmation_count</text>
   <line class="arrow" x1="610" y1="668" x2="610" y2="698"/>
+
+  <!-- fork: query_working_context()/query_structured() take DeterministicRanker's output through their own topic-diversified acceptance instead -->
+  <rect class="callout" x="60" y="764" width="270" height="86"/>
+  <text class="noteGL" x="76" y="784">fork here: query_working_context()/</text>
+  <text class="noteGL" x="76" y="797">query_structured() take this same</text>
+  <text class="noteGL" x="76" y="810">DeterministicRanker output, skip</text>
+  <text class="noteGL" x="76" y="823">CategoryPreferenceScorer, and run their</text>
+  <text class="noteGL" x="76" y="836">own topic-diversified AcceptanceStage</text>
+  <text class="noteGL" x="76" y="849">(see Working Context diagram)</text>
+  <line class="arrowDashed" x1="330" y1="807" x2="358" y2="807"/>
 
   <!-- CategoryPreferenceScorer -->
   <rect class="box" x="360" y="812" width="500" height="56"/>
   <text class="lbl" x="610" y="834">CategoryPreferenceScorer.score()</text>
   <text class="path" x="610" y="850">category_preference.py — bounded bonus for ContextPlan-preferred categories, never a hard filter</text>
-  <line class="arrow" x1="610" y1="780" x2="610" y2="810"/>
+  <line class="arrow" x1="610" y1="796" x2="610" y2="810"/>
 
   <!-- AcceptanceStage gate -->
   <polygon class="gate" points="330,890 890,890 870,1004 350,1004"/>
@@ -112,7 +122,7 @@
   <rect class="box" x="360" y="1128" width="500" height="66"/>
   <text class="lbl" x="610" y="1152">ContextBuilder.build()</text>
   <text class="path" x="610" y="1168">context_builder.py — renders the final LLM-ready context string</text>
-  <text class="noteG" x="610" y="1182">query()'s return value — query_working_context()/query_structured() branch here instead (see Working Context diagram)</text>
+  <text class="noteG" x="610" y="1182" style="font-size:9px">query()'s value only — WorkingContext path forked off after DeterministicRanker (see above)</text>
   <line class="arrow" x1="610" y1="1100" x2="610" y2="1126"/>
 
   <!-- output -->

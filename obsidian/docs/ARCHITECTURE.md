@@ -96,6 +96,8 @@ Orchestrated by `MemoryEngine.query()` / `query_with_trace()`
 
 ```
 raw query
+    │  (ContextPlanner classifies task_mode + category requirements — Phase 1.5,
+    │   runs first, before rewriting; see "Context Planner" below)
     │  (optional: QueryRewriter → multi-query expansion)
     ▼
 HybridCandidateRetriever   (keyword path + ontology/concept-activation path, merged)
@@ -103,32 +105,52 @@ HybridCandidateRetriever   (keyword path + ontology/concept-activation path, mer
     ▼
 DeterministicRanker        (final_score + score_breakdown per candidate)
     │
-    ▼
-AcceptanceStage            (abstention / score-gap cut / relative floor / hard cap)
-    │
-    ▼
-DeterministicSlotAllocator (context-budget cap; rarely binds after AcceptanceStage)
-    │
-    ├──────────────────────────────┬─────────────────────────────────┐
-    ▼                               ▼                                 
-ContextBuilder                WorkingContextBuilder
-(flat text — legacy)          (groups allocated candidates by anchor concept)
-    │                               │
-    ▼                               ▼
-context string                 StructuredPromptBuilder
-(POST /retrieve_context)      (+ ProjectState, for CONTINUATION-mode queries)
-                                    │
-                                    ▼
-                              <HavenContext> XML prompt
-                              (POST /retrieve_working_context — live: what the
-                               extension's Use Haven button inserts, and what
-                               the dashboard's Working Context preview shows)
+    ├──────────────────────────────────┬─────────────────────────────────────────┐
+    ▼                                   ▼
+CategoryPreferenceScorer            (no category-preference step — WorkingContext
+(bonus for plan-requested            path stays planner-agnostic for scoring;
+categories; ContextBuilder           see "Category-Aware Retrieval" below)
+path only — Phase 3)
+    │                                   │
+    ▼                                   ▼
+AcceptanceStage                     AcceptanceStage
+(one global pass — abstention /     (topic-diversified — one pass per anchor
+score-gap cut / relative floor /    concept, plus a ContextPlan-driven category
+hard cap)                           fallback for CONTINUATION queries)
+    │                                   │
+    ▼                                   ▼
+DeterministicSlotAllocator          DeterministicSlotAllocator
+(context-budget cap; rarely         (same class/instance, invoked via
+binds after AcceptanceStage)        `_accept_and_allocate`)
+    │                                   │
+    ▼                                   ▼
+ContextBuilder                      WorkingContextBuilder
+(flat text — legacy)                (groups allocated candidates by anchor concept)
+    │                                   │
+    ▼                                   ▼
+context string                      StructuredPromptBuilder
+(POST /retrieve_context)            (+ ProjectState, for CONTINUATION-mode queries)
+                                         │
+                                         ▼
+                                   <HavenContext> XML prompt
+                                   (POST /retrieve_working_context — live: what the
+                                    extension's Use Haven button inserts, and what
+                                    the dashboard's Working Context preview shows)
 ```
 
-Both branches run the exact same retrieval → rank → accept → allocate prefix
-(`MemoryEngine._run_retrieval` / `_accept_and_allocate`); only the renderer
-at the end differs. `POST /retrieve_context` only ever calls `ContextBuilder`
-and is unaffected by anything below it.
+Both branches share one retrieval → rank prefix (`MemoryEngine._run_retrieval`);
+the fork happens immediately after `DeterministicRanker`, not just at the
+renderer. `query_with_trace()` (backing `POST /retrieve_context`) applies
+`CategoryPreferenceScorer` then a single global `AcceptanceStage` pass;
+`query_working_context()`/`query_structured()` (backing
+`POST /retrieve_working_context`) skip category preference entirely and instead
+run `AcceptanceStage` once per topic via `_accept_and_allocate` (see
+"Category-Aware Retrieval" below for why the two paths diverge here).
+`query_with_trace()` also runs `CoverageAnalyzer` and `GapRecoveryDecision`
+after allocation — observational only, attached to `RetrievalTrace`, never read
+back into ranking/acceptance/allocation (see "Coverage Analysis" and "Gap
+Recovery Decision" below). `POST /retrieve_context` is otherwise unaffected by
+anything in the right-hand branch.
 
 - **HybridCandidateRetriever** resolves query text to seed Concepts via
   `AliasIndex`, spreads activation across `ConceptGraph` with
