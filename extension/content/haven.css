@@ -19,6 +19,7 @@
 .haven-review-textarea:focus-visible,
 .haven-review-remove:focus-visible,
 .haven-context-header:focus-visible,
+.haven-memory-item:focus-visible,
 .haven-rewrite-use:focus-visible,
 .haven-rewrite-dismiss:focus-visible {
   outline: 2px solid #10a37f;
@@ -236,10 +237,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  overscroll-behavior: contain;
   animation: haven-overlay-fade-in 0.18s ease both;
 }
 
 .haven-dialog {
+  box-sizing: border-box;
   background: #ffffff;
   border-radius: 8px;
   padding: 16px;
@@ -249,9 +252,28 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
+  overflow: hidden;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
   animation: haven-dialog-rise-in 0.18s cubic-bezier(0.21, 0.7, 0.35, 1) both;
+}
+
+/* Working Context dialog (showWorkingContextDialog) gets a much larger
+   footprint than the plainer dialogs sharing this class (Rewrite preview,
+   Memory Review) -- it's reviewing potentially several projects' worth of
+   memories at once, where the default 480px/70vh reads as cramped even on
+   a full desktop viewport. Sized off the viewport with generous caps rather
+   than a fixed px value so it scales down gracefully on narrow windows. */
+.haven-dialog-large {
+  max-width: min(760px, 94vw);
+  width: 94vw;
+  max-height: min(88vh, 920px);
+}
+
+.haven-dialog-heading,
+.haven-dialog-heading-group,
+.haven-dialog-actions {
+  flex-shrink: 0;
 }
 
 @keyframes haven-overlay-fade-in {
@@ -298,6 +320,8 @@
   display: flex;
   justify-content: flex-end;
   gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid #eaeaea;
 }
 
 .haven-dialog-cancel,
@@ -325,13 +349,36 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+  flex: 1 1 auto;
+  min-height: 0;
   overflow-y: auto;
+  /* Without this, scrolling past the top/bottom of the list chains into
+     the host page's own scroll behind the overlay -- the dialog reads as
+     "hard to scroll" because the gesture that should scroll the memory
+     list instead scrolls ChatGPT/the page underneath it. */
+  overscroll-behavior: contain;
+  /* A few px of right padding keeps card content clear of the scrollbar
+     track instead of the scrollbar overlapping card borders/badges. */
+  padding-right: 4px;
+}
+
+.haven-dialog-summary {
+  flex-shrink: 0;
+  font-size: 12px;
+  color: #6b6b6b;
 }
 
 .haven-context-card {
   border: 1px solid #d0d0d0;
   border-radius: 6px;
   overflow: hidden;
+  /* Without this, .haven-context-card's own overflow:hidden gives it an
+     automatic flex min-height of 0, so with many cards the default
+     flex-shrink:1 squashes every card down to fit .haven-context-list's
+     available height instead of the list scrolling -- the opposite of
+     the intended behavior. Cards keep their natural height; the list's
+     own overflow-y:auto handles anything that doesn't fit. */
+  flex-shrink: 0;
 }
 
 .haven-context-header {
@@ -396,34 +443,82 @@
   display: none;
 }
 
-.haven-context-field-label {
-  font-size: 11px;
-  color: #6b6b6b;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  margin-bottom: 2px;
-}
-
-.haven-context-field-value {
-  font-size: 13px;
-  color: #202020;
-}
-
-.haven-context-field ul {
-  margin: 0;
-  padding-left: 16px;
-  font-size: 13px;
-  color: #202020;
-}
-
-.haven-context-field ul li {
-  margin-bottom: 2px;
-}
-
 .haven-context-empty {
   margin: 0;
   font-size: 12px;
   color: #6b6b6b;
+}
+
+/* Individual memory items inside a context card's body (buildMemoryItem) --
+   one per current_goal/current_focus/recent_decisions/pending_tasks/
+   open_questions entry. Each shows a type badge plus a 2-line preview so
+   the user can tell what a memory is about without opening it; clicking
+   toggles that single item's own expanded state, independent of the
+   context card's own collapse/expand and of every other item in the list. */
+.haven-memory-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+  border: 1px solid #e5e5e5;
+  border-radius: 6px;
+  padding: 8px 10px;
+  background: #ffffff;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+}
+
+.haven-memory-item:hover {
+  background: #fafafa;
+  border-color: #d0d0d0;
+}
+
+.haven-memory-type {
+  flex-shrink: 0;
+  margin-top: 1px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+
+.haven-memory-type-goal { background: #eef2ff; color: #4338ca; }
+.haven-memory-type-focus { background: #e0f2fe; color: #0369a1; }
+.haven-memory-type-decision { background: #e3f6ef; color: #0d8c6d; }
+.haven-memory-type-task { background: #fef3c7; color: #92400e; }
+.haven-memory-type-open-question { background: #fee2e2; color: #b91c1c; }
+
+.haven-memory-text {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: #202020;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.haven-memory-item.haven-memory-expanded .haven-memory-text {
+  -webkit-line-clamp: unset;
+  overflow: visible;
+}
+
+.haven-memory-chevron {
+  flex-shrink: 0;
+  margin-top: 1px;
+  font-size: 11px;
+  color: #6b6b6b;
+  transition: transform 0.15s ease;
+}
+
+.haven-memory-item.haven-memory-expanded .haven-memory-chevron {
+  transform: rotate(-180deg);
 }
 
 /* Memory Review dialog (showReviewDialog) -- one card per extracted/added

@@ -533,11 +533,16 @@
       overlay.className = "haven-dialog-overlay";
 
       const dialog = document.createElement("div");
-      dialog.className = "haven-dialog";
+      dialog.className = "haven-dialog haven-dialog-large";
 
       const heading = document.createElement("div");
       heading.className = "haven-dialog-heading";
       heading.textContent = "Working context";
+
+      const totalMemories = contexts.reduce((sum, ctx) => sum + ctx.memory_count, 0);
+      const summary = document.createElement("div");
+      summary.className = "haven-dialog-summary";
+      summary.textContent = `${totalMemories} memor${totalMemories === 1 ? "y" : "ies"} retrieved across ${contexts.length} context${contexts.length === 1 ? "" : "s"}`;
 
       const list = document.createElement("div");
       list.className = "haven-context-list";
@@ -559,7 +564,7 @@
       actions.className = "haven-dialog-actions";
       actions.append(cancelButton, insertButton);
 
-      dialog.append(heading, list, actions);
+      dialog.append(heading, summary, list, actions);
       overlay.append(dialog);
       document.body.append(overlay);
 
@@ -615,10 +620,11 @@
 
     const body = document.createElement("div");
     body.className = "haven-context-body";
-    appendField(body, "Current goal", context.current_goal);
-    appendField(body, "Current focus", context.current_focus);
-    appendFieldList(body, "Recent decisions", context.recent_decisions);
-    appendFieldList(body, "Pending tasks", context.pending_tasks);
+    if (context.current_goal) body.append(buildMemoryItem("Goal", context.current_goal));
+    if (context.current_focus) body.append(buildMemoryItem("Focus", context.current_focus));
+    appendMemoryItems(body, "Decision", context.recent_decisions);
+    appendMemoryItems(body, "Task", context.pending_tasks);
+    appendMemoryItems(body, "Open question", context.open_questions);
     if (!body.childElementCount) {
       const empty = document.createElement("p");
       empty.className = "haven-context-empty";
@@ -630,35 +636,40 @@
     return card;
   }
 
-  function appendField(container, label, value) {
-    if (!value) return;
-    const field = document.createElement("div");
-    field.className = "haven-context-field";
-    const labelEl = document.createElement("div");
-    labelEl.className = "haven-context-field-label";
-    labelEl.textContent = label;
-    const valueEl = document.createElement("div");
-    valueEl.className = "haven-context-field-value";
-    valueEl.textContent = value;
-    field.append(labelEl, valueEl);
-    container.append(field);
+  // One retrieved memory, shown as a type badge + a 2-line preview
+  // (haven-memory-text's CSS line-clamp) so the user can tell what it's
+  // about without opening it. Clicking toggles this single item's own
+  // expanded state via haven-memory-expanded -- independent of every
+  // other item and of the context card's own collapse/expand.
+  function buildMemoryItem(typeLabel, text) {
+    const item = document.createElement("button");
+    item.type = "button";
+    item.className = "haven-memory-item";
+
+    const badge = document.createElement("span");
+    badge.className = `haven-memory-type haven-memory-type-${typeLabel.toLowerCase().replace(/\s+/g, "-")}`;
+    badge.textContent = typeLabel;
+
+    const textEl = document.createElement("span");
+    textEl.className = "haven-memory-text";
+    textEl.textContent = text;
+
+    const chevron = document.createElement("span");
+    chevron.className = "haven-memory-chevron";
+    chevron.textContent = "▾";
+
+    item.append(badge, textEl, chevron);
+    item.addEventListener("click", () => {
+      item.classList.toggle("haven-memory-expanded");
+    });
+    return item;
   }
 
-  function appendFieldList(container, label, values) {
+  function appendMemoryItems(container, typeLabel, values) {
     if (!values || !values.length) return;
-    const field = document.createElement("div");
-    field.className = "haven-context-field";
-    const labelEl = document.createElement("div");
-    labelEl.className = "haven-context-field-label";
-    labelEl.textContent = label;
-    const list = document.createElement("ul");
     for (const value of values) {
-      const item = document.createElement("li");
-      item.textContent = value;
-      list.append(item);
+      container.append(buildMemoryItem(typeLabel, value));
     }
-    field.append(labelEl, list);
-    container.append(field);
   }
 
   // Memory Review dialog (Remember -> Review -> Save). Deliberately flatter
