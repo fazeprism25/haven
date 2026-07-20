@@ -3,6 +3,19 @@
 Result files preserved for history rather than deleted outright, even where
 stale or superseded — same convention as `obsidian/docs/archive/`.
 
+- `judge_error_2026-07-11/` — `results_haven_full.json`,
+  `results_haven_no_keyword.json`, `results_haven_no_ontology.json`, and
+  `results_haven_no_recency.json` from a 2026-07-11 rerun (commit
+  `aa508ce9`'s pipeline) in which **every one of the 288 judge calls in
+  every file failed** with a provider 403 ("free quota has been
+  exhausted"): all cases carry `failure_type: JUDGE_ERROR`,
+  `answer_score: 0.0`, `passed: false`. **No usable scores** — the pass
+  rates in these files measure the judge's quota, not Haven. This run's
+  `results_haven_full.json` had accidentally overwritten the canonical
+  2026-07-08 DeepSeek-judged file in `benchmarks/results/` (commit
+  `e322db00`); the canonical file has been restored from `aa508ce9`.
+  Re-run the three ablation adapters against a working judge before
+  citing any ablation-vs-full comparison beyond `haven_retrieval`.
 - `qwen_partial_2026-07-11/` — `results.json`, `results_bm25.json`,
   `results_embedding.json`, `results_haven_retrieval.json`,
   `results_recency.json`, `results_return_all.json`, and
