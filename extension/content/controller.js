@@ -1050,7 +1050,20 @@
       contentToInsert = context;
     }
 
-    adapter.insertContextAbove(composeBox, contentToInsert);
+    // structuredPrompt already embeds the resolved query verbatim inside its
+    // own <UserRequest> element (see obsidian/memory_engine/engine.py's
+    // query_structured, which renders StructuredPromptBuilder with exactly
+    // the same `query` this call sent as retrieveWorkingContext's request
+    // body). Prepending it above the still-present compose box draft --
+    // insertContextAbove's contract, correct for the legacy flat `context`
+    // below, which never contains the request -- would leave that same
+    // request sitting a second time, raw, after </System>. setComposeText
+    // replaces the draft outright so the request appears exactly once.
+    if (workingContextAvailable) {
+      adapter.setComposeText(composeBox, contentToInsert);
+    } else {
+      adapter.insertContextAbove(composeBox, contentToInsert);
+    }
 
     if (settings.autoRemember) {
       await onRememberClick();
