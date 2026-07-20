@@ -271,13 +271,15 @@ Then, in your browser:
 4. **Pick a vault.** Open `http://127.0.0.1:8765/dashboard` — first run shows a
    *Select your vault* prompt. Paste any folder path (pointing at an existing
    Obsidian vault is safe; Haven only adds its own subfolders, non-destructively).
-5. **Click "Import Demo Data."** Two seconds later you have 47 memories, 47
-   concepts, and 57 relationships from three fictional people — every one written
-   through the production write path, producing the exact same on-disk artifacts a
+5. **Click "Import Demo Data."** Moments later you have 89 memories, 63
+   concepts, and 125 relationships — Haven telling its own development story,
+   from first commit to this submission — every one written through the
+   production write path, producing the exact same on-disk artifacts a
    real save would.
-6. **Explore.** Query the Retrieval Inspector (`"billing-service"`, `"capstone"`),
-   click any memory card to open the Memory Inspector, and open the Write
-   Inspector's three `priya-standup` traces to watch write cost collapse as
+6. **Explore.** Query the Retrieval Inspector (`"benchmark judge"`,
+   `"what is blocking the deployment"`), click any memory card to open the
+   Memory Inspector, and open the Write Inspector's three
+   `haven-benchmark-honesty` traces to watch write cost collapse as
    checkpointing kicks in.
 
 <p align="center"><img src="obsidian/docs/media/dashboard-hero.png" alt="Haven's dashboard header and stat row: memories, active, archived, concepts, relationships, and retrieval speed, populated immediately after demo import" width="820" /></p>
@@ -298,6 +300,14 @@ Chromium browsers (Chrome, Edge, Brave — not Firefox/Safari):
    compose box to pull matching context from your vault — or click **Remember**
    after a reply to save something new. The popup also searches your vault
    directly.
+
+With the optional Query Rewriter configured (`config/query_rewriter.env` —
+see the next section's config pointers), the extension also runs a
+typing-time **Query Rewrite Assistant**: pause after drafting a message and
+a small card below the compose box suggests a clearer phrasing
+(`POST /api/v1/query/rewrite`), inserted with one click on **Use Rewrite**.
+It's fail-open by design — with no key configured, or nothing worth
+changing, the card simply never appears.
 
 `Ctrl+C` stops the server; your Markdown vault on disk is untouched, and the
 extension shows "Offline" until it's back.
@@ -476,9 +486,9 @@ prompt-and-pray.
 The same allocated candidates `ContextBuilder` renders as a flat string can
 instead be grouped by `WorkingContextBuilder` into per-topic buckets (goals,
 decisions, tasks, open questions) with a deterministic status summary — used
-by the "Use Haven" injection preview, by `query_structured()`'s XML prompt for
-continuation-style queries, and, read-only, as background for the write
-pipeline's incremental-ingestion path.
+by the "Use Haven" injection preview, by `query_structured()`'s XML prompt
+(which adds a `<ProjectState>` element for continuation-style queries), and,
+read-only, as background for the write pipeline's incremental-ingestion path.
 
 ![Working Context assembly: WorkingContextBuilder grouping ranked candidates into per-concept topic buckets with a deterministic state summary, and its three consumers](obsidian/docs/media/working-context-assembly.svg)
 
@@ -510,8 +520,9 @@ trace that created it.
 
 ### Write Inspector — *"what did that save actually cost?"*
 
-Every write leaves a `WriteTrace` on disk. Open the three `priya-standup` traces
-in order and the incremental-ingestion story tells itself:
+Every write leaves a `WriteTrace` on disk. Open the seeded
+`haven-benchmark-honesty` conversation's three traces in order and the
+incremental-ingestion story tells itself:
 
 | Send | Checkpoint mode | Facts extracted | Pipeline stages run |
 |---|---|---:|---|
@@ -634,8 +645,9 @@ incremental path**, documented in
 ### Read path: LLM-judged retrieval quality (288 cases)
 
 `benchmarks/runners/run_benchmarks.py` runs Haven's real pipeline
-(`HavenAdapter` → `VaultWriter` + `OntologyPipeline` + `MemoryEngine`, no stage
-bypassed) against a 288-case, LLM-judged dataset, alongside four naive
+(`HavenFullAdapter` — Extractor → Classifier → ImportanceScorer →
+CanonicalMatcher → KnowledgeUpdater → `VaultWriter` + `OntologyPipeline` +
+`MemoryEngine`, no stage bypassed) against a 288-case, LLM-judged dataset, alongside four naive
 baselines — return-everything, most-recent, BM25 keyword search, embedding
 similarity — and a retrieval-only ablation of Haven itself. Full results,
 per-category breakdown, and a root-cause analysis of every failure are in
@@ -645,8 +657,9 @@ data is browsable case by case in the dashboard's
 [Benchmark Explorer](#-see-haven-in-action).
 
 ```bash
-python -m benchmarks.runners.run_benchmarks --adapter mem0     # baseline
-python -m benchmarks.runners.run_benchmarks --adapter haven    # Haven
+python -m benchmarks.runners.run_benchmarks --adapter mem0        # upstream mem0 baseline
+python -m benchmarks.runners.run_benchmarks --adapter haven_full  # Haven's full pipeline (the 240/288 headline)
+python -m benchmarks.runners.run_benchmarks --adapter haven       # retrieval-only ablation
 ```
 
 > 🏆 **Key results:** Across the 288-case suite, Haven Full (**240/288, 83.3%**)
@@ -659,7 +672,8 @@ python -m benchmarks.runners.run_benchmarks --adapter haven    # Haven
 > as a lower bound, not a competing retrieval strategy. Haven ties for the top
 > score in 4 of the suite's 11 categories; of the remaining 7, the 4 where it
 > currently loses to Recency are root-caused below, not glossed over, and the
-> other 3 lose narrowly to Return All and/or Embedding, not Recency.
+> other 3 lose narrowly to Return All, Embedding, and (in two of the three)
+> BM25 — not Recency.
 
 | Category | **Haven Full** | Return All | Recency | BM25 | Embedding |
 |---|---:|---:|---:|---:|---:|
@@ -681,7 +695,8 @@ of 11 categories (`decisions`, `goals`, `identity`, `preferences`). Of the
 remaining 7, 4 (`beliefs`, `contradictions`, `supersession`, `temporal`) all
 lose to Recency for the same root-caused reason (below), and 3
 (`concept_consolidation`, `decision_reconstruction`, `refinements`) lose
-narrowly to Return All and/or Embedding, not Recency — and "Return All" — a
+narrowly to Return All and/or Embedding — plus, in `concept_consolidation`
+and `refinements`, narrowly to BM25 — not Recency. And "Return All" — a
 strategy that returns literally everything with no filtering — isn't a
 meaningful bar to clear on the overall number. Full per-category
 table with source data:
@@ -894,7 +909,10 @@ documents its own blind spots.
 
 **ChatGPT** — the `extension/` folder is a Chromium extension that adds
 **Remember** (save this conversation) and **Use Haven** (inject relevant context
-into the compose box) directly on chatgpt.com, plus vault search from the popup.
+into the compose box) directly on chatgpt.com, plus vault search from the popup
+and — when the optional Query Rewriter is configured — a typing-time **Query
+Rewrite Assistant** that offers a clearer phrasing of your draft before you
+send it.
 
 <p align="center"><img src="obsidian/docs/media/extension-use-haven-button-chatgpt.png" alt="The Use Haven button in the ChatGPT compose area" width="820" /></p>
 
@@ -903,12 +921,16 @@ into the compose box) directly on chatgpt.com, plus vault search from the popup.
 ### What actually gets injected
 
 When you click **Use Haven** in ChatGPT, the context block your LLM receives is
-the read pipeline's final output: only acceptance-surviving memories, rendered by
-the ContextBuilder with their canonical facts. Because the acceptance stage can
+the read pipeline's final output: only acceptance-surviving memories, previewed
+as Working Context cards and inserted as the XML-delimited structured prompt
+(`POST /api/v1/retrieve_working_context`, rendered by `StructuredPromptBuilder`
+with your request embedded exactly once; against an older server the extension
+falls back to the ContextBuilder's flat rendering via
+`POST /api/v1/retrieve_context`). Because the acceptance stage can
 abstain, the honest answer to "nothing relevant is in the vault" is an *empty*
 injection — not three paragraphs of plausible-looking noise silently steering your
-conversation. What you inject is exactly what the Retrieval Inspector shows you,
-because it's the same pipeline output.
+conversation. The memories you inject are exactly the ones the Retrieval
+Inspector shows you as accepted, because it's the same pipeline output.
 
 **Quick Capture** — not everything arrives as a conversation. The dashboard's
 Quick Capture panel takes a free-form Markdown note (`POST /api/v1/capture`),
@@ -1018,9 +1040,10 @@ Priority-ordered; the full version with sourcing lives in
 **Next** — wire `SUPERSEDE` into the automatic pipeline so conversations
 can contradict existing knowledge end-to-end (`UPDATE`/refinement is already
 automatic) · fix the Working Context memory-type gap the benchmarks surfaced ·
-promote the richer structured-XML prompt builder to the live context renderer ·
-fill the five remaining empty benchmark categories and fix the keyword-overlap
-denominator edge case.
+add the freshness check + bounded gap-fill fallback for continuation queries
+(the structured-XML prompt itself is already live behind the extension's
+**Use Haven** flow) · fill the five remaining empty benchmark categories and
+fix the keyword-overlap denominator edge case.
 
 **Later** — Claude and Gemini conversation importers (ChatGPT is implemented
 today) · memory decay / adaptive forgetting · a visual concept-graph explorer
