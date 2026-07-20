@@ -96,15 +96,28 @@ function getConversationTurns() {
 // second, so re-serializing the whole conversation on every tick is
 // O(mutations x conversation size). This walks message nodes newest-first
 // and serializes only the one it needs.
-function getLastAssistantMessage() {
+function getLastMessageByRole(role) {
   const nodes = document.querySelectorAll(MESSAGE_SELECTOR);
   for (let i = nodes.length - 1; i >= 0; i--) {
     const node = nodes[i];
-    if (node.getAttribute("data-message-author-role") !== "assistant") continue;
+    if (node.getAttribute("data-message-author-role") !== role) continue;
     const content = getMessageMarkdown(node);
     if (content) return content;
   }
   return null;
+}
+
+function getLastAssistantMessage() {
+  return getLastMessageByRole("assistant");
+}
+
+// Same "last turn, not the whole conversation" rationale as
+// getLastAssistantMessage above -- controller.js's bootstrap-lifecycle
+// tracking (see remember-visibility.js's userMessageObserved) needs to tell
+// "the user sent a new message" apart from unrelated DOM churn just as
+// cheaply, and on the same every-mutation cadence.
+function getLastUserMessage() {
+  return getLastMessageByRole("user");
 }
 
 // ---------------------------------------------------------------------------
@@ -416,9 +429,20 @@ export const adapter = {
   getAnchorForButton,
   getConversationTurns,
   getLastAssistantMessage,
+  getLastUserMessage,
   getConversationKey,
 };
 
 // Exported for chatgpt.test.js only -- controller.js and the rest of the
 // extension only ever go through the adapter object above.
 export { getMessageMarkdown };
+
+// Exported for tests/e2e/helpers/selectors.js only, as the single source of
+// truth for these two selectors -- the E2E suite drives the real chatgpt.com
+// DOM and needs to find the same compose box / message nodes this adapter
+// does, and duplicating the literal strings a second time would let them
+// drift silently after a ChatGPT redesign (fixed in one file, forgotten in
+// the other). Neither this file's own logic above nor controller.js reads
+// these two exports -- they still only ever go through the adapter/
+// getMessageMarkdown exports, same as before.
+export { COMPOSE_BOX_SELECTORS, MESSAGE_SELECTOR };

@@ -334,3 +334,28 @@ test("getLastAssistantMessage skips a trailing empty assistant turn and falls ba
   ];
   assert.equal(adapter.getLastAssistantMessage(), "earlier real answer");
 });
+
+// --- getLastUserMessage() ----------------------------------------------
+// Used by controller.js's updateRememberVisibility() to advance the "Use
+// Haven" bootstrap phase machine (see remember-visibility.js) -- same
+// last-turn-only performance rationale as getLastAssistantMessage above.
+
+test("getLastUserMessage returns the most recent user turn's content", () => {
+  queryResult = [
+    turnNode("user", [text("first question")]),
+    turnNode("assistant", [text("first answer")]),
+    turnNode("user", [text("second question")]),
+    turnNode("assistant", [text("second answer")]),
+  ];
+  assert.equal(adapter.getLastUserMessage(), "second question");
+});
+
+test("getLastUserMessage returns null when there is no user turn", () => {
+  queryResult = [turnNode("assistant", [text("only an answer")])];
+  assert.equal(adapter.getLastUserMessage(), null);
+});
+
+test("getLastUserMessage returns null for an empty conversation", () => {
+  queryResult = [];
+  assert.equal(adapter.getLastUserMessage(), null);
+});

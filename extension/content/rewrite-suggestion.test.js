@@ -5,6 +5,7 @@ import {
   isEligibleForRewrite,
   isSuggestionStillRelevant,
   isAcceptedRewriteEcho,
+  createRewriteSuppression,
 } from "./rewrite-suggestion.js";
 
 test("a short in-progress fragment is not eligible", () => {
@@ -86,4 +87,42 @@ test("text that diverges from the accepted rewrite is not an echo", () => {
     ),
     false
   );
+});
+
+test("createRewriteSuppression: isSuppressed() is false outside runSuppressed()", () => {
+  const suppression = createRewriteSuppression();
+  assert.equal(suppression.isSuppressed(), false);
+});
+
+test("createRewriteSuppression: isSuppressed() is true for the whole duration of the mutation, including multiple synchronous events", () => {
+  // Regression: an earlier "consume the next single event" design assumed a
+  // compose-box mutation fires exactly one native "input" event. Confirmed
+  // against real Chromium, execCommand("insertText", ...) with a multi-line
+  // string -- which the injected Working Context prompt always is -- fires
+  // one "input" event *per line*. A mutation that fires several events must
+  // have every one of them suppressed, not just the first.
+  const suppression = createRewriteSuppression();
+  const observedDuringMutation = [];
+  suppression.runSuppressed(() => {
+    observedDuringMutation.push(suppression.isSuppressed());
+    observedDuringMutation.push(suppression.isSuppressed());
+    observedDuringMutation.push(suppression.isSuppressed());
+  });
+  assert.deepEqual(observedDuringMutation, [true, true, true]);
+});
+
+test("createRewriteSuppression: isSuppressed() is false again once runSuppressed() returns", () => {
+  const suppression = createRewriteSuppression();
+  suppression.runSuppressed(() => {});
+  assert.equal(suppression.isSuppressed(), false, "real typing after the mutation must not be suppressed");
+});
+
+test("createRewriteSuppression: clears suppression even if the mutation throws", () => {
+  const suppression = createRewriteSuppression();
+  assert.throws(() => {
+    suppression.runSuppressed(() => {
+      throw new Error("boom");
+    });
+  });
+  assert.equal(suppression.isSuppressed(), false);
 });

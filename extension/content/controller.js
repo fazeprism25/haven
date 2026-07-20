@@ -38,7 +38,8 @@
     createRememberVisibility,
     isEligibleForRewrite,
     isSuggestionStillRelevant,
-    isAcceptedRewriteEcho;
+    isAcceptedRewriteEcho,
+    createRewriteSuppression;
   try {
     ({
       HAVEN_BASE_URL,
@@ -54,14 +55,22 @@
     ({ createRememberVisibility } = await import(
       chrome.runtime.getURL("content/remember-visibility.js")
     ));
-    ({ isEligibleForRewrite, isSuggestionStillRelevant, isAcceptedRewriteEcho } = await import(
-      chrome.runtime.getURL("content/rewrite-suggestion.js")
-    ));
+    ({
+      isEligibleForRewrite,
+      isSuggestionStillRelevant,
+      isAcceptedRewriteEcho,
+      createRewriteSuppression,
+    } = await import(chrome.runtime.getURL("content/rewrite-suggestion.js")));
   } catch (error) {
     console.error("Haven: a content-script module failed to load", error);
     return;
   }
   const rememberVisibility = createRememberVisibility();
+  // Armed by "Use Haven" right before it programmatically mutates the
+  // compose box (see onButtonClick) so the native "input" event that
+  // mutation fires doesn't get treated as user-authored input by
+  // onComposeInput below -- see createRewriteSuppression's own comment.
+  const rewriteSuppression = createRewriteSuppression();
 
   // Debounce window between the user's last keystroke and the rewrite
   // request firing -- long enough that a normal typing cadence never fires
@@ -306,6 +315,15 @@
     clearTimeout(state.rewriteDebounceTimer);
     const composeBox = state.composeBox;
     if (!composeBox) return;
+    // Swallow every native "input" event a bootstrap mutation (e.g. "Use
+    // Haven" injecting the structured Working Context prompt) fires -- there
+    // can be more than one, see createRewriteSuppression's comment -- before
+    // any of the normal eligibility checks below, since none of them carry
+    // anything the user actually typed.
+    if (rewriteSuppression.isSuppressed()) {
+      hideRewriteSuggestion();
+      return;
+    }
     const text = adapter.getComposeText(composeBox);
     // A meaningful manual edit permanently clears the echo guard (until the
     // next "Use Rewrite") -- any text other than the exact accepted rewrite
@@ -1120,15 +1138,33 @@
     // below, which never contains the request -- would leave that same
     // request sitting a second time, raw, after </System>. setComposeText
     // replaces the draft outright so the request appears exactly once.
-    if (workingContextAvailable) {
-      adapter.setComposeText(composeBox, contentToInsert);
-    } else {
-      adapter.insertContextAbove(composeBox, contentToInsert);
-    }
+    // Both branches below are an internal bootstrap mutation, not
+    // user-authored input -- mark the conversation as entering the "Use
+    // Haven" bootstrap phase (also retracts the Remember visibility this
+    // same click's own retrieval just earned, see bootstrapStarted's
+    // comment) before running the mutation itself wrapped in
+    // runSuppressed(), which brackets every native "input" event it fires.
+    rememberVisibility.bootstrapStarted();
+    rewriteSuppression.runSuppressed(() => {
+      if (workingContextAvailable) {
+        adapter.setComposeText(composeBox, contentToInsert);
+      } else {
+        adapter.insertContextAbove(composeBox, contentToInsert);
+      }
+    });
 
-    if (settings.autoRemember) {
-      await onRememberClick();
-    }
+    // settings.autoRemember ("Auto-remember after insert") used to run
+    // Remember unconditionally right here, immediately after inserting --
+    // against the pre-bootstrap conversation, before the injected prompt
+    // had even been sent, let alone replied to. There was nothing new to
+    // remember yet at this point; the Working Context just inserted already
+    // exists in Haven and must never be re-extracted (see
+    // bootstrapStarted()'s call above). The trigger has moved to
+    // updateRememberVisibility() below, which fires it once
+    // rememberVisibility.assistantMessageObserved() reports the reply to
+    // the first genuine *post*-bootstrap user message -- i.e. once this
+    // conversation actually contains newly-created knowledge. Manual
+    // Remember clicks (the rememberButton listener above) are unaffected.
   }
 
   // Remember now runs Remember -> Review -> Save: it stops after
@@ -1337,10 +1373,13 @@
   }
 
   // Remember's visibility is keyed off which conversation is on screen (see
-  // remember-visibility.js) and the content of its latest assistant turn --
-  // independent of retrieval/"Use Haven" entirely, and independent of the
-  // compose box's DOM-node identity above (ChatGPT can swap that node out
-  // from under us within the same conversation).
+  // remember-visibility.js) and the content of its latest assistant/user
+  // turns -- independent of the compose box's DOM-node identity above
+  // (ChatGPT can swap that node out from under us within the same
+  // conversation). The retrieval-based visibility reason is independent of
+  // "Use Haven" entirely, as before; the assistant/user-turn reason now also
+  // tracks "Use Haven"'s bootstrap phase (see bootstrapStarted()) so its own
+  // injected prompt and the reply to it don't count as new eligibility.
   //
   // This runs directly from the raw MutationObserver callback below, NOT
   // from the debounced sync() -- unlike positioning/mount (expensive layout
@@ -1371,11 +1410,40 @@
     const lastAssistantContent = adapter.getLastAssistantMessage
       ? adapter.getLastAssistantMessage()
       : null;
+    // True exactly once per "Use Haven" bootstrap: the reply to the first
+    // genuine post-bootstrap user message, i.e. the conversation crossing
+    // back over the boundary "Use Haven" drew into newly-created knowledge
+    // -- see assistantMessageObserved's own comment. False for the
+    // bootstrap's own reply, and false for every plain conversation that
+    // never called bootstrapStarted() in the first place.
+    let crossedIntoNewConversation = false;
     if (lastAssistantContent) {
-      rememberVisibility.assistantMessageObserved(lastAssistantContent);
+      crossedIntoNewConversation = rememberVisibility.assistantMessageObserved(lastAssistantContent);
+    }
+
+    // Same rationale, needed to advance the bootstrap phase machine (see
+    // remember-visibility.js's userMessageObserved) -- telling "the user
+    // sent a genuine follow-up" apart from "Use Haven"'s own injected
+    // prompt being sent requires seeing the user side of the conversation
+    // too, not just the assistant side above.
+    const lastUserContent = adapter.getLastUserMessage
+      ? adapter.getLastUserMessage()
+      : null;
+    if (lastUserContent) {
+      rememberVisibility.userMessageObserved(lastUserContent);
     }
 
     syncRememberButtonVisibility();
+
+    // The redesigned Auto Remember trigger (see onButtonClick's comment
+    // above): only once the conversation has crossed back over "Use
+    // Haven"'s boundary into genuinely new information, and only if the
+    // setting is on. onRememberClick() has its own
+    // state.rememberButton.disabled guard, so this is a no-op if some other
+    // Remember/Use Haven flow is already in flight.
+    if (crossedIntoNewConversation && settings.autoRemember) {
+      onRememberClick();
+    }
   }
 
   let debounceTimer = null;

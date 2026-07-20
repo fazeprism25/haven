@@ -53,3 +53,54 @@ export function isAcceptedRewriteEcho(currentText, lastAcceptedRewrite) {
     (currentText ?? "").trim() === lastAcceptedRewrite
   );
 }
+
+// Suppression for the compose-input listener during a programmatic
+// compose-box mutation that is not user-authored input -- e.g. "Use Haven"
+// replacing the draft with the structured Working Context prompt. That
+// mutation fires real native "input" events (same execCommand("insertText",
+// ...) pipeline isAcceptedRewriteEcho's caller relies on above), which would
+// otherwise be indistinguishable from the user typing and arm a rewrite
+// check against Haven's own injected prompt.
+//
+// runSuppressed() brackets the mutation rather than consuming a single
+// event: confirmed against real Chromium, a single execCommand("insertText",
+// ...) call inserting a multi-line string (which the structured Working
+// Context prompt always is) fires one native "input" event *per line*, not
+// one for the whole call -- an earlier one-shot "consume the next event"
+// version of this suppressed only the first of those and let the rest
+// through as if the user had typed them. Bracketing works because
+// execCommand's entire beforeinput/input dispatch cascade is synchronous:
+// `mutate` does not return until every event it fires has already reached
+// (and been swallowed by) the compose-input listener, and no real keystroke
+// can interleave with that -- JS is single-threaded and a browser input
+// event is always a separate task. This is a structural guarantee, not a
+// timing guess: it needs no knowledge of how many events a given mutation
+// happens to fire, and no assumption about wall-clock duration.
+//
+// Deliberately state-only, with no knowledge of *what* text was inserted --
+// unlike isAcceptedRewriteEcho, which must keep comparing content because
+// "Use Rewrite" wants checks to resume the moment the user edits that
+// specific text, this only ever needs to bracket one synchronous mutation
+// call and has no reason to inspect the inserted string (never mind parse
+// it as XML) to decide that.
+export function createRewriteSuppression() {
+  let suppressed = false;
+  return {
+    // Called by controller.js in place of calling a compose-box mutation
+    // directly -- runs `mutate` with suppression active for its entire
+    // (synchronous) duration, then always clears it afterward, mutate
+    // throwing or not.
+    runSuppressed(mutate) {
+      suppressed = true;
+      try {
+        mutate();
+      } finally {
+        suppressed = false;
+      }
+    },
+    // Called from onComposeInput on every native "input" event.
+    isSuppressed() {
+      return suppressed;
+    },
+  };
+}

@@ -1,3 +1,13 @@
 {
-  "type": "module"
+  "type": "module",
+  "scripts": {
+    "test:e2e": "playwright test",
+    "test:e2e:headed": "playwright test --headed",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:login": "node tests/e2e/setup-login.js",
+    "test:e2e:opera-copy-profile": "node tests/e2e/copy-opera-profile.js"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.48.0"
+  }
 }

@@ -1,0 +1,10 @@
+node_modules/
+
+# Playwright E2E suite output -- regeneratable, see tests/e2e/README.md.
+test-results/
+playwright-report/
+
+# Persistent Chromium profile used to authenticate the E2E suite against
+# ChatGPT (see tests/e2e/setup-login.js) -- holds real session cookies,
+# must never be committed.
+tests/e2e/.auth/
