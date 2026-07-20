@@ -155,6 +155,7 @@
 
   const state = {
     composeBox: null,
+    uiComposeBox: null, // the compose box mount()/buildUI() last ran for -- see sync()'s comment
     container: null,
     statusDot: null,
     statusText: null,
@@ -1274,7 +1275,11 @@
   // debounced sync() -> mount() path below, since none of that is
   // time-sensitive the way the input listener is, and it's idempotent
   // (buildUI/refreshHealth both no-op once already done) so running it a
-  // tick later than the listener move is harmless.
+  // tick later than the listener move is harmless. Crucially, this updates
+  // state.composeBox but NOT state.uiComposeBox -- sync() below keys its own
+  // mount() decision off the latter specifically so this function running
+  // first on every tick can never make sync() believe UI-mounting has
+  // already happened when it hasn't.
   function ensureComposeListenerAttached() {
     const composeBox = adapter.findComposeBox();
     if (!composeBox || composeBox === state.composeBox) return;
@@ -1287,18 +1292,30 @@
     if (!state.container.isConnected) document.body.append(state.container);
     requestAnimationFrame(positionContainer);
     if (state.connected === null) refreshHealth();
+    state.uiComposeBox = composeBox;
   }
 
   function unmount() {
     state.composeBox?.removeEventListener("input", onComposeInput);
     state.composeBox = null;
+    state.uiComposeBox = null;
     state.container?.remove();
     hideRewriteSuggestion();
   }
 
+  // Compares against state.uiComposeBox (last box mount() actually ran for),
+  // NOT state.composeBox -- ensureComposeListenerAttached() (see its comment
+  // above) can update state.composeBox undebounced, on the very next
+  // MutationObserver tick after a compose-box swap, well before this
+  // debounced sync() ever runs. Comparing against state.composeBox here
+  // would then find them already equal and skip mount() forever, which is
+  // exactly the bug this separate tracker exists to avoid: buildUI() would
+  // never run for a freshly (re)loaded page, and the floating "Use
+  // Haven"/"Remember" buttons would never appear even though the input
+  // listener and rewrite suggestion card work fine.
   function sync() {
     const composeBox = adapter.findComposeBox();
-    if (composeBox && composeBox !== state.composeBox) {
+    if (composeBox && composeBox !== state.uiComposeBox) {
       mount(composeBox);
     } else if (!composeBox && state.composeBox) {
       unmount();
