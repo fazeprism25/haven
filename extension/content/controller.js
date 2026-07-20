@@ -28,24 +28,39 @@
     return;
   }
 
-  const {
-    HAVEN_BASE_URL,
+  let HAVEN_BASE_URL,
     SETTINGS_STORAGE_KEY,
     DEFAULT_SETTINGS,
     REQUEST_TIMEOUT_MS,
     loadSettings,
     MEMORY_TYPE_LABELS,
-  } = await import(chrome.runtime.getURL("config.js"));
-  const { resolveQuery } = await import(
-    chrome.runtime.getURL("content/resolve-query.js")
-  );
-  const { createRememberVisibility } = await import(
-    chrome.runtime.getURL("content/remember-visibility.js")
-  );
+    resolveQuery,
+    createRememberVisibility,
+    isEligibleForRewrite,
+    isSuggestionStillRelevant;
+  try {
+    ({
+      HAVEN_BASE_URL,
+      SETTINGS_STORAGE_KEY,
+      DEFAULT_SETTINGS,
+      REQUEST_TIMEOUT_MS,
+      loadSettings,
+      MEMORY_TYPE_LABELS,
+    } = await import(chrome.runtime.getURL("config.js")));
+    ({ resolveQuery } = await import(
+      chrome.runtime.getURL("content/resolve-query.js")
+    ));
+    ({ createRememberVisibility } = await import(
+      chrome.runtime.getURL("content/remember-visibility.js")
+    ));
+    ({ isEligibleForRewrite, isSuggestionStillRelevant } = await import(
+      chrome.runtime.getURL("content/rewrite-suggestion.js")
+    ));
+  } catch (error) {
+    console.error("Haven: a content-script module failed to load", error);
+    return;
+  }
   const rememberVisibility = createRememberVisibility();
-  const { isEligibleForRewrite, isSuggestionStillRelevant } = await import(
-    chrome.runtime.getURL("content/rewrite-suggestion.js")
-  );
 
   // Debounce window between the user's last keystroke and the rewrite
   // request firing -- long enough that a normal typing cadence never fires
@@ -73,19 +88,34 @@
           settled = true;
           resolve({ ok: false, error: "Haven extension messaging timed out." });
         }, SEND_MESSAGE_TIMEOUT_MS);
-        chrome.runtime.sendMessage({ type, payload }, (response) => {
-          if (settled) return;
-          settled = true;
-          clearTimeout(timer);
-          if (chrome.runtime.lastError) {
-            console.error("Haven extension messaging error:", chrome.runtime.lastError.message);
+        try {
+          chrome.runtime.sendMessage({ type, payload }, (response) => {
+            if (settled) return;
+            settled = true;
+            clearTimeout(timer);
+            if (chrome.runtime.lastError) {
+              console.error("Haven extension messaging error:", chrome.runtime.lastError.message);
+            }
+            resolve(
+              chrome.runtime.lastError
+                ? { ok: false, error: "Haven extension needs a page refresh." }
+                : response
+            );
+          });
+        } catch (sendError) {
+          // chrome.runtime.sendMessage throws synchronously (rather than
+          // going through the callback's lastError) when this content
+          // script's extension context has been invalidated -- e.g. the
+          // extension was reloaded from chrome://extensions after this tab
+          // was last refreshed, so this still-running old content-script
+          // instance is talking to a service worker that no longer exists.
+          console.error("Haven extension messaging error (context invalidated):", sendError);
+          if (!settled) {
+            settled = true;
+            clearTimeout(timer);
+            resolve({ ok: false, error: "Haven extension needs a page refresh." });
           }
-          resolve(
-            chrome.runtime.lastError
-              ? { ok: false, error: "Haven extension needs a page refresh." }
-              : response
-          );
-        });
+        }
       });
     },
     checkHealth() {
@@ -209,7 +239,7 @@
     dismissButton.type = "button";
     dismissButton.className = "haven-rewrite-dismiss";
     dismissButton.textContent = "Dismiss";
-    dismissButton.addEventListener("click", hideRewriteSuggestion);
+    dismissButton.addEventListener("click", () => hideRewriteSuggestion());
 
     const actions = document.createElement("div");
     actions.className = "haven-rewrite-actions";
@@ -273,7 +303,13 @@
       hideRewriteSuggestion();
       return;
     }
+    const armedOnComposeBox = composeBox;
     state.rewriteDebounceTimer = setTimeout(() => {
+      // The debounce can outlive the compose box it was armed on if
+      // ChatGPT swapped the DOM node in the intervening 700ms -- drop the
+      // stale request rather than send it against a node that may no
+      // longer be the live one.
+      if (armedOnComposeBox !== state.composeBox || !armedOnComposeBox.isConnected) return;
       requestRewriteSuggestion(text.trim());
     }, REWRITE_DEBOUNCE_MS);
   }
@@ -1196,18 +1232,44 @@
     state.container.style.left = `${window.scrollX + rect.left}px`;
   }
 
-  function mount(composeBox) {
+  // Attaches/moves the "input" listener to whatever compose element is
+  // currently live, independent of sync()'s heavier mount() work below.
+  // Called both from mount() (the normal, debounced path) and directly,
+  // undebounced, from the raw MutationObserver callback (see
+  // ensureComposeListenerAttached below) -- the same fix already applied to
+  // updateRememberVisibility for the identical starvation problem: sync()'s
+  // shared 150ms debounce timer gets reset by every mutation anywhere in
+  // <body>, including the ones the user's own typing causes, so waiting for
+  // it to settle before moving the listener can leave it attached to a
+  // detached/abandoned compose node for a while if ChatGPT swaps that node
+  // out mid-typing-session -- every keystroke on the real, current node
+  // would then fire zero "input" events with no error, no exception, and no
+  // sign anything is wrong short of the suggestion just never appearing.
+  function attachComposeInputListener(composeBox) {
     const previousComposeBox = state.composeBox;
+    if (previousComposeBox === composeBox) return;
+    previousComposeBox?.removeEventListener("input", onComposeInput);
     state.composeBox = composeBox;
-    // ChatGPT's own re-renders can swap the compose box's underlying DOM
-    // node (see chatgpt.js's insertContextAbove comment) -- sync() calls
-    // mount() again whenever that happens, so the "input" listener that
-    // drives the Query Rewrite Assistant has to move with it rather than
-    // being attached once.
-    if (previousComposeBox !== composeBox) {
-      previousComposeBox?.removeEventListener("input", onComposeInput);
-      composeBox.addEventListener("input", onComposeInput);
-    }
+    composeBox.addEventListener("input", onComposeInput);
+  }
+
+  // Undebounced counterpart to sync()'s mount()/unmount() -- runs on every
+  // raw MutationObserver tick so a compose-node swap is caught within one
+  // mutation instead of waiting out sync()'s starvable debounce (see
+  // attachComposeInputListener's comment above). Only moves the listener;
+  // buildUI/positioning/refreshHealth still happen through the normal
+  // debounced sync() -> mount() path below, since none of that is
+  // time-sensitive the way the input listener is, and it's idempotent
+  // (buildUI/refreshHealth both no-op once already done) so running it a
+  // tick later than the listener move is harmless.
+  function ensureComposeListenerAttached() {
+    const composeBox = adapter.findComposeBox();
+    if (!composeBox || composeBox === state.composeBox) return;
+    attachComposeInputListener(composeBox);
+  }
+
+  function mount(composeBox) {
+    attachComposeInputListener(composeBox);
     if (!state.container) buildUI();
     if (!state.container.isConnected) document.body.append(state.container);
     requestAnimationFrame(positionContainer);
@@ -1278,6 +1340,7 @@
   let debounceTimer = null;
   const observer = new MutationObserver(() => {
     updateRememberVisibility();
+    ensureComposeListenerAttached();
     clearTimeout(debounceTimer);
     debounceTimer = setTimeout(sync, 150);
   });

@@ -167,6 +167,16 @@
   animation: haven-fade-in 0.18s ease both;
 }
 
+/* Without this, the unconditional `display: flex` above (author-origin)
+   always wins the cascade over the UA stylesheet's `[hidden] { display:
+   none }` (author beats user-agent regardless of specificity) -- so toggling
+   the `hidden` property from controller.js's hideRewriteSuggestion() had no
+   visual effect at all; the card stayed rendered every time it was ever
+   built. Confirmed via computed-style check, not assumed. */
+.haven-rewrite-card[hidden] {
+  display: none;
+}
+
 .haven-rewrite-heading {
   font-weight: 600;
   font-size: 12px;
