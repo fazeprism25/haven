@@ -34,3 +34,22 @@ export function isSuggestionStillRelevant(response, currentText) {
     response.data.original === (currentText ?? "").trim()
   );
 }
+
+// adapter.setComposeText (used by "Use Rewrite") replaces the compose box's
+// contents via execCommand("insertText", ...) so React's controlled-input
+// state stays in sync -- but that also fires a real native "input" event,
+// indistinguishable from user typing, for the text it just inserted. Without
+// this check, that programmatic echo would re-arm the rewrite debounce
+// against the text Haven itself just proposed, and if the server judged
+// that text rewrite-worthy too, a second suggestion would appear unprompted
+// -- repeatedly, since accepting it triggers the exact same echo again.
+// controller.js calls this from onComposeInput to tell "the box still holds
+// exactly what Use Rewrite just inserted" apart from "the user has changed
+// something since" -- the moment currentText no longer matches
+// lastAcceptedRewrite, normal rewrite-eligibility checks resume.
+export function isAcceptedRewriteEcho(currentText, lastAcceptedRewrite) {
+  return (
+    typeof lastAcceptedRewrite === "string" &&
+    (currentText ?? "").trim() === lastAcceptedRewrite
+  );
+}

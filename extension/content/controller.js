@@ -37,7 +37,8 @@
     resolveQuery,
     createRememberVisibility,
     isEligibleForRewrite,
-    isSuggestionStillRelevant;
+    isSuggestionStillRelevant,
+    isAcceptedRewriteEcho;
   try {
     ({
       HAVEN_BASE_URL,
@@ -53,7 +54,7 @@
     ({ createRememberVisibility } = await import(
       chrome.runtime.getURL("content/remember-visibility.js")
     ));
-    ({ isEligibleForRewrite, isSuggestionStillRelevant } = await import(
+    ({ isEligibleForRewrite, isSuggestionStillRelevant, isAcceptedRewriteEcho } = await import(
       chrome.runtime.getURL("content/rewrite-suggestion.js")
     ));
   } catch (error) {
@@ -167,6 +168,7 @@
     rewriteTextEl: null,
     rewriteDebounceTimer: null,
     pendingRewrite: null, // the suggested text "Use Rewrite" would insert, or null when no suggestion is showing
+    lastAcceptedRewrite: null, // the text most recently inserted by "Use Rewrite", or null -- see isAcceptedRewriteEcho
   };
 
   function buildUI() {
@@ -278,6 +280,11 @@
     const rewritten = state.pendingRewrite;
     hideRewriteSuggestion();
     if (!composeBox || !rewritten) return;
+    // setComposeText's execCommand("insertText", ...) fires a native "input"
+    // event for the text it's about to insert -- record it here, before that
+    // event reaches onComposeInput, so that handler can recognize its own
+    // echo and not immediately re-arm a rewrite check against it.
+    state.lastAcceptedRewrite = rewritten.trim();
     adapter.setComposeText(composeBox, rewritten);
   }
 
@@ -299,6 +306,12 @@
     const composeBox = state.composeBox;
     if (!composeBox) return;
     const text = adapter.getComposeText(composeBox);
+    // A meaningful manual edit permanently clears the echo guard (until the
+    // next "Use Rewrite") -- any text other than the exact accepted rewrite
+    // means the user has typed something, so normal eligibility checks
+    // resume from here on.
+    if (isAcceptedRewriteEcho(text, state.lastAcceptedRewrite)) return;
+    state.lastAcceptedRewrite = null;
     if (!isEligibleForRewrite(text)) {
       hideRewriteSuggestion();
       return;

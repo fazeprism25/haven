@@ -1,7 +1,11 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { isEligibleForRewrite, isSuggestionStillRelevant } from "./rewrite-suggestion.js";
+import {
+  isEligibleForRewrite,
+  isSuggestionStillRelevant,
+  isAcceptedRewriteEcho,
+} from "./rewrite-suggestion.js";
 
 test("a short in-progress fragment is not eligible", () => {
   assert.equal(isEligibleForRewrite("hey"), false);
@@ -48,4 +52,38 @@ test("a failed request is never relevant", () => {
 test("trims the current text before comparing", () => {
   const response = { ok: true, data: { original: "remind me where we left off", rewritten: "Retrieve the latest architecture decisions", changed: true } };
   assert.equal(isSuggestionStillRelevant(response, "  remind me where we left off  "), true);
+});
+
+test("the programmatic echo of a just-accepted rewrite is recognized", () => {
+  assert.equal(
+    isAcceptedRewriteEcho(
+      "what was the last topic or decision we discussed",
+      "what was the last topic or decision we discussed"
+    ),
+    true
+  );
+});
+
+test("trims the current text before comparing against the accepted rewrite", () => {
+  assert.equal(
+    isAcceptedRewriteEcho(
+      "  what was the last topic or decision we discussed  ",
+      "what was the last topic or decision we discussed"
+    ),
+    true
+  );
+});
+
+test("no accepted rewrite on record is never an echo", () => {
+  assert.equal(isAcceptedRewriteEcho("anything", null), false);
+});
+
+test("text that diverges from the accepted rewrite is not an echo", () => {
+  assert.equal(
+    isAcceptedRewriteEcho(
+      "what was the last topic or decision we discussed, also about auth",
+      "what was the last topic or decision we discussed"
+    ),
+    false
+  );
 });
