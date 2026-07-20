@@ -86,7 +86,7 @@ screens.
 ChatGPT: **Use Haven** pulls matching context into your reply, **Remember**
 saves new facts back to the vault.
 
-<p align="center"><img src="obsidian/docs/media/extension-use-haven-button-chatgpt.png" alt="The Use Haven button in the ChatGPT compose area" width="820" /></p>
+<p align="center"><img src="obsidian/docs/media/extension-use-haven-button-chatgpt.png" alt="A real ChatGPT conversation asking Haven to catch up after a few days away, with the Use Haven and Remember buttons visible in the compose area" width="820" /></p>
 
 **2. Project Overview** — Pick up complex work exactly where you left off:
 objective, milestone, current focus, and any active blocker, reconstructed
@@ -914,7 +914,7 @@ and — when the optional Query Rewriter is configured — a typing-time **Query
 Rewrite Assistant** that offers a clearer phrasing of your draft before you
 send it.
 
-<p align="center"><img src="obsidian/docs/media/extension-use-haven-button-chatgpt.png" alt="The Use Haven button in the ChatGPT compose area" width="820" /></p>
+<p align="center"><img src="obsidian/docs/media/extension-use-haven-button-chatgpt.png" alt="A real ChatGPT conversation asking Haven to catch up after a few days away, with the Use Haven and Remember buttons visible in the compose area" width="820" /></p>
 
 ![Extension to Haven to Obsidian flow: content script and popup message-passing through background.js to the FastAPI server for Use Haven, Remember, and search, plus the separate Obsidian vault importer converging on the same /memory/commit route](obsidian/docs/media/extension-obsidian-flow.svg)
 
