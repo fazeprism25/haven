@@ -5,6 +5,13 @@ __pycache__/
 .aider*
 haven_data/
 
+# Windows/OneDrive local artifacts that have no business in the repo --
+# /Downloads/ is the user's real OS Downloads folder (it ends up nested
+# under this OneDrive path); desktop.ini is Explorer folder metadata and
+# can appear in any directory, so it's left unanchored.
+/Downloads/
+desktop.ini
+
 # Real local config (see config/*.env.example for the committed templates)
 config/*.env
 
